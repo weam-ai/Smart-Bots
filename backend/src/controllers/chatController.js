@@ -1,0 +1,237 @@
+/**
+ * Chat Controller
+ * Handles chat messages and implements RAG pipeline
+ */
+
+const agentService = require('../services/agentService')
+const openaiService = require('../services/openaiService')
+const qdrantService = require('../services/qdrantService')
+const { v4: uuidv4 } = require('uuid')
+
+// ==================== SEND MESSAGE ====================
+
+const sendMessage = async (req, res) => {
+  try {
+    const { agentId } = req.params
+    const { message, sessionId, model, temperature, instructions } = req.body
+
+    console.log('💬 Chat message received:', { 
+      agentId, 
+      message: message?.substring(0, 100), 
+      sessionId,
+      model,
+      temperature,
+      instructions: instructions?.substring(0, 50)
+    })
+
+    // Validate input
+    if (!message || !message.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          message: 'Message is required',
+          code: 'MISSING_MESSAGE'
+        }
+      })
+    }
+
+    // 1. Get agent data
+    console.log('🔍 Fetching agent data for:', agentId)
+    const agent = await agentService.getAgentById(agentId)
+    if (!agent) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          message: 'Agent not found',
+          code: 'AGENT_NOT_FOUND'
+        }
+      })
+    }
+
+    console.log('✅ Agent found:', agent.name, 'Status:', agent.status)
+
+    // 2. Generate query embedding
+    console.log('🧠 Generating query embedding...')
+    const embeddingResult = await openaiService.generateEmbeddings([message.trim()])
+    const queryEmbedding = embeddingResult.embeddings[0].embedding
+    console.log('✅ Query embedding generated, dimensions:', queryEmbedding.length)
+
+    // 3. Search similar chunks
+    console.log('🔍 Searching for similar chunks...')
+    const searchResult = await qdrantService.searchSimilar(
+      agentId,
+      queryEmbedding,
+      {
+        limit: 5,
+        threshold: 0.3,
+        companyId: agentId, // Using agentId as companyId for now
+        userId: 'chat-user' // Default user for chat
+      }
+    )
+
+    const similarChunks = searchResult.results || []
+    console.log('📊 Found similar chunks:', similarChunks.length)
+
+    // 4. Build context from chunks
+    let context = ''
+    let referencedChunks = []
+    
+    if (similarChunks.length > 0) {
+      context = similarChunks.map(chunk => chunk.content).join('\n\n')
+      referencedChunks = similarChunks.map(chunk => ({
+        id: chunk.id,
+        content: chunk.content.substring(0, 200) + '...',
+        score: chunk.score,
+        metadata: chunk.metadata
+      }))
+      console.log('📝 Context built, length:', context.length)
+    } else {
+      console.log('⚠️ No similar chunks found, using general response')
+    }
+
+    // 5. Generate AI response
+    console.log('🤖 Generating AI response...')
+    
+    // Use frontend parameters if provided, otherwise fall back to agent defaults
+    const finalModel = model || agent.model || 'gpt-3.5-turbo'
+    const finalTemperature = temperature !== undefined ? temperature : (agent.temperature || 0.7)
+    const finalInstructions = instructions || agent.systemPrompt || 'You are a helpful AI assistant. Answer questions based on the provided context.'
+    
+    console.log('🔧 Using parameters:', { finalModel, finalTemperature, finalInstructions: finalInstructions.substring(0, 50) })
+    
+    const aiResponse = await openaiService.generateChatCompletion(
+      message.trim(), // userMessage
+      similarChunks,  // context chunks
+      {
+        model: finalModel,
+        temperature: finalTemperature,
+        maxTokens: agent.maxTokens || 1000,
+        systemPrompt: finalInstructions
+      }
+    )
+
+    console.log('✅ AI response generated, length:', aiResponse.response.length)
+
+    // 6. Generate session ID if not provided
+    const finalSessionId = sessionId || uuidv4()
+
+    // 7. Return response
+    const response = {
+      success: true,
+      data: {
+        _id: uuidv4(),
+        sessionId: finalSessionId,
+        agentId: agentId,
+        role: 'assistant',
+        content: aiResponse.response,
+        referencedChunks: referencedChunks,
+        ragMetadata: {
+          chunksFound: similarChunks.length,
+          contextLength: context.length,
+          query: message.trim(),
+          timestamp: new Date().toISOString()
+        },
+        createdAt: new Date().toISOString()
+      }
+    }
+
+    console.log('🎉 Chat response ready, sessionId:', finalSessionId)
+    res.json(response)
+
+  } catch (error) {
+    console.error('❌ Chat error:', error)
+    res.status(500).json({
+      success: false,
+      error: {
+        message: 'Failed to process chat message',
+        code: 'CHAT_ERROR',
+        details: error.message
+      }
+    })
+  }
+}
+
+// ==================== GET SESSIONS ====================
+
+const getSessions = async (req, res) => {
+  try {
+    const { agentId } = req.params
+    console.log('📋 Fetching sessions for agent:', agentId)
+
+    // For now, return empty sessions array
+    // In a full implementation, you'd fetch from database
+    const sessions = []
+
+    res.json({
+      success: true,
+      data: sessions
+    })
+
+  } catch (error) {
+    console.error('❌ Get sessions error:', error)
+    res.status(500).json({
+      success: false,
+      error: {
+        message: 'Failed to fetch sessions',
+        code: 'SESSIONS_ERROR',
+        details: error.message
+      }
+    })
+  }
+}
+
+// ==================== GET SESSION MESSAGES ====================
+
+const getSessionMessages = async (req, res) => {
+  try {
+    const { agentId, sessionId } = req.params
+    console.log('💬 Fetching messages for session:', sessionId, 'agent:', agentId)
+
+    // For now, return empty messages array
+    // In a full implementation, you'd fetch from database
+    const messages = []
+
+    res.json({
+      success: true,
+      data: messages
+    })
+
+  } catch (error) {
+    console.error('❌ Get messages error:', error)
+    res.status(500).json({
+      success: false,
+      error: {
+        message: 'Failed to fetch messages',
+        code: 'MESSAGES_ERROR',
+        details: error.message
+      }
+    })
+  }
+}
+
+// ==================== HEALTH CHECK ====================
+
+const healthCheck = async (req, res) => {
+  try {
+    res.json({
+      success: true,
+      message: 'Chat service is healthy',
+      timestamp: new Date().toISOString()
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: {
+        message: 'Chat service health check failed',
+        details: error.message
+      }
+    })
+  }
+}
+
+module.exports = {
+  sendMessage,
+  getSessions,
+  getSessionMessages,
+  healthCheck
+}

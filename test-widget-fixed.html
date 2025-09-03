@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test AI Chatbot Widget</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Chatbot Widget Test</h1>
+        <div class="info">
+            <h3>Test Instructions:</h3>
+            <ol>
+                <li>Look for the chat widget in the bottom-right corner</li>
+                <li>Click on it to open the chat interface</li>
+                <li>Type a message and press Enter or click Send</li>
+                <li>Check the browser console (F12) for debug logs</li>
+            </ol>
+        </div>
+        
+        <h2>Sample Content</h2>
+        <p>This is a test page to verify that the AI chatbot widget is working correctly. The widget should appear in the bottom-right corner of the page.</p>
+        
+        <p>Try asking the chatbot questions like:</p>
+        <ul>
+            <li>"Hello, how are you?"</li>
+            <li>"What can you help me with?"</li>
+            <li>"Tell me about the uploaded documents"</li>
+        </ul>
+    </div>
+
+    <!-- AI Chatbot Widget -->
+    <script>
+        (function() {
+            var chatbotConfig = {
+                deploymentId: 'd0d460d0-dbf8-4105-adaa-f4079338f8c6',
+                theme: 'light',
+                position: 'bottom-right',
+                size: {
+                    width: '400px',
+                    height: '600px'
+                },
+                autoOpen: false,
+                welcomeMessage: 'Hi! How can I help you today?',
+                customCSS: ``,
+                customJS: ``
+            };
+            
+            var script = document.createElement('script');
+            script.src = 'http://localhost:3001/widget/chat-widget.js';
+            script.async = true;
+            script.onload = function() {
+                if (window.AIChatbotWidget) {
+                    window.AIChatbotWidget.init(chatbotConfig);
+                }
+            };
+            document.head.appendChild(script);
+        })();
+    </script>
+</body>
+</html>
