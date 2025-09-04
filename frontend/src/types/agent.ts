@@ -4,7 +4,7 @@
  */
 
 // Agent Status
-export type AgentStatus = 'creating' | 'ready' | 'training' | 'error'
+export type AgentStatus = 'creating' | 'ready' | 'training' | 'completed' | 'error'
 
 // Agent Model Options
 export type AgentModel = 'gpt-3.5-turbo' | 'gpt-4' | 'gpt-4-turbo'

@@ -23,9 +23,11 @@ interface AgentUploadProps {
   onFilesUploaded: (files: File[]) => void
   onBack: () => void
   onStartTraining?: () => void
+  onStartTesting?: () => void
+  hasNewUploads?: boolean
 }
 
-export default function AgentUpload({ agentData, onFilesUploaded, onBack, onStartTraining }: AgentUploadProps) {
+export default function AgentUpload({ agentData, onFilesUploaded, onBack, onStartTraining, onStartTesting, hasNewUploads }: AgentUploadProps) {
   // Use real upload hooks
   const {
     uploadedFiles,
@@ -324,15 +326,31 @@ export default function AgentUpload({ agentData, onFilesUploaded, onBack, onStar
               </div>
             )}
 
-            {/* Training Data Button - Show if agent has files (either existing or newly uploaded) */}
-            {(agentData.files && agentData.files.length > 0) && onStartTraining && (
-              <button
-                onClick={onStartTraining}
-                className="btn-primary inline-flex items-center gap-2"
-              >
-                <ArrowRight className="h-4 w-4" />
-                Training Data
-              </button>
+            {/* Show appropriate button based on upload status */}
+            {((agentData.files && agentData.files.length > 0) || (allCompleted && allSuccessful && uploadedFiles.length > 0)) && (
+              <>
+                {/* Show Training button if new files were uploaded */}
+                {((allCompleted && allSuccessful && uploadedFiles.length > 0) || hasNewUploads) && onStartTraining && (
+                  <button
+                    onClick={onStartTraining}
+                    className="btn-primary inline-flex items-center gap-2"
+                  >
+                    <ArrowRight className="h-4 w-4" />
+                    Training Data
+                  </button>
+                )}
+                
+                {/* Show Testing button if no new files were uploaded */}
+                {!hasNewUploads && !(allCompleted && allSuccessful && uploadedFiles.length > 0) && onStartTesting && (
+                  <button
+                    onClick={onStartTesting}
+                    className="btn-primary inline-flex items-center gap-2"
+                  >
+                    <ArrowRight className="h-4 w-4" />
+                    Testing Chatbot
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>

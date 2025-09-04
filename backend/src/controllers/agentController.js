@@ -1,9 +1,13 @@
 const agentService = require('../services/agentService');
 
-// Get all agents
+// Get all agents for the user's company
 const getAllAgents = async (req, res) => {
   try {
-    const agents = await agentService.getAllAgents();
+    const { companyId } = req.user;
+    
+    // Get agents for the user's company only
+    const agents = await agentService.getAgentsByCompany(companyId);
+    
     res.json({ agents });
   } catch (error) {
     console.error('Error fetching agents:', error);
@@ -11,11 +15,12 @@ const getAllAgents = async (req, res) => {
   }
 };
 
-// Get agent by ID
+// Get agent by ID (must belong to user's company)
 const getAgentById = async (req, res) => {
   try {
     const { id } = req.params;
-    const agent = await agentService.getAgentById(id);
+    const { companyId } = req.user;
+    const agent = await agentService.getAgentByIdAndCompany(id, companyId);
     
     if (!agent) {
       return res.status(404).json({ error: 'Agent not found' });
@@ -31,7 +36,13 @@ const getAgentById = async (req, res) => {
 // Create new agent
 const createAgent = async (req, res) => {
   try {
-    const agentData = req.body;
+    const { userId, userEmail, companyId } = req.user;
+    const agentData = {
+      ...req.body,
+      companyId,
+      createdBy: userId,
+      createdByEmail: userEmail
+    };
     const newAgent = await agentService.createAgent(agentData);
     
     res.status(201).json({ agent: newAgent });
@@ -41,13 +52,14 @@ const createAgent = async (req, res) => {
   }
 };
 
-// Update agent
+// Update agent (must belong to user's company)
 const updateAgent = async (req, res) => {
   try {
     const { id } = req.params;
+    const { companyId } = req.user;
     const updates = req.body;
     
-    const updatedAgent = await agentService.updateAgent(id, updates);
+    const updatedAgent = await agentService.updateAgentByIdAndCompany(id, companyId, updates);
     
     if (!updatedAgent) {
       return res.status(404).json({ error: 'Agent not found' });
@@ -60,11 +72,13 @@ const updateAgent = async (req, res) => {
   }
 };
 
-// Delete agent
+// Delete agent (must belong to user's company)
 const deleteAgent = async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedAgent = await agentService.deleteAgent(id);
+    const { companyId } = req.user;
+    
+    const deletedAgent = await agentService.deleteAgentByIdAndCompany(id, companyId);
     
     if (!deletedAgent) {
       return res.status(404).json({ error: 'Agent not found' });

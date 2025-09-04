@@ -11,6 +11,29 @@ const agentSchema = new mongoose.Schema({
     trim: true
   },
   description: String,
+  // Multi-tenant fields
+  companyId: {
+    type: String,
+    required: function() {
+      // Required for new records, optional for existing records
+      return this.isNew;
+    },
+    index: true
+  },
+  createdBy: {
+    type: String,
+    required: function() {
+      // Required for new records, optional for existing records
+      return this.isNew;
+    }
+  },
+  createdByEmail: {
+    type: String,
+    required: function() {
+      // Required for new records, optional for existing records
+      return this.isNew;
+    }
+  },
   status: {
     type: String,
     enum: ['draft', 'uploading', 'training', 'trained', 'error', 'archived'],
@@ -68,6 +91,22 @@ const fileSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Agent',
     required: true
+  },
+  // Multi-tenant fields
+  companyId: {
+    type: String,
+    required: function() {
+      // Required for new records, optional for existing records
+      return this.isNew;
+    },
+    index: true
+  },
+  createdBy: {
+    type: String,
+    required: function() {
+      // Required for new records, optional for existing records
+      return this.isNew;
+    }
   },
   originalFilename: {
     type: String,
@@ -219,10 +258,41 @@ const fileSchema = new mongoose.Schema({
 
 // Chat Session Schema
 const chatSessionSchema = new mongoose.Schema({
+  sessionId: {
+    type: String,
+    required: false,
+    unique: true,
+    index: true
+  },
+  // Multi-tenant fields
+  companyId: {
+    type: String,
+    required: function() {
+      // Required for new records, optional for existing records
+      return this.isNew;
+    },
+    index: true
+  },
+  createdBy: {
+    type: String,
+    required: function() {
+      // Required for new records, optional for existing records
+      return this.isNew;
+    }
+  },
   agent: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Agent',
     required: true
+  },
+  visitor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Visitor',
+    required: false // Optional for backward compatibility
+  },
+  deploymentId: {
+    type: String,
+    required: false // Optional for backward compatibility
   },
   sessionName: String,
   status: {
@@ -250,6 +320,22 @@ const chatMessageSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'ChatSession',
     required: true
+  },
+  // Multi-tenant fields
+  companyId: {
+    type: String,
+    required: function() {
+      // Required for new records, optional for existing records
+      return this.isNew;
+    },
+    index: true
+  },
+  createdBy: {
+    type: String,
+    required: function() {
+      // Required for new records, optional for existing records
+      return this.isNew;
+    }
   },
   agent: {
     type: mongoose.Schema.Types.ObjectId,
@@ -300,6 +386,22 @@ const apiUsageSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Agent'
   },
+  // Multi-tenant fields
+  companyId: {
+    type: String,
+    required: function() {
+      // Required for new records, optional for existing records
+      return this.isNew;
+    },
+    index: true
+  },
+  createdBy: {
+    type: String,
+    required: function() {
+      // Required for new records, optional for existing records
+      return this.isNew;
+    }
+  },
   endpoint: {
     type: String,
     required: true
@@ -324,6 +426,72 @@ const apiUsageSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Visitor Schema - For tracking website visitors
+const visitorSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+    trim: true,
+    lowercase: true,
+    index: true
+  },
+  // Multi-tenant fields
+  companyId: {
+    type: String,
+    required: function() {
+      // Required for new records, optional for existing records
+      return this.isNew;
+    },
+    index: true
+  },
+  createdBy: {
+    type: String,
+    required: function() {
+      // Required for new records, optional for existing records
+      return this.isNew;
+    }
+  },
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  deploymentId: {
+    type: String,
+    required: true,
+    index: true
+  },
+  agentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Agent',
+    required: true
+  },
+  websiteUrl: {
+    type: String,
+    required: true
+  },
+  ipAddress: String,
+  userAgent: String,
+  firstVisit: {
+    type: Date,
+    default: Date.now
+  },
+  lastVisit: {
+    type: Date,
+    default: Date.now
+  },
+  totalSessions: {
+    type: Number,
+    default: 0
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  }
+}, {
+  timestamps: true
+});
+
 // Script Tag Deployment Schema
 const scriptTagSchema = new mongoose.Schema({
   deploymentId: {
@@ -331,6 +499,22 @@ const scriptTagSchema = new mongoose.Schema({
     required: true,
     unique: true,
     index: true
+  },
+  // Multi-tenant fields
+  companyId: {
+    type: String,
+    required: function() {
+      // Required for new records, optional for existing records
+      return this.isNew;
+    },
+    index: true
+  },
+  createdBy: {
+    type: String,
+    required: function() {
+      // Required for new records, optional for existing records
+      return this.isNew;
+    }
   },
   agent: {
     type: mongoose.Schema.Types.ObjectId,
@@ -401,26 +585,44 @@ const scriptTagSchema = new mongoose.Schema({
 agentSchema.index({ status: 1 });
 agentSchema.index({ tags: 1 });
 agentSchema.index({ isPublic: 1 });
+agentSchema.index({ companyId: 1 });
+agentSchema.index({ createdBy: 1 });
 
 fileSchema.index({ agent: 1 });
 fileSchema.index({ status: 1 });
 fileSchema.index({ fileHash: 1 });
+fileSchema.index({ companyId: 1 });
+fileSchema.index({ createdBy: 1 });
 
 // File chunk indexes removed - chunks now stored in Qdrant
 
 chatSessionSchema.index({ agent: 1 });
 chatSessionSchema.index({ status: 1 });
+chatSessionSchema.index({ companyId: 1 });
+chatSessionSchema.index({ createdBy: 1 });
 
 chatMessageSchema.index({ session: 1 });
 chatMessageSchema.index({ agent: 1 });
 chatMessageSchema.index({ createdAt: 1 });
+chatMessageSchema.index({ companyId: 1 });
+chatMessageSchema.index({ createdBy: 1 });
 
 apiUsageSchema.index({ agent: 1 });
 apiUsageSchema.index({ createdAt: 1 });
+apiUsageSchema.index({ companyId: 1 });
+apiUsageSchema.index({ createdBy: 1 });
 
 scriptTagSchema.index({ agent: 1 });
 scriptTagSchema.index({ isActive: 1 });
 scriptTagSchema.index({ version: 1 });
+scriptTagSchema.index({ companyId: 1 });
+scriptTagSchema.index({ createdBy: 1 });
+
+visitorSchema.index({ email: 1, deploymentId: 1 });
+visitorSchema.index({ agentId: 1 });
+visitorSchema.index({ isActive: 1 });
+visitorSchema.index({ companyId: 1 });
+visitorSchema.index({ createdBy: 1 });
 
 // Create models
 const Agent = mongoose.model('Agent', agentSchema);
@@ -429,6 +631,7 @@ const ChatSession = mongoose.model('ChatSession', chatSessionSchema);
 const ChatMessage = mongoose.model('ChatMessage', chatMessageSchema);
 const ApiUsage = mongoose.model('ApiUsage', apiUsageSchema);
 const ScriptTag = mongoose.model('ScriptTag', scriptTagSchema);
+const Visitor = mongoose.model('Visitor', visitorSchema);
 
 module.exports = {
   Agent,
@@ -436,5 +639,6 @@ module.exports = {
   ChatSession,
   ChatMessage,
   ApiUsage,
-  ScriptTag
+  ScriptTag,
+  Visitor
 };

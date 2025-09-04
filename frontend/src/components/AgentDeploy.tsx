@@ -37,9 +37,10 @@ interface AgentDeployProps {
   agentId: string
   agentName: string
   onBack: () => void
+  onViewHistory?: () => void
 }
 
-export default function AgentDeploy({ agentId, agentName, onBack }: AgentDeployProps) {
+export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory }: AgentDeployProps) {
   const [deployments, setDeployments] = useState<Deployment[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -295,13 +296,24 @@ export default function AgentDeploy({ agentId, agentName, onBack }: AgentDeployP
             Create deployments to embed your chatbot on any website
           </p>
         </div>
-        <button
-          onClick={openCreateModal}
-          className="btn-primary flex items-center gap-2"
-        >
-          <Plus className="h-5 w-5" />
-          Create Deployment
-        </button>
+        <div className="flex items-center gap-3">
+          {onViewHistory && (
+            <button
+              onClick={onViewHistory}
+              className="btn-secondary flex items-center gap-2"
+            >
+              <BarChart3 className="h-5 w-5" />
+              View Chat History
+            </button>
+          )}
+          <button
+            onClick={openCreateModal}
+            className="btn-primary flex items-center gap-2"
+          >
+            <Plus className="h-5 w-5" />
+            Create Deployment
+          </button>
+        </div>
       </div>
 
       {/* Deployments Grid */}

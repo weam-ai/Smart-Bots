@@ -87,7 +87,7 @@ export default function AIChatbotPage() {
                 agents?.length || 0
               )}
             </div>
-            <div className="text-sm text-gray-600">Active Agents</div>
+            <div className="text-sm text-gray-600">Company Agents</div>
           </div>
           <div className="card text-center">
             <div className="text-3xl font-bold text-green-600 mb-2">
@@ -113,7 +113,7 @@ export default function AIChatbotPage() {
 
         {/* Agents Grid */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Your AI Agents</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Company AI Agents</h2>
           
           {/* Loading State */}
           {isLoadingAgents && (
@@ -147,7 +147,7 @@ export default function AIChatbotPage() {
             </div>
           )}
 
-          {/* Agents List */}
+                       {/* Agents List */}
           {!isLoadingAgents && !agentsError && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {(agents?.length || 0) === 0 ? (
@@ -161,7 +161,32 @@ export default function AIChatbotPage() {
                   </button>
                 </div>
               ) : (
-                agents?.map((agent) => (
+                <>
+                  {/* Create New Agent Card - First in grid */}
+                  <div className="card-hover border-2 border-dashed border-gray-300 hover:border-primary-400 transition-colors cursor-pointer">
+                    <div 
+                      className="flex flex-col items-center justify-center text-center py-8"
+                      onClick={handleCreateNewAgent}
+                    >
+                      <div className="h-12 w-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
+                        <Plus className="h-6 w-6 text-primary-600" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Create New Agent</h3>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Upload documents and train a new AI chatbot
+                      </p>
+                      {isCreating ? (
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
+                      ) : (
+                        <div className="btn-primary text-sm px-4 py-2">
+                          Get Started
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Existing Agents */}
+                  {agents?.map((agent) => (
                   <div key={agent._id} className="card-hover group cursor-pointer" onClick={() => handleOpenAgent(agent._id)}>
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
@@ -229,60 +254,15 @@ export default function AIChatbotPage() {
                       </button>
                     </div>
                   </div>
-                ))
+                  ))}
+                </>
               )}
             </div>
           )}
 
-          {/* Show Create New Agent Card only when we have agents */}
-          {!isLoadingAgents && !agentsError && (agents?.length || 0) > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-              <div className="card-hover border-2 border-dashed border-gray-300 hover:border-primary-400 transition-colors cursor-pointer">
-                <div 
-                  className="flex flex-col items-center justify-center text-center py-8"
-                  onClick={handleCreateNewAgent}
-                >
-                  <div className="h-12 w-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
-                    <Plus className="h-6 w-6 text-primary-600" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Create New Agent</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Upload documents and train a new AI chatbot
-                  </p>
-                  {isCreating ? (
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
-                  ) : (
-                    <div className="btn-primary text-sm px-4 py-2">
-                      Get Started
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
+       
         </div>
 
-        {/* Quick Actions */}
-        <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button className="btn-secondary text-left p-4">
-              <FileText className="h-5 w-5 text-primary-600 mb-2" />
-              <div className="font-medium">View All Documents</div>
-              <div className="text-sm text-gray-600">Manage uploaded files</div>
-            </button>
-            <button className="btn-secondary text-left p-4">
-              <Users className="h-5 w-5 text-primary-600 mb-2" />
-              <div className="font-medium">Chat Analytics</div>
-              <div className="text-sm text-gray-600">View conversation insights</div>
-            </button>
-            <button className="btn-secondary text-left p-4">
-              <Bot className="h-5 w-5 text-primary-600 mb-2" />
-              <div className="font-medium">Agent Settings</div>
-              <div className="text-sm text-gray-600">Configure AI behavior</div>
-            </button>
-          </div>
-        </div>
       </main>
 
       {/* Create Agent Modal */}

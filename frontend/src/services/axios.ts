@@ -6,6 +6,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios'
 import toast from 'react-hot-toast'
 import { API_CONFIG, HTTP_STATUS, ERROR_MESSAGES, HEADERS, STORAGE_KEYS } from '@/utils/constants'
+import { getAuthHeaders } from '@/utils/auth'
 import type { ApiResponse } from '@/types/api'
 
 // Authentication state
@@ -95,26 +96,45 @@ const handleHttpError = (status: number, errorData?: ApiResponse): void => {
 /**
  * Handle outgoing requests
  */
-const handleRequest = (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
-  // Add auth token if available
-  if (authToken) {
+const handleRequest = async (config: InternalAxiosRequestConfig): Promise<InternalAxiosRequestConfig> => {
+  try {
+    // Get JWT auth headers
+    const authHeaders = await getAuthHeaders()
+    
+    // Add auth headers
     config.headers = config.headers || {}
-    config.headers[HEADERS.AUTHORIZATION] = `Bearer ${authToken}`
+    Object.assign(config.headers, authHeaders)
+
+    // Set default Content-Type for non-upload requests
+    if (!config.headers['Content-Type'] && !(config.data instanceof FormData)) {
+      config.headers['Content-Type'] = 'application/json'
+    }
+
+    // Add request ID for tracking
+    config.headers[HEADERS.X_REQUEST_ID] = generateRequestId()
+
+    // Log request in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`, {
+        headers: config.headers,
+        data: config.data,
+      })
+    }
+
+    return config
+  } catch (error) {
+    console.error('❌ Failed to add auth headers:', error)
+    // Continue without auth headers (will result in 401)
+    config.headers = config.headers || {}
+    config.headers[HEADERS.X_REQUEST_ID] = generateRequestId()
+    
+    // Set default Content-Type for non-upload requests
+    if (!config.headers['Content-Type'] && !(config.data instanceof FormData)) {
+      config.headers['Content-Type'] = 'application/json'
+    }
+    
+    return config
   }
-
-  // Add request ID for tracking
-  config.headers = config.headers || {}
-  config.headers[HEADERS.X_REQUEST_ID] = generateRequestId()
-
-  // Log request in development
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`, {
-      headers: config.headers,
-      data: config.data,
-    })
-  }
-
-  return config
 }
 
 /**

@@ -25,11 +25,11 @@
     "joi": "^17.11.0",
     "jsonwebtoken": "^9.0.2",
     "langchain": "^0.0.200",
+    "mammoth": "^1.6.0",
     "mongoose": "^8.0.3",
     "morgan": "^1.10.0",
     "openai": "^4.20.1",
     "pdf-parse": "^1.1.1",
-    "mammoth": "^1.6.0",
     "redis": "^4.6.11",
     "uuid": "^9.0.1"
   },

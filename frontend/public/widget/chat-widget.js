@@ -30,11 +30,21 @@
     config: null,
     messages: [],
     currentSessionId: null,
-    isLoading: false
+    isLoading: false,
+    visitor: null,
+    showIdentityForm: true,
+    websiteUrl: window.location.origin
   };
 
   // DOM elements
   let elements = {};
+
+  /**
+   * Generate a unique session ID
+   */
+  function generateSessionId() {
+    return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  }
 
   /**
    * Initialize the widget
@@ -132,8 +142,33 @@
           </div>
         </div>
         
+        <!-- Identity Form -->
+        <div class="ai-chatbot-identity-form" id="ai-chatbot-identity-form" style="display: ${widgetState.showIdentityForm ? 'block' : 'none'};">
+          <div class="ai-chatbot-identity-header">
+            <h3>Let's get started!</h3>
+            <p>Please provide your details to begin chatting</p>
+          </div>
+          <form id="ai-chatbot-identity-form-element">
+            <div class="ai-chatbot-form-group">
+              <label for="ai-chatbot-name">Name *</label>
+              <input type="text" id="ai-chatbot-name" name="name" required placeholder="Enter your name">
+            </div>
+            <div class="ai-chatbot-form-group">
+              <label for="ai-chatbot-email">Email *</label>
+              <input type="email" id="ai-chatbot-email" name="email" required placeholder="Enter your email">
+            </div>
+            <div class="ai-chatbot-form-group">
+              <label class="ai-chatbot-checkbox-label">
+                <input type="checkbox" id="ai-chatbot-privacy" name="privacy" required>
+                <span class="ai-chatbot-checkbox-text">I agree to the privacy policy and terms of service</span>
+              </label>
+            </div>
+            <button type="submit" class="ai-chatbot-identity-submit">Start Chatting</button>
+          </form>
+        </div>
+
         <!-- Chat Messages -->
-        <div class="ai-chatbot-messages" id="ai-chatbot-messages">
+        <div class="ai-chatbot-messages" id="ai-chatbot-messages" style="display: ${widgetState.showIdentityForm ? 'none' : 'block'};">
           <div class="ai-chatbot-welcome">
             <div class="ai-chatbot-welcome-avatar">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -147,7 +182,7 @@
         </div>
         
         <!-- Chat Input -->
-        <div class="ai-chatbot-input-container">
+        <div class="ai-chatbot-input-container" style="display: ${widgetState.showIdentityForm ? 'none' : 'block'};">
           <div class="ai-chatbot-input-wrapper">
             <input 
               type="text" 
@@ -186,6 +221,8 @@
       container: widget.querySelector('.ai-chatbot-container'),
       minimized: widget.querySelector('.ai-chatbot-minimized'),
       messages: widget.querySelector('#ai-chatbot-messages'),
+      identityForm: widget.querySelector('#ai-chatbot-identity-form'),
+      identityFormElement: widget.querySelector('#ai-chatbot-identity-form-element'),
       input: widget.querySelector('#ai-chatbot-input'),
       sendBtn: widget.querySelector('#ai-chatbot-send-btn'),
       minimizeBtn: widget.querySelector('.ai-chatbot-minimize-btn'),
@@ -432,6 +469,100 @@
         color: white;
       }
       
+      .ai-chatbot-identity-form {
+        padding: 20px;
+        background: ${colors.background};
+      }
+      
+      .ai-chatbot-identity-header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      
+      .ai-chatbot-identity-header h3 {
+        margin: 0 0 8px 0;
+        color: ${colors.text};
+        font-size: 18px;
+        font-weight: 600;
+      }
+      
+      .ai-chatbot-identity-header p {
+        margin: 0;
+        color: ${colors.textSecondary};
+        font-size: 14px;
+      }
+      
+      .ai-chatbot-form-group {
+        margin-bottom: 16px;
+      }
+      
+      .ai-chatbot-form-group label {
+        display: block;
+        margin-bottom: 6px;
+        color: ${colors.text};
+        font-size: 14px;
+        font-weight: 500;
+      }
+      
+      .ai-chatbot-form-group input[type="text"],
+      .ai-chatbot-form-group input[type="email"] {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid ${colors.border};
+        border-radius: 8px;
+        background: ${colors.surface};
+        color: ${colors.text};
+        font-size: 14px;
+        box-sizing: border-box;
+      }
+      
+      .ai-chatbot-form-group input[type="text"]:focus,
+      .ai-chatbot-form-group input[type="email"]:focus {
+        outline: none;
+        border-color: ${colors.primary};
+        box-shadow: 0 0 0 2px ${colors.primary}20;
+      }
+      
+      .ai-chatbot-checkbox-label {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        cursor: pointer;
+        font-size: 12px;
+        line-height: 1.4;
+      }
+      
+      .ai-chatbot-checkbox-label input[type="checkbox"] {
+        margin: 0;
+        flex-shrink: 0;
+      }
+      
+      .ai-chatbot-checkbox-text {
+        color: ${colors.textSecondary};
+      }
+      
+      .ai-chatbot-identity-submit {
+        width: 100%;
+        padding: 12px 16px;
+        background: ${colors.primary};
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      
+      .ai-chatbot-identity-submit:hover {
+        background: ${colors.primaryHover};
+      }
+      
+      .ai-chatbot-identity-submit:disabled {
+        background: ${colors.border};
+        cursor: not-allowed;
+      }
+      
       .ai-chatbot-input-container {
         padding: 16px;
         border-top: 1px solid ${colors.border};
@@ -594,6 +725,9 @@
    * Setup event listeners
    */
   function setupEventListeners() {
+    // Identity form submission
+    elements.identityFormElement.addEventListener('submit', handleIdentitySubmit);
+    
     // Send button click
     elements.sendBtn.addEventListener('click', handleSendMessage);
     
@@ -613,6 +747,99 @@
     
     // Minimized widget click
     elements.minimized.addEventListener('click', openWidget);
+  }
+
+  /**
+   * Handle identity form submission
+   */
+  async function handleIdentitySubmit(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const name = formData.get('name').trim();
+    const email = formData.get('email').trim();
+    const privacy = formData.get('privacy');
+    
+    // Validate form
+    if (!name || !email || !privacy) {
+      alert('Please fill in all required fields and accept the privacy policy.');
+      return;
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+    
+    try {
+      // Disable form during submission
+      const submitBtn = e.target.querySelector('.ai-chatbot-identity-submit');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creating account...';
+      
+      // Create or update visitor
+      const response = await fetch(`${CONFIG.API_BASE_URL}/visitors`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          deploymentId: widgetState.config.deploymentId,
+          name: name,
+          email: email,
+          websiteUrl: widgetState.websiteUrl
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        // Store visitor data
+        widgetState.visitor = {
+          id: result.data.visitorId,
+          name: result.data.name,
+          email: result.data.email,
+          isNewVisitor: result.data.isNewVisitor
+        };
+
+        // Generate a session ID for this conversation
+        widgetState.currentSessionId = generateSessionId();
+        console.log('🆔 Generated session ID:', widgetState.currentSessionId);
+        
+        // Hide identity form and show chat
+        widgetState.showIdentityForm = false;
+        elements.identityForm.style.display = 'none';
+        elements.messages.style.display = 'block';
+        
+        // Show chat input
+        const inputContainer = elements.widget.querySelector('.ai-chatbot-input-container');
+        if (inputContainer) {
+          inputContainer.style.display = 'block';
+        }
+        
+        // Add welcome message with visitor name
+        addMessage('assistant', `Hi ${name}! ${widgetState.config.welcomeMessage}`);
+        
+        console.log('✅ Visitor created/updated:', widgetState.visitor);
+      } else {
+        throw new Error(result.error?.message || 'Failed to create visitor account');
+      }
+      
+    } catch (error) {
+      console.error('❌ Failed to submit identity form:', error);
+      alert('Failed to create your account. Please try again.');
+      
+      // Re-enable form
+      const submitBtn = e.target.querySelector('.ai-chatbot-identity-submit');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Start Chatting';
+    }
   }
 
   /**
@@ -681,9 +908,13 @@
       },
       body: JSON.stringify({
         message: message,
-        sessionId: widgetState.currentSessionId
+        sessionId: widgetState.currentSessionId,
+        visitorId: widgetState.visitor?.id || null,
+        deploymentId: widgetState.config.deploymentId
       })
     });
+    
+    console.log('📤 Sending message with sessionId:', widgetState.currentSessionId);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

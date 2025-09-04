@@ -68,6 +68,8 @@ app.use('/api/search', require('./routes/search'));
 // app.use('/api/files', require('./routes/files')); // TODO: Create files route
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/deployments', require('./routes/deployment'));
+app.use('/api/visitors', require('./routes/visitor'));
+app.use('/api/chat-history', require('./routes/chatHistory'));
 
 // Add error handling middleware imports
 const { 

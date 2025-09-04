@@ -6,7 +6,8 @@ const {
   ChatSession,
   ChatMessage,
   ApiUsage,
-  ScriptTag
+  ScriptTag,
+  Visitor
 } = require('../schema/mongodb-schema');
 
 module.exports = {
@@ -16,5 +17,6 @@ module.exports = {
   ChatSession,
   ChatMessage,
   ApiUsage,
-  ScriptTag
+  ScriptTag,
+  Visitor
 };

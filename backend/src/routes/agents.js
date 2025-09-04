@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const agentController = require('../controllers/agentController');
 const deploymentController = require('../controllers/deploymentController');
+const { jwtAuthMiddleware } = require('../middleware/cookieAuth');
 const {
   validateAgentCreate,
   validateAgentUpdate,
@@ -20,18 +21,17 @@ const {
 // Apply general rate limiting to all agent routes
 router.use(generalLimiter);
 
-// GET /api/agents - Get all agents
+// GET /api/agents - Get all agents for user's company
 router.get('/', 
   validatePagination,
-  optionalAuth,
+  jwtAuthMiddleware,
   agentController.getAllAgents
 );
 
-// GET /api/agents/:id - Get specific agent
+// GET /api/agents/:id - Get specific agent (must belong to user's company)
 router.get('/:id', 
   validateObjectId,
-  optionalAuth,
-  verifyAgentOwnership,
+  jwtAuthMiddleware,
   agentController.getAgentById
 );
 
@@ -39,24 +39,22 @@ router.get('/:id',
 router.post('/', 
   agentCreationLimiter,
   validateAgentCreate,
-  optionalAuth,
+  jwtAuthMiddleware,
   agentController.createAgent
 );
 
-// PUT /api/agents/:id - Update agent
+// PUT /api/agents/:id - Update agent (must belong to user's company)
 router.put('/:id', 
   validateObjectId,
   validateAgentUpdate,
-  optionalAuth,
-  verifyAgentOwnership,
+  jwtAuthMiddleware,
   agentController.updateAgent
 );
 
-// DELETE /api/agents/:id - Delete agent
+// DELETE /api/agents/:id - Delete agent (must belong to user's company)
 router.delete('/:id', 
   validateObjectId,
-  optionalAuth,
-  verifyAgentOwnership,
+  jwtAuthMiddleware,
   agentController.deleteAgent
 );
 
@@ -66,16 +64,14 @@ router.delete('/:id',
 router.post('/:agentId/deployments',
   validateAgentId,
   validateCreateDeployment,
-  optionalAuth,
-  verifyAgentOwnership,
+  jwtAuthMiddleware,
   deploymentController.createDeployment
 );
 
 // GET /api/agents/:agentId/deployments - List all deployments for agent
 router.get('/:agentId/deployments',
   validateAgentId,
-  optionalAuth,
-  verifyAgentOwnership,
+  jwtAuthMiddleware,
   deploymentController.getDeployments
 );
 
@@ -83,8 +79,7 @@ router.get('/:agentId/deployments',
 router.get('/:agentId/deployments/:deploymentId',
   validateAgentId,
   validateDeploymentId,
-  optionalAuth,
-  verifyAgentOwnership,
+  jwtAuthMiddleware,
   deploymentController.getDeployment
 );
 
@@ -93,8 +88,7 @@ router.put('/:agentId/deployments/:deploymentId',
   validateAgentId,
   validateDeploymentId,
   validateUpdateDeployment,
-  optionalAuth,
-  verifyAgentOwnership,
+  jwtAuthMiddleware,
   deploymentController.updateDeployment
 );
 
@@ -102,8 +96,7 @@ router.put('/:agentId/deployments/:deploymentId',
 router.delete('/:agentId/deployments/:deploymentId',
   validateAgentId,
   validateDeploymentId,
-  optionalAuth,
-  verifyAgentOwnership,
+  jwtAuthMiddleware,
   deploymentController.deleteDeployment
 );
 

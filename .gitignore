@@ -1,4 +1,24 @@
 .env
+.env.*
 frontend/node_modules
 backend/node_modules
-    
+
+# next.js
+frontend/.next/
+/out/
+
+# production
+frontend/build
+backend/build
+
+!.env.example
+
+# Continue.Dev
+*.continue
+*.vscode
+# Continue.Dev
+*.continue
+*.vscode
+
+.cursorrules
+.cursor

@@ -9,8 +9,9 @@ import AgentUpload from '@/components/AgentUpload'
 import AgentTraining from '@/components/AgentTraining'
 import AgentPlayground from '@/components/AgentPlayground'
 import AgentDeploy from '@/components/AgentDeploy'
+import ChatHistory from '@/components/ChatHistory'
 
-export type AgentStep = 'upload' | 'training' | 'playground' | 'deploy'
+export type AgentStep = 'upload' | 'training' | 'playground' | 'deploy' | 'history'
 
 export interface AgentFile {
   _id: string
@@ -45,6 +46,7 @@ export default function AgentPage() {
   console.log('🆔 Agent ID from params:', agentId)
 
   const [currentStep, setCurrentStep] = useState<AgentStep>('upload')
+  const [hasNewUploads, setHasNewUploads] = useState(false)
   
   // Debug step changes
   useEffect(() => {
@@ -156,23 +158,9 @@ export default function AgentPage() {
           trainingProgress: calculateTrainingProgress(agent.status, files)
         })
 
-        // Determine the appropriate step based on agent status and files
-        const mappedStatus = mapAgentStatus(agent.status)
-        console.log('🎯 Determining step - Agent status:', agent.status, 'Mapped status:', mappedStatus, 'Files count:', files.length)
-        
-        if (files.length === 0) {
-          console.log('📁 No files found, showing upload step')
-          setCurrentStep('upload')
-        } else if (mappedStatus === 'training' || mappedStatus === 'error') {
-          console.log('🔄 Agent in training/error state, showing training step')
-          setCurrentStep('training')
-        } else if (mappedStatus === 'trained') {
-          console.log('✅ Agent is trained, showing deploy step')
-          setCurrentStep('deploy')
-        } else {
-          console.log('📤 Agent has files but not trained, showing upload step')
-          setCurrentStep('upload')
-        }
+        // Always start at step 1 (upload) when opening an agent
+        console.log('🎯 Always starting at upload step when opening agent')
+        setCurrentStep('upload')
 
       } catch (error: any) {
         console.error('Error fetching agent data:', error)
@@ -292,12 +280,10 @@ export default function AgentPage() {
   }
 
   const handleFilesUploaded = (files: File[]) => {
-    // After files are uploaded, refetch the agent data to get the updated files
-    setTimeout(() => {
-      window.location.reload() // Simple reload to get fresh data
-    }, 1000)
-    
-    setCurrentStep('training')
+    // Mark that new files were uploaded
+    setHasNewUploads(true)
+    // After files are uploaded, go directly to deploy step
+    setCurrentStep('deploy')
     toast.success(`${files.length} file${files.length !== 1 ? 's' : ''} uploaded successfully!`)
   }
 
@@ -327,6 +313,11 @@ export default function AgentPage() {
   const handleStartTraining = () => {
     console.log('🚀 Starting training process')
     setCurrentStep('training')
+  }
+
+  const handleStartTesting = () => {
+    console.log('🧪 Starting testing/playground')
+    setCurrentStep('playground')
   }
 
   const handleStartPlayground = () => {
@@ -371,6 +362,8 @@ export default function AgentPage() {
           onFilesUploaded={handleFilesUploaded}
           onBack={handleBackToAgents}
           onStartTraining={handleStartTraining}
+          onStartTesting={handleStartTesting}
+          hasNewUploads={hasNewUploads}
         />
       )}
 
@@ -387,7 +380,23 @@ export default function AgentPage() {
           agentId={agentId}
           agentName={agentData.name}
           onBack={handleStartPlayground}
+          onViewHistory={() => setCurrentStep('history')}
         />
+      )}
+
+      {currentStep === 'history' && (
+        <div className="space-y-6">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setCurrentStep('deploy')}
+              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              ← Back to Deploy
+            </button>
+            <h1 className="text-2xl font-bold text-gray-900">Chat History</h1>
+          </div>
+          <ChatHistory agentId={agentId} />
+        </div>
       )}
 
       {currentStep === 'playground' && (

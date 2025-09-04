@@ -6,6 +6,7 @@
 const agentService = require('../services/agentService')
 const openaiService = require('../services/openaiService')
 const qdrantService = require('../services/qdrantService')
+const { ChatSession, ChatMessage, Visitor } = require('../models')
 const { v4: uuidv4 } = require('uuid')
 
 // ==================== SEND MESSAGE ====================
@@ -13,12 +14,14 @@ const { v4: uuidv4 } = require('uuid')
 const sendMessage = async (req, res) => {
   try {
     const { agentId } = req.params
-    const { message, sessionId, model, temperature, instructions } = req.body
+    const { message, sessionId, model, temperature, instructions, visitorId, deploymentId } = req.body
 
     console.log('💬 Chat message received:', { 
       agentId, 
       message: message?.substring(0, 100), 
       sessionId,
+      visitorId,
+      deploymentId,
       model,
       temperature,
       instructions: instructions?.substring(0, 50)
@@ -115,7 +118,81 @@ const sendMessage = async (req, res) => {
     // 6. Generate session ID if not provided
     const finalSessionId = sessionId || uuidv4()
 
-    // 7. Return response
+    // 7. Create or update chat session with visitor data
+    try {
+      console.log('🔍 Looking for session with sessionId:', finalSessionId)
+      let session = await ChatSession.findOne({ sessionId: finalSessionId })
+      
+      if (!session) {
+        console.log('❌ Session not found, creating new one')
+        // Create new session with the provided sessionId
+        session = new ChatSession({
+          sessionId: finalSessionId,
+          agent: agentId,
+          visitor: visitorId || null,
+          deploymentId: deploymentId || null,
+          status: 'active',
+          totalMessages: 0
+        })
+        await session.save()
+        console.log('✅ New chat session created:', session._id, 'with sessionId:', finalSessionId)
+      } else {
+        console.log('✅ Found existing session:', session._id, 'with sessionId:', finalSessionId)
+      }
+
+      // Update session with visitor data if provided
+      if (visitorId && !session.visitor) {
+        session.visitor = visitorId
+      }
+      if (deploymentId && !session.deploymentId) {
+        session.deploymentId = deploymentId
+      }
+
+      session.totalMessages += 1
+      session.lastMessageAt = new Date()
+      await session.save()
+
+      console.log('✅ Chat session updated:', session._id)
+
+      // Store user message
+      const userMessage = new ChatMessage({
+        session: session._id,
+        agent: agentId,
+        messageType: 'user',
+        content: message.trim(),
+        contentHash: require('crypto').createHash('md5').update(message.trim()).digest('hex'),
+        createdAt: new Date()
+      })
+      await userMessage.save()
+
+      // Store AI response
+      const aiMessage = new ChatMessage({
+        session: session._id,
+        agent: agentId,
+        messageType: 'assistant',
+        content: aiResponse.response,
+        contentHash: require('crypto').createHash('md5').update(aiResponse.response).digest('hex'),
+        referencedChunks: referencedChunks,
+        ragMetadata: {
+          chunksFound: similarChunks.length,
+          contextLength: context.length,
+          query: message.trim(),
+          timestamp: new Date().toISOString()
+        },
+        createdAt: new Date()
+      })
+      
+      console.log('🔍 AI Message before save:', { messageType: aiMessage.messageType, content: aiMessage.content.substring(0, 50) })
+      await aiMessage.save()
+      console.log('🔍 AI Message after save:', { messageType: aiMessage.messageType, _id: aiMessage._id })
+
+      console.log('✅ Chat messages stored:', { userMessage: userMessage._id, aiMessage: aiMessage._id })
+    } catch (sessionError) {
+      console.warn('⚠️ Failed to update chat session:', sessionError.message)
+      // Don't fail the entire request if session update fails
+    }
+
+    // 8. Return response
     const response = {
       success: true,
       data: {

@@ -1,6 +1,6 @@
 const { Agent } = require('../models');
 
-// Get all agents
+// Get all agents (deprecated - use getAgentsByCompany instead)
 const getAllAgents = async () => {
   try {
     const agents = await Agent.find({}).sort({ createdAt: -1 });
@@ -10,10 +10,32 @@ const getAllAgents = async () => {
   }
 };
 
-// Get agent by ID
+// Get agents by company ID
+const getAgentsByCompany = async (companyId) => {
+  try {
+    const agents = await Agent.find({ companyId }).sort({ createdAt: -1 });
+    return agents;
+  } catch (error) {
+    throw new Error(`Failed to fetch agents for company: ${error.message}`);
+  }
+};
+
+// All agents now have companyId for proper multi-tenant support
+
+// Get agent by ID (deprecated - use getAgentByIdAndCompany instead)
 const getAgentById = async (id) => {
   try {
     const agent = await Agent.findById(id);
+    return agent;
+  } catch (error) {
+    throw new Error(`Failed to fetch agent: ${error.message}`);
+  }
+};
+
+// Get agent by ID and company ID
+const getAgentByIdAndCompany = async (id, companyId) => {
+  try {
+    const agent = await Agent.findOne({ _id: id, companyId });
     return agent;
   } catch (error) {
     throw new Error(`Failed to fetch agent: ${error.message}`);
@@ -29,6 +51,9 @@ const createAgent = async (agentData) => {
       _id: agentData._id, // Use the provided ID from frontend
       name: agentData.name || `New Agent ${Date.now()}`,
       description: agentData.description || 'A new AI chatbot agent',
+      companyId: agentData.companyId,
+      createdBy: agentData.createdBy,
+      createdByEmail: agentData.createdByEmail,
       status: 'uploading',
       avatar: agentData.avatar || '🤖',
       systemPrompt: agentData.systemPrompt || 'You are a helpful AI assistant.',
@@ -51,7 +76,7 @@ const createAgent = async (agentData) => {
   }
 };
 
-// Update agent
+// Update agent (deprecated - use updateAgentByIdAndCompany instead)
 const updateAgent = async (id, updates) => {
   try {
     const updatedAgent = await Agent.findByIdAndUpdate(
@@ -65,7 +90,21 @@ const updateAgent = async (id, updates) => {
   }
 };
 
-// Delete agent
+// Update agent by ID and company ID
+const updateAgentByIdAndCompany = async (id, companyId, updates) => {
+  try {
+    const updatedAgent = await Agent.findOneAndUpdate(
+      { _id: id, companyId },
+      updates,
+      { new: true, runValidators: true }
+    );
+    return updatedAgent;
+  } catch (error) {
+    throw new Error(`Failed to update agent: ${error.message}`);
+  }
+};
+
+// Delete agent (deprecated - use deleteAgentByIdAndCompany instead)
 const deleteAgent = async (id) => {
   try {
     const deletedAgent = await Agent.findByIdAndDelete(id);
@@ -75,7 +114,17 @@ const deleteAgent = async (id) => {
   }
 };
 
-// Update agent status
+// Delete agent by ID and company ID
+const deleteAgentByIdAndCompany = async (id, companyId) => {
+  try {
+    const deletedAgent = await Agent.findOneAndDelete({ _id: id, companyId });
+    return deletedAgent;
+  } catch (error) {
+    throw new Error(`Failed to delete agent: ${error.message}`);
+  }
+};
+
+// Update agent status (deprecated - use updateAgentByIdAndCompany instead)
 const updateAgentStatus = async (id, status) => {
   try {
     const updatedAgent = await Agent.findByIdAndUpdate(
@@ -89,7 +138,7 @@ const updateAgentStatus = async (id, status) => {
   }
 };
 
-// Get agents by status
+// Get agents by status (deprecated - use getAgentsByCompany with status filter instead)
 const getAgentsByStatus = async (status) => {
   try {
     const agents = await Agent.find({ status }).sort({ createdAt: -1 });
@@ -99,7 +148,7 @@ const getAgentsByStatus = async (status) => {
   }
 };
 
-// Get public agents
+// Get public agents (deprecated - use getAgentsByCompany with isPublic filter instead)
 const getPublicAgents = async () => {
   try {
     const agents = await Agent.find({ isPublic: true, status: 'trained' }).sort({ createdAt: -1 });
@@ -111,10 +160,14 @@ const getPublicAgents = async () => {
 
 module.exports = {
   getAllAgents,
+  getAgentsByCompany,
   getAgentById,
+  getAgentByIdAndCompany,
   createAgent,
   updateAgent,
+  updateAgentByIdAndCompany,
   deleteAgent,
+  deleteAgentByIdAndCompany,
   updateAgentStatus,
   getAgentsByStatus,
   getPublicAgents
