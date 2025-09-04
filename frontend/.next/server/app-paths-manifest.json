@@ -1,4 +1,0 @@
-{
-  "/not-found": "app/not-found.js",
-  "/ai-chatbot/[agentId]/page": "app/ai-chatbot/[agentId]/page.js"
-}
