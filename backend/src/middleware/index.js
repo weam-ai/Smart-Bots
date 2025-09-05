@@ -4,6 +4,7 @@
  */
 
 const auth = require('./auth');
+const cookieAuth = require('./cookieAuth');
 const validation = require('./validation');
 const rateLimiting = require('./rateLimiting');
 const errorHandler = require('./errorHandler');
@@ -11,6 +12,7 @@ const errorHandler = require('./errorHandler');
 module.exports = {
   // Authentication & Authorization
   ...auth,
+  ...cookieAuth,
   
   // Validation (Joi)
   ...validation,

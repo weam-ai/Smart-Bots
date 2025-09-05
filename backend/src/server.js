@@ -162,11 +162,11 @@ const startServer = async () => {
     console.log('✅ Database connected successfully');
     
     // Seed database with demo data
-    await seedDatabase();
+    // await seedDatabase();
     console.log('✅ Database seeded with demo data');
     
     // Start server
-    app.listen(PORT, '0.0.0.0', () => {
+    app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🔗 API URL: http://localhost:${PORT}`);

@@ -20,7 +20,7 @@ const uploadFiles = asyncHandler(async (req, res) => {
   try {
     // Get user context from request
     const context = {
-      userId: req.user?.id,
+      userId: req.user?.userId,
       companyId: req.user?.companyId,
       userAgent: req.get('User-Agent'),
       
@@ -31,6 +31,20 @@ const uploadFiles = asyncHandler(async (req, res) => {
       embeddingModel: req.query.embeddingModel,
       priority: req.query.priority
     };
+    
+    console.log('🔍 Upload context debug:', {
+      hasUser: !!req.user,
+      user: req.user,
+      context: context,
+      authHeader: req.headers.authorization
+    });
+    
+    // Ensure we have required fields for multi-tenant context
+    if (!context.companyId || !context.userId) {
+      console.warn('⚠️ Missing multi-tenant context, using fallback values');
+      context.companyId = context.companyId || 'fallback-company';
+      context.userId = context.userId || 'fallback-user';
+    }
     
     // Process the uploaded files using queue-based service
     const result = await queuedUploadService.handleQueuedUpload(req, agentId, context);

@@ -110,7 +110,7 @@ const verifyAgentOwnership = async (req, res, next) => {
     }
 
     // For now, allow access to public agents or owned agents
-    if (agent.isPublic || agent.createdBy === req.user.id) {
+    if (agent.isPublic || agent.createdBy === req.user.userId) {
       return next();
     }
 

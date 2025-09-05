@@ -39,14 +39,30 @@ const createOrUpdateVisitor = asyncHandler(async (req, res) => {
   }
 
   try {
-    // Get deployment info to get agentId
-    const deployment = await ScriptTag.findOne({ deploymentId });
+    // Get deployment info with agent details to get company context
+    const deployment = await ScriptTag.findOne({ deploymentId }).populate('agent', 'companyId createdBy');
+    console.log("🚀 ~ deployment:", deployment)
     if (!deployment) {
       return res.status(404).json({
         success: false,
         error: {
           message: 'Deployment not found',
           code: 'DEPLOYMENT_NOT_FOUND'
+        }
+      });
+    }
+
+    // Get company context from the agent
+    const companyId = deployment.agent?.companyId;
+    const createdBy = deployment.agent?.createdBy;
+
+    if (!companyId || !createdBy) {
+      console.warn('⚠️ Deployment agent missing company context:', { deploymentId, companyId, createdBy });
+      return res.status(500).json({
+        success: false,
+        error: {
+          message: 'Deployment configuration error',
+          code: 'DEPLOYMENT_CONFIG_ERROR'
         }
       });
     }
@@ -71,9 +87,13 @@ const createOrUpdateVisitor = asyncHandler(async (req, res) => {
       // Create new visitor
       visitor = new Visitor({
         email: email.toLowerCase(),
+        // Multi-tenant fields (required for new records)
+        companyId: companyId,
+        createdBy: createdBy,
+        
         name,
         deploymentId,
-        agentId: deployment.agent,
+        agentId: deployment.agent._id,
         websiteUrl,
         ipAddress,
         userAgent,

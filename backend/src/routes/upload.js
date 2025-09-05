@@ -4,7 +4,7 @@ const uploadController = require('../controllers/uploadController');
 const {
   validateAgentId,
   uploadLimiter,
-  optionalAuth,
+  optionalJwtAuth,
   verifyAgentOwnership
 } = require('../middleware');
 
@@ -17,7 +17,7 @@ router.get('/supported-types', uploadController.getSupportedTypes);
 // POST /api/upload/:agentId - Upload files for agent training (Busboy + Parallel Processing)
 router.post('/:agentId', 
   validateAgentId,
-  optionalAuth,
+  optionalJwtAuth,
   verifyAgentOwnership,
   // No multer middleware needed - Busboy handles streams directly
   uploadController.uploadFiles
@@ -26,7 +26,7 @@ router.post('/:agentId',
 // GET /api/upload/:agentId/status - Get upload/training status
 router.get('/:agentId/status',
   validateAgentId,
-  optionalAuth,
+  optionalJwtAuth,
   verifyAgentOwnership,
   uploadController.getUploadStatus
 );
@@ -34,7 +34,7 @@ router.get('/:agentId/status',
 // GET /api/upload/:agentId/files - Get agent files list
 router.get('/:agentId/files',
   validateAgentId,
-  optionalAuth,
+  optionalJwtAuth,
   verifyAgentOwnership,
   uploadController.getAgentFiles
 );
@@ -42,7 +42,7 @@ router.get('/:agentId/files',
 // GET /api/upload/:agentId/files/:fileId - Get file details
 router.get('/:agentId/files/:fileId',
   validateAgentId,
-  optionalAuth,
+  optionalJwtAuth,
   verifyAgentOwnership,
   uploadController.getFileDetails
 );
@@ -50,7 +50,7 @@ router.get('/:agentId/files/:fileId',
 // POST /api/upload/:agentId/files/:fileId/retry - Retry failed file processing
 router.post('/:agentId/files/:fileId/retry',
   validateAgentId,
-  optionalAuth,
+  optionalJwtAuth,
   verifyAgentOwnership,
   uploadController.retryFileProcessing
 );
@@ -58,7 +58,7 @@ router.post('/:agentId/files/:fileId/retry',
 // DELETE /api/upload/:agentId/files/:fileId - Delete uploaded file
 router.delete('/:agentId/files/:fileId',
   validateAgentId,
-  optionalAuth,
+  optionalJwtAuth,
   verifyAgentOwnership,
   uploadController.deleteFile
 );
@@ -66,7 +66,7 @@ router.delete('/:agentId/files/:fileId',
 // POST /api/upload/:agentId/fix-status - Fix agent and file status (temporary)
 router.post('/:agentId/fix-status',
   validateAgentId,
-  optionalAuth,
+  optionalJwtAuth,
   verifyAgentOwnership,
   uploadController.fixAgentStatus
 );

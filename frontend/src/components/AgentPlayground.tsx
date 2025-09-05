@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { 
   ArrowLeft, 
   Send, 
@@ -43,6 +44,7 @@ const models = [
 ]
 
 export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: AgentPlaygroundProps) {
+  const router = useRouter()
   const [localAgentData, setLocalAgentData] = useState(agentData)
   
   // Use real chat hooks
@@ -77,6 +79,12 @@ export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: Ag
     toast.success('Agent saved successfully!')
   }
 
+  const handleDeploy = () => {
+    // Save agent first, then navigate to deploy page
+    onAgentUpdate(localAgentData)
+    router.push(`/ai-chatbot/${agentData.id}/deploy?step=4`)
+  }
+
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes'
     const k = 1024
@@ -109,12 +117,12 @@ export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: Ag
                   <div className="w-8 h-2 bg-green-500 rounded-full"></div>
                   <div className="w-8 h-2 bg-green-500 rounded-full"></div>
                   <div className="w-8 h-2 bg-primary-600 rounded-full"></div>
-                  <div className="w-8 h-2 bg-gray-300 rounded-full"></div>
+                  <div className="w-8 h-2 bg-gray-200 rounded-full"></div>
                 </div>
                 <span className="text-sm text-gray-500 ml-2">Playground</span>
               </div>
               <button
-                onClick={onBack}
+                onClick={handleDeploy}
                 className="btn-secondary inline-flex items-center gap-2"
               >
                 <Globe className="h-4 w-4" />

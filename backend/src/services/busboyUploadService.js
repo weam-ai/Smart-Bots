@@ -88,9 +88,16 @@ const processFileParallel = async (stream, filename, mimetype, agentId, getConte
     //   );
     // }
 
+    // Get context for multi-tenant fields
+    const context = getContext();
+    
     // Prepare file document data (but don't save yet)
     const fileDocData = {
       agent: agentId,
+      // Multi-tenant fields (required for new records)
+      companyId: context.companyId,
+      createdBy: context.userId,
+      
       originalFilename: filename,
       s3Key: s3Key,
       s3Url: '', // Will be set after S3 upload
@@ -103,6 +110,11 @@ const processFileParallel = async (stream, filename, mimetype, agentId, getConte
         processing: {
           stage: 'uploading',
           progress: 0
+        },
+        uploadContext: {
+          userAgent: context.userAgent,
+          uploadedBy: context.userId,
+          companyId: context.companyId
         }
       }
     };

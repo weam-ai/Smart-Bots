@@ -116,11 +116,6 @@ export default function AgentTraining({ agentData, onTrainingComplete, onBack }:
 
     addLog('🎉 RAG training completed! Agent is ready for chat.')
     setIsTraining(false)
-    
-    // Auto-proceed to playground after a short delay
-    setTimeout(() => {
-      onTrainingComplete()
-    }, 2000)
   }
 
   const simulateStepProgress = (stepIndex: number): Promise<void> => {
@@ -164,7 +159,7 @@ export default function AgentTraining({ agentData, onTrainingComplete, onBack }:
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
-  const totalSize = agentData.files.reduce((acc, file) => acc + file.size, 0)
+  const totalSize = agentData.files.reduce((acc, file) => acc + file.fileSize, 0)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -182,13 +177,14 @@ export default function AgentTraining({ agentData, onTrainingComplete, onBack }:
               </button>
               <div>
                 <h1 className="text-xl font-semibold text-gray-900">Training AI Agent</h1>
-                <p className="text-sm text-gray-500">Step 2 of 3 • Agent: {agentData.name}</p>
+                <p className="text-sm text-gray-500">Step 2 of 4 • Agent: {agentData.name}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1">
                 <div className="w-8 h-2 bg-green-500 rounded-full"></div>
                 <div className="w-8 h-2 bg-primary-600 rounded-full"></div>
+                <div className="w-8 h-2 bg-gray-200 rounded-full"></div>
                 <div className="w-8 h-2 bg-gray-200 rounded-full"></div>
               </div>
               <span className="text-sm text-gray-500 ml-2">Training</span>
@@ -291,8 +287,8 @@ export default function AgentTraining({ agentData, onTrainingComplete, onBack }:
                   <div key={index} className="flex items-center gap-3 p-2 bg-gray-50 rounded">
                     <FileText className="h-4 w-4 text-gray-400" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{file.name}</p>
-                      <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
+                      <p className="text-sm font-medium text-gray-900 truncate">{file.originalFilename}</p>
+                      <p className="text-xs text-gray-500">{formatFileSize(file.fileSize)}</p>
                     </div>
                     <CheckCircle className="h-4 w-4 text-green-500" />
                   </div>
@@ -363,9 +359,9 @@ export default function AgentTraining({ agentData, onTrainingComplete, onBack }:
           {overallProgress === 100 && (
             <button
               onClick={onTrainingComplete}
-              className="btn-primary inline-flex items-center gap-2 text-lg px-8 py-4"
+              className="btn-primary inline-flex items-center gap-2 text-lg px-4 py-2"
             >
-              Testing Chatbot
+              Test Chatbot
               <ArrowRight className="h-5 w-5" />
             </button>
           )}

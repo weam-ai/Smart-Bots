@@ -92,9 +92,13 @@ const saveFileToDisk = async (agentId, buffer, filename) => {
 /**
  * Save file metadata to database
  */
-const saveFileToDatabase = async (agentId, file, fileHash, storedFilename) => {
+const saveFileToDatabase = async (agentId, file, fileHash, storedFilename, context = {}) => {
   const fileDoc = new File({
     agent: agentId,
+    // Multi-tenant fields (required for new records)
+    companyId: context.companyId,
+    createdBy: context.userId,
+    
     originalFilename: file.originalname,
     storedFilename: storedFilename,
     filePath: `/uploads/${agentId}/${storedFilename}`,
@@ -106,7 +110,12 @@ const saveFileToDatabase = async (agentId, file, fileHash, storedFilename) => {
     metadata: {
       uploadedAt: new Date(),
       encoding: file.encoding || 'binary',
-      fieldname: file.fieldname || MULTER_CONFIG.FIELD_NAME
+      fieldname: file.fieldname || MULTER_CONFIG.FIELD_NAME,
+      uploadContext: {
+        userAgent: context.userAgent,
+        uploadedBy: context.userId,
+        companyId: context.companyId
+      }
     }
   });
 
@@ -127,7 +136,7 @@ const checkDuplicateFile = async (agentId, fileHash) => {
 /**
  * Process uploaded files
  */
-const processUploadedFiles = asyncHandler(async (agentId, files) => {
+const processUploadedFiles = asyncHandler(async (agentId, files, context = {}) => {
   console.log(`📁 Processing ${files.length} files for agent ${agentId}`);
 
   // Validate agent exists
@@ -172,7 +181,7 @@ const processUploadedFiles = asyncHandler(async (agentId, files) => {
       await saveFileToDisk(agentId, file.buffer, storedFilename);
 
       // Save file metadata to database
-      const fileDoc = await saveFileToDatabase(agentId, file, fileHash, storedFilename);
+      const fileDoc = await saveFileToDatabase(agentId, file, fileHash, storedFilename, context);
 
       processedFiles.push({
         id: fileDoc._id,

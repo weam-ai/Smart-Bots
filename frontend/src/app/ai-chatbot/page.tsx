@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Plus, Bot, FileText, Users, Calendar, Play, Loader2 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { useAgentOperations } from '@/hooks/useAgents'
@@ -10,6 +10,7 @@ import type { Agent, CreateAgentPayload } from '@/types/agent'
 
 export default function AIChatbotPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [showCreateModal, setShowCreateModal] = useState(false)
   
   // Use real API hooks
@@ -23,6 +24,17 @@ export default function AIChatbotPage() {
   } = useAgentOperations()
     console.log("🚀 ~ AIChatbotPage ~ agents:", agents)
 
+  // Ensure URL shows step=1 for main page
+  useEffect(() => {
+    const currentStep = searchParams.get('step')
+    if (!currentStep || currentStep !== '1') {
+      // Replace current URL with step=1 parameter
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.set('step', '1')
+      window.history.replaceState({}, '', newUrl.toString())
+    }
+  }, [searchParams])
+
   const handleCreateNewAgent = () => {
     setShowCreateModal(true)
   }
@@ -34,15 +46,15 @@ export default function AIChatbotPage() {
     
     if (newAgent && newAgent._id) {
       setShowCreateModal(false)
-      console.log('🚀 Navigating to:', `/ai-chatbot/${newAgent._id}`)
-      router.push(`/ai-chatbot/${newAgent._id}`)
+      console.log('🚀 Navigating to:', `/ai-chatbot/${newAgent._id}?step=2`)
+      router.push(`/ai-chatbot/${newAgent._id}?step=1`)
     } else {
       console.error('❌ No agent ID available for navigation')
     }
   }
 
   const handleOpenAgent = (agentId: string) => {
-    router.push(`/ai-chatbot/${agentId}`)
+    router.push(`/ai-chatbot/${agentId}?step=1`)
   }
 
   return (
@@ -250,7 +262,7 @@ export default function AIChatbotPage() {
                         }`}
                       >
                         <Play className="h-4 w-4" />
-                        {agent.status === 'ready' || agent.status === 'completed' ? 'Open Playground' : `Open Agent (${agent.status})`}
+                        {agent.status === 'ready' || agent.status === 'completed' ? 'Train the Chatbot' : `Train the Chatbot (${agent.status})`}
                       </button>
                     </div>
                   </div>

@@ -57,6 +57,10 @@ const createDeployment = asyncHandler(async (req, res) => {
     // Create deployment record
     const deployment = new ScriptTag({
       deploymentId: deploymentId,
+      // Multi-tenant fields (required for new records)
+      companyId: req.user?.companyId,
+      createdBy: req.user?.userId,
+      
       agent: agentId,
       name: name.trim(),
       description: description?.trim() || '',

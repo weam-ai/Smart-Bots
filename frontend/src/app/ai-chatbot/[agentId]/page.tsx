@@ -1,17 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { httpGet } from '@/services/axios'
 import { Agent } from '@/types/agent'
 import AgentUpload from '@/components/AgentUpload'
 import AgentTraining from '@/components/AgentTraining'
-import AgentPlayground from '@/components/AgentPlayground'
-import AgentDeploy from '@/components/AgentDeploy'
-import ChatHistory from '@/components/ChatHistory'
 
-export type AgentStep = 'upload' | 'training' | 'playground' | 'deploy' | 'history'
+export type AgentStep = 'upload' | 'training' | 'playground'
 
 export interface AgentFile {
   _id: string
@@ -40,6 +37,7 @@ export interface AgentData {
 export default function AgentPage() {
   const router = useRouter()
   const params = useParams()
+  const searchParams = useSearchParams()
   const agentId = params.agentId as string
   
   console.log('🔍 Agent page params:', params)
@@ -47,6 +45,35 @@ export default function AgentPage() {
 
   const [currentStep, setCurrentStep] = useState<AgentStep>('upload')
   const [hasNewUploads, setHasNewUploads] = useState(false)
+  
+  // Handle step parameter from query string - URL-based routing
+  useEffect(() => {
+    const step = searchParams.get('step')
+    if (step) {
+      const stepNumber = parseInt(step)
+      switch (stepNumber) {
+        case 1:
+          setCurrentStep('upload') // Upload documents (Step 1)
+          break
+        case 2:
+          setCurrentStep('training') // Train data page (Step 2)
+          break
+        case 3:
+          // Navigate to playground page for step 3
+          router.push(`/ai-chatbot/${agentId}/playground?step=3`)
+          break
+        case 4:
+          // Navigate to deploy page for step 4
+          router.push(`/ai-chatbot/${agentId}/deploy?step=4`)
+          break
+        default:
+          setCurrentStep('upload')
+      }
+    } else {
+      // Default to step 1 if no step parameter
+      setCurrentStep('upload')
+    }
+  }, [searchParams, agentId, router])
   
   // Debug step changes
   useEffect(() => {
@@ -282,8 +309,10 @@ export default function AgentPage() {
   const handleFilesUploaded = (files: File[]) => {
     // Mark that new files were uploaded
     setHasNewUploads(true)
-    // After files are uploaded, go directly to deploy step
-    setCurrentStep('deploy')
+    // After files are uploaded, go to training step
+    setCurrentStep('training')
+    // Update URL to show step=2
+    router.push(`/ai-chatbot/${agentId}?step=2`)
     toast.success(`${files.length} file${files.length !== 1 ? 's' : ''} uploaded successfully!`)
   }
 
@@ -293,8 +322,9 @@ export default function AgentPage() {
       status: 'trained',
       trainingProgress: 100
     }))
-    setCurrentStep('deploy')
     toast.success('🎉 Training completed! Your agent is ready to deploy.')
+    // Navigate to playground page with step=3
+    router.push(`/ai-chatbot/${agentId}/playground?step=3`)
   }
 
   const handleBackToUpload = () => {
@@ -307,34 +337,14 @@ export default function AgentPage() {
   }
 
   const handleBackToAgents = () => {
-    router.push('/ai-chatbot')
+    router.push('/ai-chatbot?step=1')
   }
 
   const handleStartTraining = () => {
     console.log('🚀 Starting training process')
     setCurrentStep('training')
-  }
-
-  const handleStartTesting = () => {
-    console.log('🧪 Starting testing/playground')
-    setCurrentStep('playground')
-  }
-
-  const handleStartPlayground = () => {
-    console.log('🎮 Starting playground')
-    setCurrentStep('playground')
-  }
-
-  const handleBackToDeploy = () => {
-    setCurrentStep('deploy')
-  }
-
-  const handleAgentUpdate = (updates: Partial<AgentData>) => {
-    setAgentData(prev => ({ ...prev, ...updates }))
-  }
-
-  const handleRefresh = () => {
-    window.location.reload()
+    // Update URL to show step=2
+    router.push(`/ai-chatbot/${agentId}?step=2`)
   }
 
   if (loading) {
@@ -362,7 +372,6 @@ export default function AgentPage() {
           onFilesUploaded={handleFilesUploaded}
           onBack={handleBackToAgents}
           onStartTraining={handleStartTraining}
-          onStartTesting={handleStartTesting}
           hasNewUploads={hasNewUploads}
         />
       )}
@@ -375,37 +384,7 @@ export default function AgentPage() {
         />
       )}
 
-      {currentStep === 'deploy' && (
-        <AgentDeploy
-          agentId={agentId}
-          agentName={agentData.name}
-          onBack={handleStartPlayground}
-          onViewHistory={() => setCurrentStep('history')}
-        />
-      )}
-
-      {currentStep === 'history' && (
-        <div className="space-y-6">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setCurrentStep('deploy')}
-              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              ← Back to Deploy
-            </button>
-            <h1 className="text-2xl font-bold text-gray-900">Chat History</h1>
-          </div>
-          <ChatHistory agentId={agentId} />
-        </div>
-      )}
-
-      {currentStep === 'playground' && (
-        <AgentPlayground
-          agentData={agentData}
-          onAgentUpdate={handleAgentUpdate}
-          onBack={handleBackToDeploy}
-        />
-      )}
+      {/* Step 3 (Playground) and Step 4 (Deploy) are handled by dedicated pages */}
     </div>
   )
 }

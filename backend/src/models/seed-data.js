@@ -1,4 +1,38 @@
 const { Agent, ChatSession, ChatMessage } = require('./index');
+const jwt = require('jsonwebtoken');
+
+// JWT configuration (should match the one in cookieAuth.js)
+const JWT_SECRET = process.env.JWT_SECRET || 'your-jwt-secret-key-change-in-production';
+
+// Extract user context from JWT token (same logic as middleware)
+const extractUserContextFromToken = (token) => {
+  try {
+    // Try JWT verification first
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    return {
+      userId: decoded.userId,
+      userEmail: decoded.email,
+      companyId: decoded.companyId,
+      roleCode: decoded.roleCode || 'user'
+    };
+  } catch (jwtError) {
+    try {
+      // Fallback to base64 decoding for testing
+      const base64Decoded = Buffer.from(token, 'base64').toString('utf-8');
+      const decoded = JSON.parse(base64Decoded);
+      
+      return {
+        userId: decoded.userId,
+        userEmail: decoded.email,
+        companyId: decoded.companyId,
+        roleCode: decoded.roleCode || 'user'
+      };
+    } catch (base64Error) {
+      throw new Error('Invalid token format');
+    }
+  }
+};
 
 // Demo agents data
 const demoAgents = [
@@ -61,10 +95,26 @@ const demoAgents = [
   }
 ];
 
-// Seed database with demo data
-const seedDatabase = async () => {
+// Seed database with demo data using real JWT token
+const seedDatabase = async (jwtToken = null) => {
   try {
     console.log('🌱 Seeding database with demo data...');
+    
+    // Extract user context from JWT token if provided
+    let userContext = null;
+    if (jwtToken) {
+      try {
+        userContext = extractUserContextFromToken(jwtToken);
+        console.log('🔐 Extracted user context from JWT:', userContext);
+      } catch (error) {
+        console.warn('⚠️ Failed to extract user context from JWT, using fallback:', error.message);
+      }
+    }
+    
+    // Fallback to demo data if no valid JWT token
+    if (!userContext) {
+      console.error('❌ No valid JWT token provided');
+    }
     
     // Check if demo agents already exist
     const existingAgents = await Agent.find({
@@ -72,12 +122,20 @@ const seedDatabase = async () => {
     });
     
     if (existingAgents.length === 0) {
-      // Insert demo agents
-      await Agent.insertMany(demoAgents);
-      console.log('✅ Demo agents created successfully');
+      // Add user context to demo agents
+      const agentsWithContext = demoAgents.map(agent => ({
+        ...agent,
+        companyId: userContext.companyId,
+        createdBy: userContext.userId,
+        createdByEmail: userContext.userEmail
+      }));
+      
+      // Insert demo agents with proper multi-tenant context
+      await Agent.insertMany(agentsWithContext);
+      console.log('✅ Demo agents created successfully with user context');
       
       // Create some sample chat sessions
-      await createSampleSessions();
+      await createSampleSessions(userContext);
       console.log('✅ Sample chat sessions created');
     } else {
       console.log('ℹ️  Demo agents already exist, skipping seed');
@@ -90,11 +148,15 @@ const seedDatabase = async () => {
 };
 
 // Create sample chat sessions
-const createSampleSessions = async () => {
+const createSampleSessions = async (userContext) => {
   try {
     const sampleSessions = [
       {
         agent: '6752b8f0a1b2c3d4e5f60001', // Customer Support Bot
+        // Multi-tenant fields (required for new records)
+        companyId: userContext.companyId,
+        createdBy: userContext.userId,
+        
         sessionName: 'Product Question Session',
         status: 'ended',
         totalMessages: 6,
@@ -103,6 +165,10 @@ const createSampleSessions = async () => {
       },
       {
         agent: '6752b8f0a1b2c3d4e5f60002', // Documentation Assistant
+        // Multi-tenant fields (required for new records)
+        companyId: userContext.companyId,
+        createdBy: userContext.userId,
+        
         sessionName: 'API Documentation Help',
         status: 'ended',
         totalMessages: 4,
@@ -117,6 +183,10 @@ const createSampleSessions = async () => {
     const sampleMessages = [
       {
         session: sessions[0]._id,
+        // Multi-tenant fields (required for new records)
+        companyId: userContext.companyId,
+        createdBy: userContext.userId,
+        
         agent: '6752b8f0a1b2c3d4e5f60001',
         messageType: 'assistant',
         content: 'Hello! How can I help you with our products today?',
@@ -124,6 +194,10 @@ const createSampleSessions = async () => {
       },
       {
         session: sessions[0]._id,
+        // Multi-tenant fields (required for new records)
+        companyId: userContext.companyId,
+        createdBy: userContext.userId,
+        
         agent: '6752b8f0a1b2c3d4e5f60001',
         messageType: 'user',
         content: 'I have a question about your pricing plans',
@@ -131,6 +205,10 @@ const createSampleSessions = async () => {
       },
       {
         session: sessions[0]._id,
+        // Multi-tenant fields (required for new records)
+        companyId: userContext.companyId,
+        createdBy: userContext.userId,
+        
         agent: '6752b8f0a1b2c3d4e5f60001',
         messageType: 'assistant',
         content: 'I\'d be happy to help you understand our pricing! We offer several plans to fit different needs...',

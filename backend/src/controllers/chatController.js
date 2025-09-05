@@ -51,6 +51,21 @@ const sendMessage = async (req, res) => {
       })
     }
 
+    // Get company context from agent
+    const companyId = agent.companyId;
+    const createdBy = agent.createdBy;
+
+    if (!companyId || !createdBy) {
+      console.warn('⚠️ Agent missing company context:', { agentId, companyId, createdBy });
+      return res.status(500).json({
+        success: false,
+        error: {
+          message: 'Agent configuration error',
+          code: 'AGENT_CONFIG_ERROR'
+        }
+      });
+    }
+
     console.log('✅ Agent found:', agent.name, 'Status:', agent.status)
 
     // 2. Generate query embedding
@@ -128,6 +143,10 @@ const sendMessage = async (req, res) => {
         // Create new session with the provided sessionId
         session = new ChatSession({
           sessionId: finalSessionId,
+          // Multi-tenant fields (required for new records)
+          companyId: companyId,
+          createdBy: createdBy,
+          
           agent: agentId,
           visitor: visitorId || null,
           deploymentId: deploymentId || null,
@@ -157,6 +176,10 @@ const sendMessage = async (req, res) => {
       // Store user message
       const userMessage = new ChatMessage({
         session: session._id,
+        // Multi-tenant fields (required for new records)
+        companyId: companyId,
+        createdBy: createdBy,
+        
         agent: agentId,
         messageType: 'user',
         content: message.trim(),
@@ -168,6 +191,10 @@ const sendMessage = async (req, res) => {
       // Store AI response
       const aiMessage = new ChatMessage({
         session: session._id,
+        // Multi-tenant fields (required for new records)
+        companyId: companyId,
+        createdBy: createdBy,
+        
         agent: agentId,
         messageType: 'assistant',
         content: aiResponse.response,

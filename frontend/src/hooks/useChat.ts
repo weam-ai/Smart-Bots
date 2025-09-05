@@ -34,7 +34,7 @@ export const useChatSessions = (agentId: string) => {
 
   useEffect(() => {
     fetchSessions()
-  }, [fetchSessions])
+  }, [agentId]) // Only depend on agentId, not fetchSessions
 
   const refetch = useCallback(() => {
     fetchSessions()
@@ -55,6 +55,7 @@ export const useChatMessages = (agentId: string, sessionId?: string) => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isNewSession, setIsNewSession] = useState(false)
+  const [isHandlingNewSession, setIsHandlingNewSession] = useState(false)
 
   const fetchMessages = useCallback(async () => {
     if (!agentId || !sessionId) return
@@ -75,19 +76,19 @@ export const useChatMessages = (agentId: string, sessionId?: string) => {
   }, [agentId, sessionId])
 
   useEffect(() => {
-    if (sessionId) {
-      // Only fetch messages if this is not a new session
-      // This prevents clearing messages when a new session is created
-      if (!isNewSession) {
-        fetchMessages()
-      } else {
-        // Reset the new session flag
+    if (sessionId && !isHandlingNewSession) {
+      // Only fetch messages if we're not handling a new session response
+      fetchMessages()
+    } else if (isNewSession) {
+      // Reset the new session flag after a short delay
+      // This prevents immediate fetching after setting session ID
+      setTimeout(() => {
         setIsNewSession(false)
-      }
-    } else {
+      }, 100)
+    } else if (!sessionId) {
       setMessages([])
     }
-  }, [fetchMessages, sessionId, isNewSession])
+  }, [sessionId, isNewSession, isHandlingNewSession]) // Added isHandlingNewSession to dependencies
 
   const addMessage = useCallback((message: ChatMessage) => {
     setMessages(prev => [...prev, message])
@@ -107,6 +108,14 @@ export const useChatMessages = (agentId: string, sessionId?: string) => {
     setIsNewSession(true)
   }, [])
 
+  const markAsHandlingNewSession = useCallback(() => {
+    setIsHandlingNewSession(true)
+  }, [])
+
+  const resetHandlingNewSession = useCallback(() => {
+    setIsHandlingNewSession(false)
+  }, [])
+
   return {
     messages,
     isLoading,
@@ -115,6 +124,8 @@ export const useChatMessages = (agentId: string, sessionId?: string) => {
     updateMessage,
     clearMessages,
     markAsNewSession,
+    markAsHandlingNewSession,
+    resetHandlingNewSession,
     refetch: fetchMessages,
   }
 }
@@ -288,7 +299,9 @@ export const useChat = (agentId: string, model?: string, temperature?: number, i
     addMessage, 
     updateMessage, 
     clearMessages,
-    markAsNewSession
+    markAsNewSession,
+    markAsHandlingNewSession,
+    resetHandlingNewSession
   } = useChatMessages(agentId, currentSessionId)
   const { sendMessage, isLoading: isSending, error: sendError } = useSendMessage()
   const { isTyping, startTyping, stopTyping } = useTypingIndicator()
@@ -314,7 +327,9 @@ export const useChat = (agentId: string, model?: string, temperature?: number, i
 
   const switchToSession = useCallback((sessionId: string) => {
     setCurrentSessionId(sessionId)
-  }, [])
+    // Reset handling flag when switching to a different session
+    resetHandlingNewSession()
+  }, [resetHandlingNewSession])
 
   // Send message with typing indicator
   const handleSendMessage = useCallback(async (): Promise<boolean> => {
@@ -348,9 +363,13 @@ export const useChat = (agentId: string, model?: string, temperature?: number, i
       if (response) {
         // Update session ID if this was a new session
         if (!currentSessionId) {
-          markAsNewSession() // Mark as new session to prevent fetching messages
+          // Mark as handling new session to prevent fetching messages
+          markAsHandlingNewSession()
+          markAsNewSession()
+          // Set session ID immediately since we have the response
           setCurrentSessionId(response.sessionId)
-          refetchSessions() // Refresh sessions list
+          // Don't reset the handling flag automatically
+          // It will be reset when switching to a different session
         }
 
         // Update user message with real ID

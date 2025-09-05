@@ -39,9 +39,7 @@ export default function AgentUpload({ agentData, onFilesUploaded, onBack, onStar
     formatFileSize,
     getTotalSize,
     constraints,
-    performUpload,
     isUploading,
-    uploadError,
   } = useCompleteUpload()
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -103,12 +101,13 @@ export default function AgentUpload({ agentData, onFilesUploaded, onBack, onStar
               </button>
               <div>
                 <h1 className="text-xl font-semibold text-gray-900">Upload Documents</h1>
-                <p className="text-sm text-gray-500">Step 1 of 3 • Agent: {agentData.name}</p>
+                <p className="text-sm text-gray-500">Step 1 of 4 • Agent: {agentData.name}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1">
                 <div className="w-8 h-2 bg-primary-600 rounded-full"></div>
+                <div className="w-8 h-2 bg-gray-200 rounded-full"></div>
                 <div className="w-8 h-2 bg-gray-200 rounded-full"></div>
                 <div className="w-8 h-2 bg-gray-200 rounded-full"></div>
               </div>
@@ -341,13 +340,13 @@ export default function AgentUpload({ agentData, onFilesUploaded, onBack, onStar
                 )}
                 
                 {/* Show Testing button if no new files were uploaded */}
-                {!hasNewUploads && !(allCompleted && allSuccessful && uploadedFiles.length > 0) && onStartTesting && (
+                {!hasNewUploads && !(allCompleted && allSuccessful && agentData.files.length > 0) && onStartTraining && (
                   <button
-                    onClick={onStartTesting}
+                    onClick={onStartTraining}
                     className="btn-primary inline-flex items-center gap-2"
                   >
                     <ArrowRight className="h-4 w-4" />
-                    Testing Chatbot
+                    Train Chatbot
                   </button>
                 )}
               </>

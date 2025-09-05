@@ -162,6 +162,20 @@ const handleQueuedUpload = async (req, agentId, context = {}) => {
 const processFileForQueue = async (buffer, mimetype, filename, agentId, context) => {
   try {
     console.log(`🔄 Processing file for queue: ${filename} (${mimetype})`);
+    console.log(`🔍 ProcessFileForQueue context debug:`, {
+      context: context,
+      companyId: context.companyId,
+      userId: context.userId,
+      hasCompanyId: !!context.companyId,
+      hasUserId: !!context.userId
+    });
+    
+    // Ensure we have required multi-tenant fields
+    if (!context.companyId || !context.userId) {
+      console.warn('⚠️ Missing multi-tenant context in processFileForQueue, using fallback values');
+      context.companyId = context.companyId || 'fallback-company';
+      context.userId = context.userId || 'fallback-user';
+    }
     
     // Step 1: Correct MIME type if needed
     const correctedMimeType = correctMimeType(mimetype, filename);
@@ -184,6 +198,10 @@ const processFileForQueue = async (buffer, mimetype, filename, agentId, context)
     
     const fileDoc = new File({
       agent: agentId,
+      // Multi-tenant fields (required for new records)
+      companyId: context.companyId,
+      createdBy: context.userId,
+      
       originalFilename: filename,    // ✅ Match schema field name
       fileSize: buffer.length,       // ✅ Match schema field name  
       fileHash: contentHash,         // ✅ Match schema field name

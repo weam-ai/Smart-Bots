@@ -8,8 +8,20 @@ const createSession = async (agentId, sessionName = null) => {
       throw new Error('Agent not found');
     }
 
+    // Get company context from agent
+    const companyId = agent.companyId;
+    const createdBy = agent.createdBy;
+
+    if (!companyId || !createdBy) {
+      throw new Error('Agent missing company context');
+    }
+
     const session = new ChatSession({
       agent: agentId,
+      // Multi-tenant fields (required for new records)
+      companyId: companyId,
+      createdBy: createdBy,
+      
       sessionName: sessionName || `Session ${Date.now()}`,
       status: 'active'
     });
@@ -73,6 +85,19 @@ const processMessage = async (agentId, message, sessionId) => {
     if (!agent) {
       throw new Error('Agent not found');
     }
+
+    // Get company context from agent
+    const companyId = agent.companyId;
+    const createdBy = agent.createdBy;
+
+    if (!companyId || !createdBy) {
+      throw new Error('Agent missing company context');
+    }
+
+    // Update user message with company context
+    userMessage.companyId = companyId;
+    userMessage.createdBy = createdBy;
+    await userMessage.save();
 
     // ✅ RAG Pipeline Implementation
     console.log(`🤖 Starting RAG pipeline for agent ${agentId}: "${message}"`);
@@ -169,6 +194,10 @@ const processMessage = async (agentId, message, sessionId) => {
     // Save assistant message with RAG metadata
     const assistantMessage = new ChatMessage({
       session: session._id,
+      // Multi-tenant fields (required for new records)
+      companyId: companyId,
+      createdBy: createdBy,
+      
       agent: agentId,
       messageType: 'assistant',
       content: assistantContent,

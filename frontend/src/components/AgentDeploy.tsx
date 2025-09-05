@@ -297,15 +297,6 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {onViewHistory && (
-            <button
-              onClick={onViewHistory}
-              className="btn-secondary flex items-center gap-2"
-            >
-              <BarChart3 className="h-5 w-5" />
-              View Chat History
-            </button>
-          )}
           <button
             onClick={openCreateModal}
             className="btn-primary flex items-center gap-2"
@@ -395,12 +386,12 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
                   <Code className="h-4 w-4" />
                   View Code
                 </button>
-                <button
+                {/* <button
                   onClick={() => openEditModal(deployment)}
                   className="flex items-center gap-1 px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
                 >
                   <Settings className="h-4 w-4" />
-                </button>
+                </button> */}
                 <button
                   onClick={() => handleDeleteDeployment(deployment?._id)}
                   className="flex items-center gap-1 px-3 py-1 text-sm bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors"
