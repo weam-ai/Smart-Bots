@@ -8,6 +8,7 @@ import toast from 'react-hot-toast'
 import { API_CONFIG, HTTP_STATUS, ERROR_MESSAGES, HEADERS, STORAGE_KEYS } from '@/utils/constants'
 import { getAuthHeaders } from '@/utils/auth'
 import type { ApiResponse } from '@/types/api'
+import { NODE_ENV } from '@/config/env'
 
 // Authentication state
 let authToken: string | null = null
@@ -114,7 +115,7 @@ const handleRequest = async (config: InternalAxiosRequestConfig): Promise<Intern
     config.headers[HEADERS.X_REQUEST_ID] = generateRequestId()
 
     // Log request in development
-    if (process.env.NODE_ENV === 'development') {
+    if (NODE_ENV === 'development') {
       console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`, {
         headers: config.headers,
         data: config.data,
@@ -150,7 +151,7 @@ const handleRequestError = (error: any): Promise<never> => {
  */
 const handleResponse = (response: AxiosResponse): AxiosResponse => {
   // Log successful response in development
-  if (process.env.NODE_ENV === 'development') {
+  if (NODE_ENV === 'development') {
     console.log(`✅ API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`, {
       status: response.status,
       data: response.data,

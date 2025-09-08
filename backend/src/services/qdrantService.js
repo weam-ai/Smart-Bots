@@ -6,14 +6,15 @@
 const { QdrantClient } = require('@qdrant/js-client-rest');
 const { v4: uuidv4 } = require('uuid');
 const { createServiceError } = require('../utils/errorHelpers');
+const { QDRANT_URL, QDRANT_API_KEY } = require('../config/env');
 
 // Initialize Qdrant client
 let qdrantClient;
 
 const initializeQdrant = () => {
   if (!qdrantClient) {
-    const qdrantUrl = process.env.QDRANT_URL || 'http://localhost:6333';
-    const qdrantApiKey = process.env.QDRANT_API_KEY;
+    const qdrantUrl = QDRANT_URL || 'http://localhost:6333';
+    const qdrantApiKey = QDRANT_API_KEY;
     
     qdrantClient = new QdrantClient({
       url: qdrantUrl,

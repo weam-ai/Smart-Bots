@@ -1,8 +1,9 @@
 const { Agent, ChatSession, ChatMessage } = require('./index');
 const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = require('../config/env');
 
 // JWT configuration (should match the one in cookieAuth.js)
-const JWT_SECRET = process.env.JWT_SECRET || 'your-jwt-secret-key-change-in-production';
+const JWT_SECRET = JWT_SECRET;
 
 // Extract user context from JWT token (same logic as middleware)
 const extractUserContextFromToken = (token) => {

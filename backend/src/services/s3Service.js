@@ -1,7 +1,8 @@
 const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, CreateBucketCommand, HeadBucketCommand } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const crypto = require('crypto');
-const { createDatabaseError, createServiceError } = require('../utils/errorHelpers');
+const { createServiceError } = require('../utils/errorHelpers');
+const { NODE_ENV, AWS_S3_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_S3_BUCKET_NAME, USE_MINIO, MINIO_ENDPOINT } = require('../config/env');
 
 /**
  * S3 Service for File Storage
@@ -9,20 +10,20 @@ const { createDatabaseError, createServiceError } = require('../utils/errorHelpe
 
 // S3 Client Configuration
 const createS3Client = () => {
-  // For development, use MinIO or AWS
-  const isMinIO = process.env.NODE_ENV === 'development' && process.env.USE_MINIO === 'true';
+  // Use MinIO when USE_MINIO is true, regardless of NODE_ENV
+  const isMinIO = USE_MINIO === true;
   
   const config = {
-    region: process.env.AWS_S3_REGION || 'us-east-1',
+    region: AWS_S3_REGION || 'us-east-1',
     credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'minioadmin',
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'minioadmin'
+      accessKeyId: AWS_ACCESS_KEY_ID || 'minioadmin',
+      secretAccessKey: AWS_SECRET_ACCESS_KEY || 'minioadmin'
     }
   };
 
   // MinIO configuration for development
   if (isMinIO) {
-    config.endpoint = process.env.MINIO_ENDPOINT || 'http://minio:9000';
+    config.endpoint = MINIO_ENDPOINT || 'http://minio:9000';
     config.forcePathStyle = true;
     console.log('🔹 Using MinIO S3 storage');
   }
@@ -34,14 +35,22 @@ const createS3Client = () => {
   return new S3Client(config);
 };
 
-const s3Client = createS3Client();
-const BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME || 'ai-chatbot-files';
+let s3Client = null;
+const BUCKET_NAME = AWS_S3_BUCKET_NAME || 'ai-chatbot-files';
+
+// Lazy initialization of S3 client
+const getS3Client = () => {
+  if (!s3Client) {
+    s3Client = createS3Client();
+  }
+  return s3Client;
+};
 
 /**
  * Initialize S3 bucket (for MinIO)
  */
 const initializeBucket = async () => {
-  const isMinIO = process.env.NODE_ENV === 'development' && process.env.USE_MINIO === 'true';
+  const isMinIO = USE_MINIO === true;
   
   if (!isMinIO) {
     return; // Skip for real AWS
@@ -49,13 +58,13 @@ const initializeBucket = async () => {
 
   try {
     // Check if bucket exists
-    await s3Client.send(new HeadBucketCommand({ Bucket: BUCKET_NAME }));
+    await getS3Client().send(new HeadBucketCommand({ Bucket: BUCKET_NAME }));
     console.log(`✅ S3 bucket '${BUCKET_NAME}' already exists`);
   } catch (error) {
     if (error.name === 'NotFound') {
       // Create bucket
       try {
-        await s3Client.send(new CreateBucketCommand({ Bucket: BUCKET_NAME }));
+        await getS3Client().send(new CreateBucketCommand({ Bucket: BUCKET_NAME }));
         console.log(`✅ S3 bucket '${BUCKET_NAME}' created successfully`);
       } catch (createError) {
         console.error(`❌ Failed to create S3 bucket:`, createError.message);
@@ -82,13 +91,13 @@ const uploadBuffer = async (buffer, s3Key, contentType, metadata = {}) => {
   try {
     console.log(`☁️  Uploading to S3: ${s3Key} (${buffer.length} bytes)`);
 
-    const isMinIO = process.env.NODE_ENV === 'development' && process.env.USE_MINIO === 'true';
+    const isMinIO = USE_MINIO === true;
 
     // For development without MinIO, simulate upload
-    if (process.env.NODE_ENV === 'development' && !isMinIO) {
+    if (!isMinIO && NODE_ENV === 'development') {
       console.log(`🔧 Dev mode: Simulating S3 upload for ${s3Key}`);
       
-      const s3Url = `https://${BUCKET_NAME}.s3.${process.env.AWS_S3_REGION || 'us-east-1'}.amazonaws.com/${s3Key}`;
+      const s3Url = `https://${BUCKET_NAME}.s3.${AWS_S3_REGION || 'us-east-1'}.amazonaws.com/${s3Key}`;
       
       // Simulate upload delay
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -118,12 +127,12 @@ const uploadBuffer = async (buffer, s3Key, contentType, metadata = {}) => {
       }
     });
 
-    const result = await s3Client.send(command);
+    const result = await getS3Client().send(command);
     
     // Different URL format for MinIO vs AWS
     const s3Url = isMinIO 
       ? `http://localhost:9000/${BUCKET_NAME}/${s3Key}`
-      : `https://${BUCKET_NAME}.s3.${process.env.AWS_S3_REGION || 'us-east-1'}.amazonaws.com/${s3Key}`;
+      : `https://${BUCKET_NAME}.s3.${AWS_S3_REGION || 'us-east-1'}.amazonaws.com/${s3Key}`;
     
     console.log(`✅ S3 upload successful: ${s3Key}`);
     
@@ -159,9 +168,9 @@ const uploadStream = async (stream, s3Key, contentType, metadata = {}) => {
       }
     });
 
-    const result = await s3Client.send(command);
+    const result = await getS3Client().send(command);
     
-    const s3Url = `https://${BUCKET_NAME}.s3.${process.env.AWS_S3_REGION || 'us-east-1'}.amazonaws.com/${s3Key}`;
+    const s3Url = `https://${BUCKET_NAME}.s3.${AWS_S3_REGION || 'us-east-1'}.amazonaws.com/${s3Key}`;
     
     console.log(`✅ S3 stream upload successful: ${s3Key}`);
     
@@ -190,7 +199,7 @@ const downloadBuffer = async (s3Key) => {
       Key: s3Key
     });
 
-    const result = await s3Client.send(command);
+    const result = await getS3Client().send(command);
     
     // Convert stream to buffer
     const chunks = [];
@@ -222,7 +231,7 @@ const getStream = async (s3Key) => {
       Key: s3Key
     });
 
-    const result = await s3Client.send(command);
+    const result = await getS3Client().send(command);
     
     return result.Body;
 
@@ -244,7 +253,7 @@ const deleteFile = async (s3Key) => {
       Key: s3Key
     });
 
-    await s3Client.send(command);
+    await getS3Client().send(command);
     
     console.log(`✅ S3 delete successful: ${s3Key}`);
     
@@ -290,7 +299,7 @@ const fileExists = async (s3Key) => {
       Key: s3Key
     });
 
-    await s3Client.send(command);
+    await getS3Client().send(command);
     return true;
 
   } catch (error) {
@@ -311,7 +320,7 @@ const getFileMetadata = async (s3Key) => {
       Key: s3Key
     });
 
-    const result = await s3Client.send(command);
+    const result = await getS3Client().send(command);
     
     return {
       contentType: result.ContentType,

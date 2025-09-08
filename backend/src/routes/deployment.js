@@ -3,6 +3,7 @@ const router = express.Router();
 const deploymentController = require('../controllers/deploymentController');
 const {
   validateTrackAnalytics,
+  jwtAuthMiddleware
 } = require('../middleware');
 
 // ==================== PUBLIC EMBED ROUTES ====================
@@ -15,6 +16,7 @@ router.get('/:_id/embed',
 // POST /api/deployments/:_id/analytics - Track analytics (public)
 router.post('/:_id/analytics',
   validateTrackAnalytics,
+  jwtAuthMiddleware,
   deploymentController.trackAnalytics
 );
 

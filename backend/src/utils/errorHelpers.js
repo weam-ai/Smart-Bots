@@ -2,6 +2,8 @@
  * Function-based Error Handling Utilities
  */
 
+const { NODE_ENV } = require('../config/env');
+
 /**
  * Create standardized error response
  */
@@ -216,7 +218,7 @@ const sendErrorResponse = (res, error, includeStack = false) => {
   }
 
   // Add stack trace in development
-  if (includeStack && error.stack && process.env.NODE_ENV === 'development') {
+  if (includeStack && error.stack && NODE_ENV === 'development') {
     errorResponse.error.stack = error.stack;
   }
 
@@ -277,7 +279,7 @@ const logError = (error, req = null) => {
     })
   };
 
-  if (process.env.NODE_ENV === 'development') {
+  if (NODE_ENV === 'development') {
     console.error('🚨 ERROR DETAILS:', errorInfo);
   } else {
     console.error('❌ ERROR:', error.message);

@@ -1,3 +1,4 @@
+const { NODE_ENV } = require('../config/env');
 const { 
   sendErrorResponse, 
   createErrorResponse,
@@ -18,7 +19,7 @@ const globalErrorHandler = (err, req, res, next) => {
   }
 
   // Determine if we should include stack trace
-  const includeStack = process.env.NODE_ENV === 'development';
+  const includeStack = NODE_ENV === 'development';
 
   // Send error response using helper
   sendErrorResponse(res, err, includeStack);
@@ -47,7 +48,7 @@ const notFoundHandler = (req, res, next) => {
 const requestLogger = (req, res, next) => {
   req.requestId = generateErrorId();
   
-  if (process.env.NODE_ENV === 'development') {
+  if (NODE_ENV === 'development') {
     console.log(`📥 ${req.method} ${req.originalUrl} - ${req.ip} - ${req.requestId}`);
   }
   
@@ -63,7 +64,7 @@ const responseTimeLogger = (req, res, next) => {
   res.on('finish', () => {
     const duration = Date.now() - start;
     
-    if (process.env.NODE_ENV === 'development') {
+    if (NODE_ENV === 'development') {
       const statusEmoji = res.statusCode >= 400 ? '🔴' : '🟢';
       console.log(`📤 ${statusEmoji} ${res.statusCode} - ${duration}ms - ${req.requestId || 'N/A'}`);
     }
@@ -81,7 +82,7 @@ const initializeProcessHandlers = () => {
     console.error('💥 UNHANDLED PROMISE REJECTION!');
     console.error('Error:', err.message);
     
-    if (process.env.NODE_ENV === 'development') {
+    if (NODE_ENV === 'development') {
       console.error('Stack:', err.stack);
     }
     
@@ -94,7 +95,7 @@ const initializeProcessHandlers = () => {
     console.error('💥 UNCAUGHT EXCEPTION!');
     console.error('Error:', err.message);
     
-    if (process.env.NODE_ENV === 'development') {
+    if (NODE_ENV === 'development') {
       console.error('Stack:', err.stack);
     }
     
@@ -129,7 +130,7 @@ const setupGracefulShutdown = (server) => {
  * Development error details middleware
  */
 const developmentErrorLogger = (req, res, next) => {
-  if (process.env.NODE_ENV === 'development') {
+  if (NODE_ENV === 'development') {
     // Log request body (excluding sensitive data)
     if (req.body && Object.keys(req.body).length > 0) {
       const safeBody = { ...req.body };

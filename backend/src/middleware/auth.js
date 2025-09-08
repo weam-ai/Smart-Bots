@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { Agent } = require('../models');
+const { JWT_SECRET } = require('../config/env');
 
 /**
  * JWT Authentication Middleware
@@ -18,7 +19,7 @@ const authenticateToken = async (req, res, next) => {
     }
 
     // Verify JWT token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret-key');
+    const decoded = jwt.verify(token, JWT_SECRET);
     
     // Attach user info to request
     req.user = {
@@ -62,7 +63,7 @@ const optionalAuth = async (req, res, next) => {
     const token = authHeader && authHeader.split(' ')[1];
 
     if (token) {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret-key');
+      const decoded = jwt.verify(token, JWT_SECRET);
       req.user = {
         id: decoded.userId,
         email: decoded.email,

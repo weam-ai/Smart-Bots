@@ -4,8 +4,8 @@ const uploadController = require('../controllers/uploadController');
 const {
   validateAgentId,
   uploadLimiter,
-  optionalJwtAuth,
-  verifyAgentOwnership
+  verifyAgentOwnership,
+  jwtAuthMiddleware
 } = require('../middleware');
 
 // Apply upload rate limiting
@@ -17,57 +17,56 @@ router.get('/supported-types', uploadController.getSupportedTypes);
 // POST /api/upload/:agentId - Upload files for agent training (Busboy + Parallel Processing)
 router.post('/:agentId', 
   validateAgentId,
-  optionalJwtAuth,
   verifyAgentOwnership,
-  // No multer middleware needed - Busboy handles streams directly
+  jwtAuthMiddleware,
   uploadController.uploadFiles
 );
 
 // GET /api/upload/:agentId/status - Get upload/training status
 router.get('/:agentId/status',
   validateAgentId,
-  optionalJwtAuth,
   verifyAgentOwnership,
+  jwtAuthMiddleware,
   uploadController.getUploadStatus
 );
 
 // GET /api/upload/:agentId/files - Get agent files list
 router.get('/:agentId/files',
   validateAgentId,
-  optionalJwtAuth,
   verifyAgentOwnership,
+  jwtAuthMiddleware,
   uploadController.getAgentFiles
 );
 
 // GET /api/upload/:agentId/files/:fileId - Get file details
 router.get('/:agentId/files/:fileId',
   validateAgentId,
-  optionalJwtAuth,
   verifyAgentOwnership,
+  jwtAuthMiddleware,
   uploadController.getFileDetails
 );
 
 // POST /api/upload/:agentId/files/:fileId/retry - Retry failed file processing
 router.post('/:agentId/files/:fileId/retry',
   validateAgentId,
-  optionalJwtAuth,
   verifyAgentOwnership,
+  jwtAuthMiddleware,
   uploadController.retryFileProcessing
 );
 
 // DELETE /api/upload/:agentId/files/:fileId - Delete uploaded file
 router.delete('/:agentId/files/:fileId',
   validateAgentId,
-  optionalJwtAuth,
   verifyAgentOwnership,
+  jwtAuthMiddleware,
   uploadController.deleteFile
 );
 
 // POST /api/upload/:agentId/fix-status - Fix agent and file status (temporary)
 router.post('/:agentId/fix-status',
   validateAgentId,
-  optionalJwtAuth,
   verifyAgentOwnership,
+  jwtAuthMiddleware,
   uploadController.fixAgentStatus
 );
 

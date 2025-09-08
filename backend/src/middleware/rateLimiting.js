@@ -1,4 +1,5 @@
 const rateLimit = require('express-rate-limit');
+const { NODE_ENV } = require('../config/env');
 
 /**
  * Rate Limiting Middleware Configuration
@@ -7,7 +8,7 @@ const rateLimit = require('express-rate-limit');
 // General API rate limiting
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'development' ? 1000000000 : 100, // More lenient in development
+  max: NODE_ENV === 'development' ? 1000000000 : 100, // More lenient in development
   message: {
     error: 'Too many requests from this IP, please try again later.',
     code: 'RATE_LIMIT_EXCEEDED',
@@ -27,7 +28,7 @@ const generalLimiter = rateLimit({
 // Strict rate limiting for chat messages
 const chatLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: process.env.NODE_ENV === 'development' ? 1000 : 20, // Very lenient in development, strict in production
+  max: NODE_ENV === 'development' ? 1000 : 20, // Very lenient in development, strict in production
   message: {
     error: 'Too many chat messages, please slow down.',
     code: 'CHAT_RATE_LIMIT_EXCEEDED',
@@ -47,7 +48,7 @@ const chatLimiter = rateLimit({
 // File upload rate limiting
 const uploadLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
-  max: process.env.NODE_ENV === 'development' ? 1000 : 5, // Very lenient in development, strict in production
+  max: NODE_ENV === 'development' ? 1000 : 5, // Very lenient in development, strict in production
   message: {
     error: 'Too many file uploads, please try again later.',
     code: 'UPLOAD_RATE_LIMIT_EXCEEDED',
@@ -67,7 +68,7 @@ const uploadLimiter = rateLimit({
 // Agent creation rate limiting
 const agentCreationLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: process.env.NODE_ENV === 'development' ? 1000 : 5, // Very lenient in development, strict in production
+  max: NODE_ENV === 'development' ? 1000 : 5, // Very lenient in development, strict in production
   message: {
     error: 'Too many agents created, please try again later.',
     code: 'AGENT_CREATION_RATE_LIMIT_EXCEEDED',
@@ -87,7 +88,7 @@ const agentCreationLimiter = rateLimit({
 // Authentication rate limiting (for login attempts)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'development' ? 1000 : 5, // Very lenient in development, strict in production
+  max: NODE_ENV === 'development' ? 1000 : 5, // Very lenient in development, strict in production
   skipSuccessfulRequests: true, // Don't count successful requests
   message: {
     error: 'Too many login attempts, please try again later.',
@@ -140,13 +141,13 @@ const createAuthenticatedLimiter = (windowMs, maxRequests) => {
 // Authenticated user chat limiter (more generous)
 const authenticatedChatLimiter = createAuthenticatedLimiter(
   1 * 60 * 1000, // 1 minute
-  process.env.NODE_ENV === 'development' ? 1000 : 50 // Very lenient in development, generous in production
+  NODE_ENV === 'development' ? 1000 : 50 // Very lenient in development, generous in production
 );
 
 // Authenticated user file upload limiter
 const authenticatedUploadLimiter = createAuthenticatedLimiter(
   10 * 60 * 1000, // 10 minutes
-  process.env.NODE_ENV === 'development' ? 1000 : 20 // Very lenient in development, generous in production
+  NODE_ENV === 'development' ? 1000 : 20 // Very lenient in development, generous in production
 );
 
 /**

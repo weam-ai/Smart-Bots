@@ -4,8 +4,8 @@ const searchController = require('../controllers/searchController');
 const {
   validateAgentId,
   generalLimiter,
-  optionalAuth,
-  verifyAgentOwnership
+  verifyAgentOwnership,
+  jwtAuthMiddleware
 } = require('../middleware');
 
 // Apply general rate limiting
@@ -19,24 +19,24 @@ router.use(generalLimiter);
 // POST /api/search/:agentId - Search for similar content in agent's knowledge base
 router.post('/:agentId',
   validateAgentId,
-  optionalAuth,
   verifyAgentOwnership,
+  jwtAuthMiddleware,
   searchController.searchSimilar
 );
 
 // GET /api/search/:agentId/stats - Get search statistics and capabilities
 router.get('/:agentId/stats',
   validateAgentId,
-  optionalAuth,
   verifyAgentOwnership,
+  jwtAuthMiddleware,
   searchController.getSearchStats
 );
 
 // POST /api/search/:agentId/test - Test search functionality with sample queries
 router.post('/:agentId/test',
   validateAgentId,
-  optionalAuth,
   verifyAgentOwnership,
+  jwtAuthMiddleware,
   searchController.testSearch
 );
 

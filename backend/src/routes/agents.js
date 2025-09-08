@@ -75,7 +75,6 @@ router.get('/:agentId/deployments',
 // GET /api/agents/:agentId/deployments/:_id - Get specific deployment
 router.get('/:agentId/deployments/:_id',
   validateAgentId,
-
   jwtAuthMiddleware,
   deploymentController.getDeployment
 );

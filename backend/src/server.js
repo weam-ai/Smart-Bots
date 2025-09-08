@@ -3,13 +3,11 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
-// const compression = require('compression'); // Temporarily disabled
 const connectDB = require('./config/database');
-const { seedDatabase } = require('./models/seed-data');
 require('dotenv').config();
-
+const { PORT, NODE_ENV } = require('./config/env');
 const app = express();
-const PORT = process.env.PORT || 8000;
+
 
 // Middleware
 app.use(helmet());
@@ -19,22 +17,22 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    // Allow all localhost ports in development
-    if (process.env.NODE_ENV !== 'production') {
-      if (origin.startsWith('http://localhost:') || 
-          origin.startsWith('http://127.0.0.1:') ||
-          origin.startsWith('http://frontend:')) {
-        return callback(null, true);
-      }
+    // Allow all localhost ports (for development convenience)
+    if (origin.startsWith('http://localhost:') || 
+        origin.startsWith('http://127.0.0.1:') ||
+        origin.startsWith('http://frontend:')) {
+      return callback(null, true);
     }
     
     // Production origins
     const allowedOrigins = [
       'http://localhost:3000',
-      'http://localhost:3001', 
+      'http://localhost:3001',
+      'http://localhost:3002', 
       'http://frontend:3000',
       'http://127.0.0.1:3000',
-      'http://127.0.0.1:3001'
+      'http://127.0.0.1:3001',
+      'http://127.0.0.1:3002'
     ];
     
     if (allowedOrigins.includes(origin)) {
@@ -78,7 +76,6 @@ const {
   requestLogger,
   responseTimeLogger,
   initializeProcessHandlers,
-  setupGracefulShutdown,
   developmentErrorLogger
 } = require('./middleware/errorHandler');
 
@@ -92,7 +89,7 @@ app.options('*', (req, res) => {
   const origin = req.headers.origin;
   
   // Allow all localhost and frontend container origins in development
-  if (process.env.NODE_ENV !== 'production') {
+  if (NODE_ENV !== 'production') {
     if (!origin || 
         origin.startsWith('http://localhost:') || 
         origin.startsWith('http://127.0.0.1:') ||
@@ -161,6 +158,11 @@ const startServer = async () => {
     await connectDB();
     console.log('✅ Database connected successfully');
     
+    // Initialize S3 service
+    const s3Service = require('./services/s3Service');
+    await s3Service.initializeBucket();
+    console.log('✅ S3 service initialized');
+    
     // Seed database with demo data
     // await seedDatabase();
     console.log('✅ Database seeded with demo data');
@@ -168,7 +170,7 @@ const startServer = async () => {
     // Start server
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`📍 Environment: ${NODE_ENV || 'development'}`);
       console.log(`🔗 API URL: http://localhost:${PORT}`);
       console.log(`🏥 Health check: http://localhost:${PORT}/health`);
     });

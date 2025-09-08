@@ -7,6 +7,7 @@ const { ScriptTag } = require('../models');
 const { asyncHandler, createServiceError } = require('../utils/errorHelpers');
 const { v4: uuidv4 } = require('uuid');
 const mongoose = require('mongoose');
+const { FRONTEND_URL } = require('../config/env');
 
 // ==================== CREATE DEPLOYMENT ====================
 
@@ -396,7 +397,7 @@ const trackAnalytics = asyncHandler(async (req, res) => {
  * Generate embed code for deployment
  */
 function generateEmbedCode(_id, settings) {
-  const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+  const baseUrl = FRONTEND_URL;
   const widgetUrl = `${baseUrl}/widget/chat-widget.js`;
   
   const embedCode = `

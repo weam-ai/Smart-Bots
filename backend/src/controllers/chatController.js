@@ -149,7 +149,6 @@ const sendMessage = async (req, res) => {
           
           agent: agentId,
           visitor: visitorId || null,
-          _id: _id || null,
           status: 'active',
           totalMessages: 0
         })
@@ -162,9 +161,6 @@ const sendMessage = async (req, res) => {
       // Update session with visitor data if provided
       if (visitorId && !session.visitor) {
         session.visitor = visitorId
-      }
-      if (_id && !session._id) {
-        session._id = _id
       }
 
       session.totalMessages += 1

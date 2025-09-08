@@ -33,30 +33,26 @@ const envConfig = {
   OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
   
   // JWT Configuration
-  JWT_SECRET: process.env.JWT_SECRET || '',
-  
-  // Iron Session Configuration
-  IRON_SESSION_COOKIE_NAME: process.env.IRON_SESSION_COOKIE_NAME || 'weam',
-  IRON_SESSION_PASSWORD: process.env.IRON_SESSION_PASSWORD || '',
+  JWT_SECRET: process.env.JWT_SECRET,
   
   // Database Configuration
-  DB_CONNECTION: process.env.DB_CONNECTION || 'mongodb',
-  DB_HOST: process.env.DB_HOST || 'localhost',
-  DB_DATABASE: process.env.DB_DATABASE || 'solution_chatbot',
-  DB_PORT: parseInt(process.env.DB_PORT || '27017', 10),
-  DB_USERNAME: process.env.DB_USERNAME || 'admin',
-  DB_PASSWORD: process.env.DB_PASSWORD || 'password',
+  DB_CONNECTION: process.env.DB_CONNECTION,
+  DB_HOST: process.env.DB_HOST,
+  DB_DATABASE: process.env.DB_DATABASE,
+  DB_PORT: parseInt(process.env.DB_PORT, 10),
+  DB_USERNAME: process.env.DB_USERNAME,
+  DB_PASSWORD: process.env.DB_PASSWORD,
   
   // Vector Database
-  QDRANT_URL: process.env.QDRANT_URL || 'http://localhost:6333',
-  QDRANT_API_KEY: process.env.QDRANT_API_KEY || '',
+  QDRANT_URL: process.env.QDRANT_URL,
+  QDRANT_API_KEY: process.env.QDRANT_API_KEY,
   
   // Redis Configuration
-  REDIS_URL: process.env.REDIS_URL || 'redis://localhost:6379',
-  REDIS_HOST: process.env.REDIS_HOST || 'localhost',
-  REDIS_PORT: parseInt(process.env.REDIS_PORT || '6379', 10),
-  REDIS_PASSWORD: process.env.REDIS_PASSWORD || '',
-  REDIS_DB: parseInt(process.env.REDIS_DB || '0', 10),
+  REDIS_URL: process.env.REDIS_URL,
+  REDIS_HOST: process.env.REDIS_HOST,
+  REDIS_PORT: parseInt(process.env.REDIS_PORT, 10),
+  REDIS_PASSWORD: process.env.REDIS_PASSWORD,
+  REDIS_DB: parseInt(process.env.REDIS_DB, 10),
   
   // Rate Limiting Configuration
   RATE_LIMIT_GENERAL_DEV: parseInt(process.env.RATE_LIMIT_GENERAL_DEV || '1000000000', 10),
@@ -90,20 +86,18 @@ const envConfig = {
   CORS_ORIGIN_PROD: process.env.CORS_ORIGIN_PROD || 'https://yourdomain.com',
   
   // Frontend Configuration
-  NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
   FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3001',
   FRONTEND_PORT: parseInt(process.env.FRONTEND_PORT || '3001', 10),
-  BACKEND_PORT: parseInt(process.env.BACKEND_PORT || '5000', 10),
+  PORT: parseInt(process.env.PORT || '5000', 10),
   
   // Service Ports
   QDRANT_PORT: parseInt(process.env.QDRANT_PORT || '6333', 10),
-  REDIS_PORT: parseInt(process.env.REDIS_PORT || '6379', 10),
   MINIO_API_PORT: parseInt(process.env.MINIO_API_PORT || '9000', 10),
   MINIO_CONSOLE_PORT: parseInt(process.env.MINIO_CONSOLE_PORT || '9001', 10),
   
   // Development Settings (MinIO for S3)
   USE_MINIO: process.env.USE_MINIO === 'true',
-  MINIO_ENDPOINT: process.env.MINIO_ENDPOINT || 'http://localhost:9000',
+  MINIO_ENDPOINT: process.env.USE_MINIO === 'true' ? 'http://minio:9000' : (process.env.MINIO_ENDPOINT || 'http://localhost:9000'),
   MINIO_ROOT_USER: process.env.MINIO_ROOT_USER || 'minioadmin',
   MINIO_ROOT_PASSWORD: process.env.MINIO_ROOT_PASSWORD || 'minioadmin',
   
@@ -118,11 +112,7 @@ const envConfig = {
   
   // Environment Settings
   NODE_ENV: process.env.NODE_ENV || 'development',
-  PORT: parseInt(process.env.PORT || '5000', 10),
   
-  // JWT Fallback Secrets (for development)
-  JWT_FALLBACK_SECRET: process.env.JWT_FALLBACK_SECRET || 'your-jwt-secret-key-change-in-production',
-  JWT_FALLBACK_SECRET_ALT: process.env.JWT_FALLBACK_SECRET_ALT || 'fallback-secret-key',
 };
 
 // Validation function
@@ -172,12 +162,9 @@ module.exports = {
   API_RETRY_DELAY: envConfig.API_RETRY_DELAY,
   CORS_ORIGIN_DEV: envConfig.CORS_ORIGIN_DEV,
   CORS_ORIGIN_PROD: envConfig.CORS_ORIGIN_PROD,
-  NEXT_PUBLIC_API_URL: envConfig.NEXT_PUBLIC_API_URL,
   FRONTEND_URL: envConfig.FRONTEND_URL,
   FRONTEND_PORT: envConfig.FRONTEND_PORT,
-  BACKEND_PORT: envConfig.BACKEND_PORT,
   QDRANT_PORT: envConfig.QDRANT_PORT,
-  REDIS_PORT: envConfig.REDIS_PORT,
   MINIO_API_PORT: envConfig.MINIO_API_PORT,
   MINIO_CONSOLE_PORT: envConfig.MINIO_CONSOLE_PORT,
   USE_MINIO: envConfig.USE_MINIO,
@@ -190,7 +177,5 @@ module.exports = {
   WIDGET_API_URL: envConfig.WIDGET_API_URL,
   WIDGET_SCRIPT_URL: envConfig.WIDGET_SCRIPT_URL,
   NODE_ENV: envConfig.NODE_ENV,
-  PORT: envConfig.PORT,
-  JWT_FALLBACK_SECRET: envConfig.JWT_FALLBACK_SECRET,
-  JWT_FALLBACK_SECRET_ALT: envConfig.JWT_FALLBACK_SECRET_ALT,
+  PORT: envConfig.PORT
 };

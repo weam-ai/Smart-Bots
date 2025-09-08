@@ -70,7 +70,7 @@ const createOrUpdateVisitor = asyncHandler(async (req, res) => {
     // Check if visitor already exists
     let visitor = await Visitor.findOne({ 
       email: email.toLowerCase(), 
-      _id 
+      agentId: deployment.agent._id
     });
 
     if (visitor) {
@@ -92,7 +92,6 @@ const createOrUpdateVisitor = asyncHandler(async (req, res) => {
         createdBy: createdBy,
         
         name,
-        _id,
         agentId: deployment.agent._id,
         websiteUrl,
         ipAddress,
@@ -131,7 +130,7 @@ const getVisitorsByDeployment = asyncHandler(async (req, res) => {
   console.log('📋 Fetching visitors for deployment:', _id);
 
   try {
-    const query = { _id };
+    const query = { agentId: _id };
     
     // Add search filter if provided
     if (search) {

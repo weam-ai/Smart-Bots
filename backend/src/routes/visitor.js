@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const visitorController = require('../controllers/visitorController');
 const {
-  generalLimiter
+  generalLimiter,
+  jwtAuthMiddleware
 } = require('../middleware');
 
 // Apply general rate limiting to all visitor routes
@@ -19,11 +20,13 @@ router.post('/',
 
 // GET /api/visitors/deployment/:_id - Get visitors for a deployment
 router.get('/deployment/:_id',
+  jwtAuthMiddleware,
   visitorController.getVisitorsByDeployment
 );
 
 // GET /api/visitors/deployment/:_id/stats - Get visitor statistics
 router.get('/deployment/:_id/stats',
+  jwtAuthMiddleware,
   visitorController.getVisitorStats
 );
 
@@ -31,6 +34,7 @@ router.get('/deployment/:_id/stats',
 
 // GET /api/visitors/:visitorId - Get visitor details
 router.get('/:visitorId',
+  jwtAuthMiddleware,
   visitorController.getVisitorDetails
 );
 

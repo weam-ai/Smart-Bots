@@ -3,30 +3,19 @@
  * Handles Redis connection and queue setup
  */
 
-const { Queue, Worker, QueueEvents } = require('bullmq');
+const { Queue, QueueEvents } = require('bullmq');
 const Redis = require('redis');
-
-// Redis connection configuration
-const redisConfig = {
-  host: process.env.REDIS_HOST || 'redis',
-  port: process.env.REDIS_PORT || 6379,
-  password: process.env.REDIS_PASSWORD || undefined,
-  db: process.env.REDIS_DB || 0,
-  maxRetriesPerRequest: 3,
-  retryDelayOnFailover: 100,
-  lazyConnect: true
-};
+const { REDIS_URL, REDIS_PASSWORD, REDIS_DB } = require('./env');
 
 // Create Redis client for BullMQ (maxRetriesPerRequest must be null for BullMQ)
 const redisConnection = {
-  host: redisConfig.host,
-  port: redisConfig.port,
-  password: redisConfig.password,
-  db: redisConfig.db,
+  url: REDIS_URL,
+  password: REDIS_PASSWORD,
+  db: REDIS_DB,
   maxRetriesPerRequest: null  // Required by BullMQ
 };
 
-console.log(`🔗 BullMQ Redis config: ${redisConfig.host}:${redisConfig.port}`);
+console.log(`🔗 BullMQ Redis config: ${REDIS_URL}`);
 
 // Queue names
 const QUEUE_NAMES = {
@@ -144,12 +133,9 @@ const testRedisConnection = async () => {
   try {
     // Create client compatible with BullMQ requirements
     const client = Redis.createClient({
-      socket: {
-        host: redisConfig.host,
-        port: redisConfig.port,
-      },
-      password: redisConfig.password,
-      database: redisConfig.db,
+      url: REDIS_URL,
+      password: REDIS_PASSWORD,
+      database: REDIS_DB,
       // BullMQ compatibility
       maxRetriesPerRequest: null,
       retryDelayOnFailover: 100,
@@ -176,7 +162,6 @@ const testRedisConnection = async () => {
 
 module.exports = {
   // Configuration
-  redisConfig,
   redisConnection,
   
   // Constants
