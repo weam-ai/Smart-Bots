@@ -7,7 +7,6 @@ import { httpGet, httpPost, httpPut, httpDelete } from '@/services/axios'
 
 interface Deployment {
   _id: string
-  deploymentId: string
   name: string
   description: string
   websiteUrl?: string
@@ -149,7 +148,11 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
 
     try {
       const response = await httpPost<{data: Deployment}>(`/api/agents/${agentId}/deployments`, backendData)
-      setDeployments(prev => [response.data, ...prev])
+      
+      // Handle both direct response and response with data property
+      const newDeployment = response.data || response
+      setDeployments(prev => [newDeployment, ...prev])
+      
       setShowCreateModal(false)
       resetForm()
       toast.success('Deployment created successfully!')
@@ -177,7 +180,11 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
 
     try {
       const response = await httpPut<{data: Deployment}>(`/api/agents/${agentId}/deployments/${editingDeployment._id}`, backendData)
-      setDeployments(prev => prev.map(d => d._id === editingDeployment._id ? response.data : d))
+      
+      // Handle both direct response and response with data property
+      const updatedDeployment = response.data || response
+      setDeployments(prev => prev.map(d => d._id === editingDeployment._id ? updatedDeployment : d))
+      
       setEditingDeployment(null)
       resetForm()
       toast.success('Deployment updated successfully!')
@@ -187,12 +194,12 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
     }
   }
 
-  const handleDeleteDeployment = async (deploymentId: string) => {
+  const handleDeleteDeployment = async (_id: string) => {
     if (!confirm('Are you sure you want to delete this deployment?')) return
 
     try {
-      await httpDelete(`/api/agents/${agentId}/deployments/${deploymentId}`)
-      setDeployments(prev => prev.filter(d => d._id !== deploymentId))
+      await httpDelete(`/api/agents/${agentId}/deployments/${_id}`)
+      setDeployments(prev => prev.filter(d => d._id !== _id))
       toast.success('Deployment deleted successfully!')
     } catch (error: any) {
       console.error('Error deleting deployment:', error)
@@ -200,9 +207,9 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
     }
   }
 
-  const handleCopyEmbedCode = async (deploymentId: string) => {
+  const handleCopyEmbedCode = async (_id: string) => {
     try {
-      const response = await httpGet<{embedCode: string}>(`/api/deployments/${deploymentId}/embed`)
+      const response = await httpGet<{embedCode: string}>(`/api/deployments/${_id}/embed`)
       await navigator.clipboard.writeText(response.embedCode)
       toast.success('Embed code copied to clipboard!')
     } catch (error: any) {
@@ -211,9 +218,9 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
     }
   }
 
-  const handleViewEmbedCode = async (deploymentId: string) => {
+  const handleViewEmbedCode = async (_id: string) => {
     try {
-      const response = await httpGet<{embedCode: string}>(`/api/deployments/${deploymentId}/embed`)
+      const response = await httpGet<{embedCode: string}>(`/api/deployments/${_id}/embed`)
       setShowEmbedCode(response.embedCode)
     } catch (error: any) {
       console.error('Error fetching embed code:', error)
@@ -325,7 +332,7 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {deployments.filter(deployment => deployment && deployment.deploymentId).map((deployment) => (
+          {deployments.filter(deployment => deployment && deployment._id).map((deployment) => (
             <div key={deployment._id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
@@ -373,14 +380,14 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
               {/* Actions */}
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => handleCopyEmbedCode(deployment?.deploymentId)}
+                  onClick={() => handleCopyEmbedCode(deployment?._id)}
                   className="flex items-center gap-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
                 >
                   <Copy className="h-4 w-4" />
                   Copy Code
                 </button>
                 <button
-                  onClick={() => handleViewEmbedCode(deployment?.deploymentId)}
+                  onClick={() => handleViewEmbedCode(deployment?._id)}
                   className="flex items-center gap-1 px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
                 >
                   <Code className="h-4 w-4" />

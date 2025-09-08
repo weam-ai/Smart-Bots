@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const visitorController = require('../controllers/visitorController');
 const {
-  validateDeploymentId,
   generalLimiter
 } = require('../middleware');
 
@@ -18,15 +17,13 @@ router.post('/',
 
 // ==================== DEPLOYMENT-SPECIFIC ROUTES ====================
 
-// GET /api/visitors/deployment/:deploymentId - Get visitors for a deployment
-router.get('/deployment/:deploymentId',
-  validateDeploymentId,
+// GET /api/visitors/deployment/:_id - Get visitors for a deployment
+router.get('/deployment/:_id',
   visitorController.getVisitorsByDeployment
 );
 
-// GET /api/visitors/deployment/:deploymentId/stats - Get visitor statistics
-router.get('/deployment/:deploymentId/stats',
-  validateDeploymentId,
+// GET /api/visitors/deployment/:_id/stats - Get visitor statistics
+router.get('/deployment/:_id/stats',
   visitorController.getVisitorStats
 );
 

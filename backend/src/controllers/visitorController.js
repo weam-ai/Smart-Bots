@@ -9,18 +9,18 @@ const { asyncHandler, createServiceError } = require('../utils/errorHelpers');
 // ==================== CREATE/UPDATE VISITOR ====================
 
 const createOrUpdateVisitor = asyncHandler(async (req, res) => {
-  const { deploymentId, name, email, websiteUrl } = req.body;
+  const { _id, name, email, websiteUrl } = req.body;
   const ipAddress = req.ip || req.connection.remoteAddress;
   const userAgent = req.get('User-Agent');
 
-  console.log('👤 Creating/updating visitor:', { deploymentId, name, email, websiteUrl });
+  console.log('👤 Creating/updating visitor:', { _id, name, email, websiteUrl });
 
   // Validate required fields
-  if (!deploymentId || !name || !email || !websiteUrl) {
+  if (!_id || !name || !email || !websiteUrl) {
     return res.status(400).json({
       success: false,
       error: {
-        message: 'Missing required fields: deploymentId, name, email, websiteUrl',
+        message: 'Missing required fields: _id, name, email, websiteUrl',
         code: 'MISSING_FIELDS'
       }
     });
@@ -40,7 +40,7 @@ const createOrUpdateVisitor = asyncHandler(async (req, res) => {
 
   try {
     // Get deployment info with agent details to get company context
-    const deployment = await ScriptTag.findOne({ deploymentId }).populate('agent', 'companyId createdBy');
+    const deployment = await ScriptTag.findById(_id).populate('agent', 'companyId createdBy');
     console.log("🚀 ~ deployment:", deployment)
     if (!deployment) {
       return res.status(404).json({
@@ -57,7 +57,7 @@ const createOrUpdateVisitor = asyncHandler(async (req, res) => {
     const createdBy = deployment.agent?.createdBy;
 
     if (!companyId || !createdBy) {
-      console.warn('⚠️ Deployment agent missing company context:', { deploymentId, companyId, createdBy });
+      console.warn('⚠️ Deployment agent missing company context:', { _id, companyId, createdBy });
       return res.status(500).json({
         success: false,
         error: {
@@ -70,7 +70,7 @@ const createOrUpdateVisitor = asyncHandler(async (req, res) => {
     // Check if visitor already exists
     let visitor = await Visitor.findOne({ 
       email: email.toLowerCase(), 
-      deploymentId 
+      _id 
     });
 
     if (visitor) {
@@ -92,7 +92,7 @@ const createOrUpdateVisitor = asyncHandler(async (req, res) => {
         createdBy: createdBy,
         
         name,
-        deploymentId,
+        _id,
         agentId: deployment.agent._id,
         websiteUrl,
         ipAddress,
@@ -125,13 +125,13 @@ const createOrUpdateVisitor = asyncHandler(async (req, res) => {
 // ==================== GET VISITORS BY DEPLOYMENT ====================
 
 const getVisitorsByDeployment = asyncHandler(async (req, res) => {
-  const { deploymentId } = req.params;
+  const { _id } = req.params;
   const { page = 1, limit = 20, search } = req.query;
 
-  console.log('📋 Fetching visitors for deployment:', deploymentId);
+  console.log('📋 Fetching visitors for deployment:', _id);
 
   try {
-    const query = { deploymentId };
+    const query = { _id };
     
     // Add search filter if provided
     if (search) {
@@ -208,17 +208,17 @@ const getVisitorDetails = asyncHandler(async (req, res) => {
 // ==================== GET VISITOR STATS ====================
 
 const getVisitorStats = asyncHandler(async (req, res) => {
-  const { deploymentId } = req.params;
+  const { _id } = req.params;
   const { days = 30 } = req.query;
 
-  console.log('📊 Fetching visitor stats for deployment:', deploymentId, 'days:', days);
+  console.log('📊 Fetching visitor stats for deployment:', _id, 'days:', days);
 
   try {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - parseInt(days));
 
     const stats = await Visitor.aggregate([
-      { $match: { deploymentId, createdAt: { $gte: startDate } } },
+      { $match: { _id, createdAt: { $gte: startDate } } },
       {
         $group: {
           _id: null,

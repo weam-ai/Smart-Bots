@@ -6,6 +6,7 @@
 const { ScriptTag } = require('../models');
 const { asyncHandler, createServiceError } = require('../utils/errorHelpers');
 const { v4: uuidv4 } = require('uuid');
+const mongoose = require('mongoose');
 
 // ==================== CREATE DEPLOYMENT ====================
 
@@ -31,9 +32,6 @@ const createDeployment = asyncHandler(async (req, res) => {
     });
   }
 
-  // Generate unique deployment ID
-  const deploymentId = uuidv4();
-
   // Default settings
   const defaultSettings = {
     theme: 'light',
@@ -50,13 +48,13 @@ const createDeployment = asyncHandler(async (req, res) => {
 
   const finalSettings = { ...defaultSettings, ...settings };
 
-  // Generate embed code
-  const embedCode = generateEmbedCode(deploymentId, finalSettings);
-
   try {
-    // Create deployment record
+    // Generate embed code first (we'll use a temporary ID for now)
+    const tempId = new mongoose.Types.ObjectId();
+    const embedCode = generateEmbedCode(tempId, finalSettings);
+    
+    // Create deployment record with all required fields
     const deployment = new ScriptTag({
-      deploymentId: deploymentId,
       // Multi-tenant fields (required for new records)
       companyId: req.user?.companyId,
       createdBy: req.user?.userId,
@@ -64,12 +62,12 @@ const createDeployment = asyncHandler(async (req, res) => {
       agent: agentId,
       name: name.trim(),
       description: description?.trim() || '',
-      scriptCode: embedCode,
       version: '1.0.0',
       isActive: true,
       deploymentUrl: websiteUrl,
-      embedCode: embedCode,
       settings: finalSettings,
+      scriptCode: embedCode,
+      embedCode: embedCode,
       analytics: {
         views: 0,
         interactions: 0,
@@ -77,6 +75,12 @@ const createDeployment = asyncHandler(async (req, res) => {
       }
     });
 
+    await deployment.save();
+
+    // Update embed code with the actual _id
+    const finalEmbedCode = generateEmbedCode(deployment._id, finalSettings);
+    deployment.embedCode = finalEmbedCode;
+    deployment.scriptCode = finalEmbedCode;
     await deployment.save();
 
     console.log('✅ Deployment created successfully:', deployment._id);
@@ -121,7 +125,6 @@ const getDeployments = asyncHandler(async (req, res) => {
       success: true,
       data: deployments.map(deployment => ({
         _id: deployment._id,
-        deploymentId: deployment.deploymentId,
         agentId: deployment.agent,
         name: deployment.name,
         description: deployment.description,
@@ -143,13 +146,13 @@ const getDeployments = asyncHandler(async (req, res) => {
 // ==================== GET SINGLE DEPLOYMENT ====================
 
 const getDeployment = asyncHandler(async (req, res) => {
-  const { agentId, deploymentId } = req.params;
+  const { agentId, _id } = req.params;
 
-  console.log('🔍 Fetching deployment:', deploymentId, 'for agent:', agentId);
+  console.log('🔍 Fetching deployment:', _id, 'for agent:', agentId);
 
   try {
     const deployment = await ScriptTag.findOne({
-      _id: deploymentId,
+      _id: _id,
       agent: agentId
     });
 
@@ -191,14 +194,14 @@ const getDeployment = asyncHandler(async (req, res) => {
 // ==================== UPDATE DEPLOYMENT ====================
 
 const updateDeployment = asyncHandler(async (req, res) => {
-  const { agentId, deploymentId } = req.params;
+  const { agentId, _id } = req.params;
   const updateData = req.body;
 
-  console.log('🔄 Updating deployment:', deploymentId);
+  console.log('🔄 Updating deployment:', _id);
 
   try {
     const deployment = await ScriptTag.findOne({
-      _id: deploymentId,
+      _id: _id,
       agent: agentId
     });
 
@@ -223,7 +226,7 @@ const updateDeployment = asyncHandler(async (req, res) => {
 
     // Regenerate embed code if settings changed
     if (updateData.settings) {
-      deployment.embedCode = generateEmbedCode(deploymentId, deployment.settings);
+      deployment.embedCode = generateEmbedCode(deployment._id, deployment.settings);
       deployment.scriptCode = deployment.embedCode;
     }
 
@@ -257,13 +260,13 @@ const updateDeployment = asyncHandler(async (req, res) => {
 // ==================== DELETE DEPLOYMENT ====================
 
 const deleteDeployment = asyncHandler(async (req, res) => {
-  const { agentId, deploymentId } = req.params;
+  const { agentId, _id } = req.params;
 
-  console.log('🗑️ Deleting deployment:', deploymentId);
+  console.log('🗑️ Deleting deployment:', _id);
 
   try {
     const deployment = await ScriptTag.findOneAndDelete({
-      _id: deploymentId,
+      _id: _id,
       agent: agentId
     });
 
@@ -293,12 +296,12 @@ const deleteDeployment = asyncHandler(async (req, res) => {
 // ==================== GET EMBED CODE ====================
 
 const getEmbedCode = asyncHandler(async (req, res) => {
-  const { deploymentId } = req.params;
+  const { _id } = req.params;
 
-  console.log('📋 Getting embed code for deployment:', deploymentId);
+  console.log('📋 Getting embed code for deployment:', _id);
 
   try {
-    const deployment = await ScriptTag.findOne({ deploymentId: deploymentId });
+    const deployment = await ScriptTag.findOne({ _id: _id });
 
     if (!deployment) {
       return res.status(404).json({
@@ -325,7 +328,7 @@ const getEmbedCode = asyncHandler(async (req, res) => {
     res.json({
       success: true,
       data: {
-        deploymentId: deployment.deploymentId,
+        _id: deployment._id,
         agentId: deployment.agent,
         embedCode: deployment.embedCode,
         settings: deployment.settings
@@ -341,13 +344,13 @@ const getEmbedCode = asyncHandler(async (req, res) => {
 // ==================== TRACK DEPLOYMENT ANALYTICS ====================
 
 const trackAnalytics = asyncHandler(async (req, res) => {
-  const { deploymentId } = req.params;
+  const { _id } = req.params;
   const { event, data = {} } = req.body;
 
-  console.log('📊 Tracking analytics for deployment:', deploymentId, 'event:', event);
+  console.log('📊 Tracking analytics for deployment:', _id, 'event:', event);
 
   try {
-    const deployment = await ScriptTag.findOne({ deploymentId: deploymentId });
+    const deployment = await ScriptTag.findOne({ _id: _id });
 
     if (!deployment) {
       return res.status(404).json({
@@ -392,7 +395,7 @@ const trackAnalytics = asyncHandler(async (req, res) => {
 /**
  * Generate embed code for deployment
  */
-function generateEmbedCode(deploymentId, settings) {
+function generateEmbedCode(_id, settings) {
   const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
   const widgetUrl = `${baseUrl}/widget/chat-widget.js`;
   
@@ -401,7 +404,7 @@ function generateEmbedCode(deploymentId, settings) {
 <script>
   (function() {
     var chatbotConfig = {
-      deploymentId: '${deploymentId}',
+      _id: '${_id}',
       theme: '${settings.theme}',
       position: '${settings.position}',
       size: {

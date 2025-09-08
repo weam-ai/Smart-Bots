@@ -6,11 +6,14 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3001:3000"
+    env_file:
+      - .env
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:5000
     volumes:
       - ./frontend:/app
       - /app/node_modules
+      - ./.env:/app/.env
     depends_on:
       - backend
     networks:
@@ -40,6 +43,7 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
+      - ./.env:/app/.env
     depends_on:
       - minio
       - mongodb

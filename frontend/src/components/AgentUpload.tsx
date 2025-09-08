@@ -1,33 +1,39 @@
-'use client'
+"use client";
 
-import { useCallback, useEffect } from 'react'
-import { useDropzone } from 'react-dropzone'
-import { 
-  Upload, 
-  FileText, 
-  File, 
-  X, 
-  AlertCircle, 
+import { useCallback, useEffect } from "react";
+import { useDropzone } from "react-dropzone";
+import {
+  Upload,
+  FileText,
+  File,
+  X,
+  AlertCircle,
   CheckCircle,
   Loader2,
   AlertTriangle,
   ArrowLeft,
-  ArrowRight
-} from 'lucide-react'
-import toast from 'react-hot-toast'
-import { AgentData } from '@/app/ai-chatbot/[agentId]/page'
-import { useCompleteUpload } from '@/hooks/useUpload'
+  ArrowRight,
+} from "lucide-react";
+import { AgentData } from "@/app/ai-chatbot/[agentId]/page";
+import { useCompleteUpload } from "@/hooks/useUpload";
 
 interface AgentUploadProps {
-  agentData: AgentData
-  onFilesUploaded: (files: File[]) => void
-  onBack: () => void
-  onStartTraining?: () => void
-  onStartTesting?: () => void
-  hasNewUploads?: boolean
+  agentData: AgentData;
+  onFilesUploaded: (files: File[]) => void;
+  onBack: () => void;
+  onStartTraining?: () => void;
+  onStartTesting?: () => void;
+  hasNewUploads?: boolean;
 }
 
-export default function AgentUpload({ agentData, onFilesUploaded, onBack, onStartTraining, onStartTesting, hasNewUploads }: AgentUploadProps) {
+export default function AgentUpload({
+  agentData,
+  onFilesUploaded,
+  onBack,
+  onStartTraining,
+  onStartTesting,
+  hasNewUploads,
+}: AgentUploadProps) {
   // Use real upload hooks
   const {
     uploadedFiles,
@@ -40,52 +46,63 @@ export default function AgentUpload({ agentData, onFilesUploaded, onBack, onStar
     getTotalSize,
     constraints,
     isUploading,
-  } = useCompleteUpload()
+  } = useCompleteUpload();
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    // Create file handler with agent ID for automatic upload
-    const fileHandler = addFiles(agentData.id)
-    fileHandler(acceptedFiles)
-  }, [addFiles, agentData.id])
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      // Create file handler with agent ID for automatic upload
+      const fileHandler = addFiles(agentData.id);
+      fileHandler(acceptedFiles);
+    },
+    [addFiles, agentData.id]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: constraints.ACCEPTED_TYPES,
-    multiple: true
-  })
+    multiple: true,
+  });
 
   const getFileIcon = (fileType: string) => {
     switch (fileType) {
-      case 'application/pdf':
-        return <FileText className="h-5 w-5 text-red-500" />
-      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-        return <FileText className="h-5 w-5 text-blue-500" />
-      case 'application/msword':
-        return <FileText className="h-5 w-5 text-blue-500" />
-      case 'text/plain':
-        return <File className="h-5 w-5 text-gray-500" />
+      case "application/pdf":
+        return <FileText className="h-5 w-5 text-red-500" />;
+      case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        return <FileText className="h-5 w-5 text-blue-500" />;
+      case "application/msword":
+        return <FileText className="h-5 w-5 text-blue-500" />;
+      case "text/plain":
+        return <File className="h-5 w-5 text-gray-500" />;
       default:
-        return <File className="h-5 w-5 text-gray-400" />
+        return <File className="h-5 w-5 text-gray-400" />;
     }
-  }
+  };
 
   // Files upload automatically, so we just need to handle completion
   const handleFilesCompleted = useCallback(() => {
     if (allCompleted && allSuccessful && uploadedFiles.length > 0) {
-      console.log('✅ All files uploaded successfully, proceeding to training')
-      const files = uploadedFiles.map(f => f.file)
-      onFilesUploaded(files)
+      console.log("✅ All files uploaded successfully, proceeding to training");
+      const files = uploadedFiles.map((f) => f.file);
+      onFilesUploaded(files);
     }
-  }, [allCompleted, allSuccessful, uploadedFiles, onFilesUploaded])
+  }, [allCompleted, allSuccessful, uploadedFiles, onFilesUploaded]);
 
   // Call handleFilesCompleted when upload status changes
   useEffect(() => {
-    handleFilesCompleted()
-  }, [handleFilesCompleted])
+    handleFilesCompleted();
+  }, [handleFilesCompleted]);
 
-  const totalSize = getTotalSize()
-  const hasScannedPDFs = uploadedFiles.some(f => f.file.type === 'application/pdf')
+  const totalSize = getTotalSize();
+  const hasScannedPDFs = uploadedFiles.some(
+    (f) => f.file.type === "application/pdf"
+  );
 
+  console.log("🚀 ~ uploadedFiles:", uploadedFiles);
+  console.log("🚀 ~ agentData.files:", agentData.files);
+  console.log("🚀 ~ allCompleted:", allCompleted);
+  console.log("🚀 ~ allSuccessful:", allSuccessful);
+  console.log("🚀 ~ hasNewUploads:", hasNewUploads);
+  console.log("🚀 ~ onStartTraining:", onStartTraining);
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -100,8 +117,12 @@ export default function AgentUpload({ agentData, onFilesUploaded, onBack, onStar
                 <ArrowLeft className="h-5 w-5" />
               </button>
               <div>
-                <h1 className="text-xl font-semibold text-gray-900">Upload Documents</h1>
-                <p className="text-sm text-gray-500">Step 1 of 4 • Agent: {agentData.name}</p>
+                <h1 className="text-xl font-semibold text-gray-900">
+                  Upload Documents
+                </h1>
+                <p className="text-sm text-gray-500">
+                  Step 1 of 4 • Agent: {agentData.name}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -120,9 +141,12 @@ export default function AgentUpload({ agentData, onFilesUploaded, onBack, onStar
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Instructions */}
         <div className="card mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Upload Your Documents</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-3">
+            Upload Your Documents
+          </h2>
           <p className="text-gray-600 mb-4">
-            Upload the documents you want your AI agent to learn from. These will be processed and used to answer questions.
+            Upload the documents you want your AI agent to learn from. These
+            will be processed and used to answer questions.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div className="flex items-center gap-2">
@@ -146,15 +170,17 @@ export default function AgentUpload({ agentData, onFilesUploaded, onBack, onStar
             {...getRootProps()}
             className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors cursor-pointer ${
               isDragActive
-                ? 'border-primary-500 bg-primary-50'
-                : 'border-gray-300 hover:border-gray-400'
+                ? "border-primary-500 bg-primary-50"
+                : "border-gray-300 hover:border-gray-400"
             }`}
           >
             <input {...getInputProps()} />
             <Upload className="mx-auto h-16 w-16 text-gray-400 mb-6" />
             {isDragActive ? (
               <div>
-                <p className="text-xl text-primary-600 mb-2">Drop the files here...</p>
+                <p className="text-xl text-primary-600 mb-2">
+                  Drop the files here...
+                </p>
                 <p className="text-gray-500">Release to upload</p>
               </div>
             ) : (
@@ -165,9 +191,7 @@ export default function AgentUpload({ agentData, onFilesUploaded, onBack, onStar
                 <p className="text-gray-500 mb-4">
                   Choose PDF, DOCX, or TXT files to train your AI agent
                 </p>
-                <button className="btn-primary">
-                  Choose Files
-                </button>
+                <button className="btn-primary">Choose Files</button>
               </div>
             )}
           </div>
@@ -177,9 +201,12 @@ export default function AgentUpload({ agentData, onFilesUploaded, onBack, onStar
         {agentData.files && agentData.files.length > 0 && (
           <div className="card mb-8">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Already Uploaded Files</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Already Uploaded Files
+              </h3>
               <div className="text-sm text-gray-500">
-                {agentData.files.length} file{agentData.files.length !== 1 ? 's' : ''} ready for training
+                {agentData.files.length} file
+                {agentData.files.length !== 1 ? "s" : ""} ready for training
               </div>
             </div>
 
@@ -192,7 +219,9 @@ export default function AgentUpload({ agentData, onFilesUploaded, onBack, onStar
                   <div className="flex items-center gap-4">
                     {getFileIcon(file.mimeType)}
                     <div>
-                      <p className="font-medium text-gray-900">{file.originalFilename}</p>
+                      <p className="font-medium text-gray-900">
+                        {file.originalFilename}
+                      </p>
                       <p className="text-sm text-gray-500">
                         {formatFileSize(file.fileSize)} • {file.status}
                       </p>
@@ -213,9 +242,13 @@ export default function AgentUpload({ agentData, onFilesUploaded, onBack, onStar
         {uploadedFiles.length > 0 && (
           <div className="card mb-8">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Uploaded Files</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Uploaded Files
+              </h3>
               <div className="text-sm text-gray-500">
-                {uploadedFiles.length} file{uploadedFiles.length !== 1 ? 's' : ''} • {formatFileSize(totalSize)}
+                {uploadedFiles.length} file
+                {uploadedFiles.length !== 1 ? "s" : ""} •{" "}
+                {formatFileSize(totalSize)}
               </div>
             </div>
 
@@ -228,32 +261,38 @@ export default function AgentUpload({ agentData, onFilesUploaded, onBack, onStar
                   <div className="flex items-center gap-4">
                     {getFileIcon(fileInfo.file.type)}
                     <div>
-                      <p className="font-medium text-gray-900">{fileInfo.file.name}</p>
-                      <p className="text-sm text-gray-500">{formatFileSize(fileInfo.file.size)}</p>
+                      <p className="font-medium text-gray-900">
+                        {fileInfo.file.name}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {formatFileSize(fileInfo.file.size)}
+                      </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-4">
-                    {fileInfo.status === 'uploading' && (
+                    {fileInfo.status === "uploading" && (
                       <div className="flex items-center gap-3">
                         <div className="w-32 bg-gray-200 rounded-full h-2">
-                          <div 
+                          <div
                             className="bg-primary-600 h-2 rounded-full transition-all duration-300"
                             style={{ width: `${fileInfo.progress}%` }}
                           />
                         </div>
-                        <span className="text-sm text-gray-600 w-12">{Math.round(fileInfo.progress)}%</span>
+                        <span className="text-sm text-gray-600 w-12">
+                          {Math.round(fileInfo.progress)}%
+                        </span>
                       </div>
                     )}
-                    
-                    {fileInfo.status === 'success' && (
+
+                    {fileInfo.status === "success" && (
                       <div className="flex items-center gap-2">
                         <CheckCircle className="h-5 w-5 text-green-500" />
                         <span className="text-sm text-green-600">Ready</span>
                       </div>
                     )}
-                    
-                    {fileInfo.status === 'error' && (
+
+                    {fileInfo.status === "error" && (
                       <div className="flex items-center gap-2">
                         <AlertCircle className="h-5 w-5 text-red-500" />
                         <span className="text-sm text-red-600">Error</span>
@@ -277,9 +316,12 @@ export default function AgentUpload({ agentData, onFilesUploaded, onBack, onStar
                 <div className="flex items-start gap-3">
                   <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium text-yellow-800">PDF Files Detected</p>
+                    <p className="text-sm font-medium text-yellow-800">
+                      PDF Files Detected
+                    </p>
                     <p className="text-sm text-yellow-700 mt-1">
-                      Make sure your PDFs contain selectable text. Scanned PDFs (images) may not be processed correctly.
+                      Make sure your PDFs contain selectable text. Scanned PDFs
+                      (images) may not be processed correctly.
                     </p>
                   </div>
                 </div>
@@ -297,7 +339,7 @@ export default function AgentUpload({ agentData, onFilesUploaded, onBack, onStar
             <ArrowLeft className="h-4 w-4" />
             Back to Agents
           </button>
-          
+
           <div className="flex items-center gap-4">
             {/* Show upload status */}
             {uploadedFiles.length > 0 && (
@@ -308,14 +350,16 @@ export default function AgentUpload({ agentData, onFilesUploaded, onBack, onStar
                     <span className="text-sm">Uploading files...</span>
                   </div>
                 )}
-                
+
                 {allCompleted && allSuccessful && (
                   <div className="flex items-center gap-2 text-green-600">
                     <CheckCircle className="h-4 w-4" />
-                    <span className="text-sm">Files uploaded successfully!</span>
+                    <span className="text-sm">
+                      Files uploaded successfully!
+                    </span>
                   </div>
                 )}
-                
+
                 {allCompleted && !allSuccessful && (
                   <div className="flex items-center gap-2 text-red-600">
                     <AlertCircle className="h-4 w-4" />
@@ -325,35 +369,24 @@ export default function AgentUpload({ agentData, onFilesUploaded, onBack, onStar
               </div>
             )}
 
-            {/* Show appropriate button based on upload status */}
-            {((agentData.files && agentData.files.length > 0) || (allCompleted && allSuccessful && uploadedFiles.length > 0)) && (
-              <>
-                {/* Show Training button if new files were uploaded */}
-                {((allCompleted && allSuccessful && uploadedFiles.length > 0) || hasNewUploads) && onStartTraining && (
-                  <button
-                    onClick={onStartTraining}
-                    className="btn-primary inline-flex items-center gap-2"
-                  >
-                    <ArrowRight className="h-4 w-4" />
-                    Training Data
-                  </button>
-                )}
-                
-                {/* Show Testing button if no new files were uploaded */}
-                {!hasNewUploads && !(allCompleted && allSuccessful && agentData.files.length > 0) && onStartTraining && (
-                  <button
-                    onClick={onStartTraining}
-                    className="btn-primary inline-flex items-center gap-2"
-                  >
-                    <ArrowRight className="h-4 w-4" />
-                    Train Chatbot
-                  </button>
-                )}
-              </>
-            )}
+            {!hasNewUploads &&
+              !(
+                allCompleted &&
+                allSuccessful &&
+                (agentData.files.length > 0 || uploadedFiles.length > 0)
+              ) &&
+              onStartTraining && (
+                <button
+                  onClick={onStartTraining}
+                  className="btn-primary inline-flex items-center gap-2"
+                >
+                  <ArrowRight className="h-4 w-4" />
+                  Train Chatbot
+                </button>
+              )}
           </div>
         </div>
       </main>
     </div>
-  )
+  );
 }

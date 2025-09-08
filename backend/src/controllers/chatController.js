@@ -14,14 +14,14 @@ const { v4: uuidv4 } = require('uuid')
 const sendMessage = async (req, res) => {
   try {
     const { agentId } = req.params
-    const { message, sessionId, model, temperature, instructions, visitorId, deploymentId } = req.body
+    const { message, sessionId, model, temperature, instructions, visitorId, _id } = req.body
 
     console.log('💬 Chat message received:', { 
       agentId, 
       message: message?.substring(0, 100), 
       sessionId,
       visitorId,
-      deploymentId,
+      _id,
       model,
       temperature,
       instructions: instructions?.substring(0, 50)
@@ -149,7 +149,7 @@ const sendMessage = async (req, res) => {
           
           agent: agentId,
           visitor: visitorId || null,
-          deploymentId: deploymentId || null,
+          _id: _id || null,
           status: 'active',
           totalMessages: 0
         })
@@ -163,8 +163,8 @@ const sendMessage = async (req, res) => {
       if (visitorId && !session.visitor) {
         session.visitor = visitorId
       }
-      if (deploymentId && !session.deploymentId) {
-        session.deploymentId = deploymentId
+      if (_id && !session._id) {
+        session._id = _id
       }
 
       session.totalMessages += 1

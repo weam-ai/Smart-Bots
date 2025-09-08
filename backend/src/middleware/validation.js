@@ -412,13 +412,6 @@ const paramSchemas = {
       })
   }),
 
-  deploymentId: Joi.object({
-    deploymentId: customValidators.uuid.required()
-      .messages({
-        'any.required': 'Deployment ID parameter is required',
-        'any.invalid': 'Invalid deployment ID format'
-      })
-  })
 };
 
 // Query validation schemas
@@ -490,7 +483,6 @@ const validateTrackAnalytics = validate(deploymentSchemas.trackAnalytics, 'body'
 const validateObjectId = validate(paramSchemas.objectId, 'params');
 const validateAgentId = validate(paramSchemas.agentId, 'params');
 const validateSessionId = validate(paramSchemas.sessionId, 'params');
-const validateDeploymentId = validate(paramSchemas.deploymentId, 'params');
 
 const validatePagination = validate(querySchemas.pagination, 'query');
 
@@ -524,7 +516,7 @@ module.exports = {
   validateObjectId,
   validateAgentId,
   validateSessionId,
-  validateDeploymentId,
+
   
   // Query validation
   validatePagination,

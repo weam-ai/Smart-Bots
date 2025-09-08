@@ -1,13 +1,14 @@
 import { getIronSession, IronSession } from 'iron-session';
 import { cookies } from 'next/headers';
+import { IRON_SESSION_COOKIE_NAME, IRON_SESSION_PASSWORD, NODE_ENV } from '@/config/env';
 
 // Iron Session configuration (matching your main app)
 const ironOptions = {
-  cookieName: 'weam',
-  password: 'YczgOhDJQj0RRDR3ASnvOVoQUBV0PtSz',
+  cookieName: IRON_SESSION_COOKIE_NAME,
+  password: IRON_SESSION_PASSWORD,
   cookieOptions: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: NODE_ENV === 'production',
   },
 };
 

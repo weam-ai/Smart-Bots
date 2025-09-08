@@ -31,7 +31,6 @@ interface ChatSession {
     _id: string;
     name: string;
     email: string;
-    deploymentId: string;
   };
   agent: {
     _id: string;

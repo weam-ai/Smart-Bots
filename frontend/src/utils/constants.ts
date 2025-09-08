@@ -3,10 +3,12 @@
  * Centralized configuration and constants
  */
 
+import { NEXT_PUBLIC_API_URL, API_TIMEOUT } from '@/config/env';
+
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
-  TIMEOUT: 30000, // 30 seconds
+  BASE_URL: NEXT_PUBLIC_API_URL,
+  TIMEOUT: API_TIMEOUT,
   WITH_CREDENTIALS: true,
 } as const
 
@@ -95,8 +97,11 @@ export const ERROR_MESSAGES = {
 // File Upload Constants
 export const FILE_UPLOAD = {
   MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
+  MAX_FILE_SIZE_MB: 5,
+  MAX_FILE_SIZE_BYTES: 5242880, // 5MB in bytes
   MAX_TOTAL_SIZE: 50 * 1024 * 1024, // 50MB
   MAX_FILES: 10,
+  ALLOWED_FILE_TYPES: ['pdf', 'doc', 'docx', 'txt'],
   ACCEPTED_TYPES: {
     'application/pdf': ['.pdf'],
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
@@ -113,6 +118,12 @@ export const CHAT = {
   MAX_MESSAGE_LENGTH: 4000,
   TYPING_INDICATOR_DELAY: 1500,
   AUTO_SCROLL_THRESHOLD: 100,
+} as const
+
+// AI Model Configuration
+export const AI_MODEL = {
+  DEFAULT_MODEL: 'gpt-3.5-turbo',
+  DEFAULT_MAX_TOKENS: 1000,
 } as const
 
 // Agent Constants
@@ -134,6 +145,26 @@ export const AGENT = {
     TRAINING: 'training',
     ERROR: 'error',
   } as const,
+} as const
+
+// File Processing Configuration
+export const FILE_PROCESSING = {
+  DELAY: 5000, // 5 seconds
+  BATCH_JOB_DELAY: 5000, // 5 seconds
+  DEFAULT_CHUNK_SIZE: 1000,
+  DEFAULT_CHUNK_OVERLAP: 200,
+} as const
+
+// Database Configuration
+export const DATABASE = {
+  MONGODB_SERVER_SELECTION_TIMEOUT: 5000, // 5 seconds
+  MONGODB_SOCKET_TIMEOUT: 45000, // 45 seconds
+} as const
+
+// UI/UX Configuration
+export const UI_UX = {
+  TOAST_DURATION_SHORT: 3000, // 3 seconds
+  TOAST_DURATION_LONG: 5000, // 5 seconds
 } as const
 
 // Pagination

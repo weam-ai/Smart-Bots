@@ -8,12 +8,9 @@ const {
   validateAgentUpdate,
   validateObjectId,
   validateAgentId,
-  validateDeploymentId,
   validateCreateDeployment,
   validateUpdateDeployment,
   validatePagination,
-  optionalAuth,
-  verifyAgentOwnership,
   agentCreationLimiter,
   generalLimiter
 } = require('../middleware');
@@ -75,27 +72,25 @@ router.get('/:agentId/deployments',
   deploymentController.getDeployments
 );
 
-// GET /api/agents/:agentId/deployments/:deploymentId - Get specific deployment
-router.get('/:agentId/deployments/:deploymentId',
+// GET /api/agents/:agentId/deployments/:_id - Get specific deployment
+router.get('/:agentId/deployments/:_id',
   validateAgentId,
-  validateDeploymentId,
+
   jwtAuthMiddleware,
   deploymentController.getDeployment
 );
 
-// PUT /api/agents/:agentId/deployments/:deploymentId - Update deployment
-router.put('/:agentId/deployments/:deploymentId',
+// PUT /api/agents/:agentId/deployments/:_id - Update deployment
+router.put('/:agentId/deployments/:_id',
   validateAgentId,
-  validateDeploymentId,
   validateUpdateDeployment,
   jwtAuthMiddleware,
   deploymentController.updateDeployment
 );
 
-// DELETE /api/agents/:agentId/deployments/:deploymentId - Delete deployment
-router.delete('/:agentId/deployments/:deploymentId',
+// DELETE /api/agents/:agentId/deployments/:_id - Delete deployment
+router.delete('/:agentId/deployments/:_id',
   validateAgentId,
-  validateDeploymentId,
   jwtAuthMiddleware,
   deploymentController.deleteDeployment
 );

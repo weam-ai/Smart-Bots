@@ -2,7 +2,6 @@
 const {
   Agent,
   File,
-  FileChunk,
   ChatSession,
   ChatMessage,
   ApiUsage,
@@ -13,7 +12,6 @@ const {
 module.exports = {
   Agent,
   File,
-  FileChunk,
   ChatSession,
   ChatMessage,
   ApiUsage,

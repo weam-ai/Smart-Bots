@@ -35,7 +35,7 @@ const getChatHistoriesByAgent = asyncHandler(async (req, res) => {
 
     // Get chat sessions with visitor data
     const sessions = await ChatSession.find(query)
-      .populate('visitor', 'name email deploymentId')
+      .populate('visitor', 'name email _id')
       .populate('agent', 'name description')
       .sort({ startedAt: -1 })
       .limit(limit * 1)
@@ -169,7 +169,7 @@ const getChatSessionDetails = asyncHandler(async (req, res) => {
   try {
     // Get session with visitor and agent data
     const session = await ChatSession.findById(sessionId)
-      .populate('visitor', 'name email deploymentId websiteUrl')
+      .populate('visitor', 'name email _id websiteUrl')
       .populate('agent', 'name description')
       .lean();
 
@@ -315,7 +315,7 @@ const exportChatData = asyncHandler(async (req, res) => {
 
     // Get sessions with visitor and agent data
     const sessions = await ChatSession.find(query)
-      .populate('visitor', 'name email deploymentId websiteUrl')
+      .populate('visitor', 'name email _id websiteUrl')
       .populate('agent', 'name description')
       .sort({ startedAt: -1 })
       .lean();

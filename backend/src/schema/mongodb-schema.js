@@ -17,8 +17,7 @@ const agentSchema = new mongoose.Schema({
     required: function() {
       // Required for new records, optional for existing records
       return this.isNew;
-    },
-    index: true
+    }
   },
   createdBy: {
     type: String,
@@ -98,8 +97,7 @@ const fileSchema = new mongoose.Schema({
     required: function() {
       // Required for new records, optional for existing records
       return this.isNew;
-    },
-    index: true
+    }
   },
   createdBy: {
     type: String,
@@ -270,8 +268,7 @@ const chatSessionSchema = new mongoose.Schema({
     required: function() {
       // Required for new records, optional for existing records
       return this.isNew;
-    },
-    index: true
+    }
   },
   createdBy: {
     type: String,
@@ -288,10 +285,6 @@ const chatSessionSchema = new mongoose.Schema({
   visitor: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Visitor',
-    required: false // Optional for backward compatibility
-  },
-  deploymentId: {
-    type: String,
     required: false // Optional for backward compatibility
   },
   sessionName: String,
@@ -327,8 +320,7 @@ const chatMessageSchema = new mongoose.Schema({
     required: function() {
       // Required for new records, optional for existing records
       return this.isNew;
-    },
-    index: true
+    }
   },
   createdBy: {
     type: String,
@@ -392,8 +384,7 @@ const apiUsageSchema = new mongoose.Schema({
     required: function() {
       // Required for new records, optional for existing records
       return this.isNew;
-    },
-    index: true
+    }
   },
   createdBy: {
     type: String,
@@ -441,8 +432,7 @@ const visitorSchema = new mongoose.Schema({
     required: function() {
       // Required for new records, optional for existing records
       return this.isNew;
-    },
-    index: true
+    }
   },
   createdBy: {
     type: String,
@@ -455,11 +445,6 @@ const visitorSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true
-  },
-  deploymentId: {
-    type: String,
-    required: true,
-    index: true
   },
   agentId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -494,20 +479,13 @@ const visitorSchema = new mongoose.Schema({
 
 // Script Tag Deployment Schema
 const scriptTagSchema = new mongoose.Schema({
-  deploymentId: {
-    type: String,
-    required: true,
-    unique: true,
-    index: true
-  },
   // Multi-tenant fields
   companyId: {
     type: String,
     required: function() {
       // Required for new records, optional for existing records
       return this.isNew;
-    },
-    index: true
+    }
   },
   createdBy: {
     type: String,
@@ -618,20 +596,20 @@ scriptTagSchema.index({ version: 1 });
 scriptTagSchema.index({ companyId: 1 });
 scriptTagSchema.index({ createdBy: 1 });
 
-visitorSchema.index({ email: 1, deploymentId: 1 });
+visitorSchema.index({ email: 1, _id: 1 });
 visitorSchema.index({ agentId: 1 });
 visitorSchema.index({ isActive: 1 });
 visitorSchema.index({ companyId: 1 });
 visitorSchema.index({ createdBy: 1 });
 
-// Create models
-const Agent = mongoose.model('Agent', agentSchema);
-const File = mongoose.model('File', fileSchema);
-const ChatSession = mongoose.model('ChatSession', chatSessionSchema);
-const ChatMessage = mongoose.model('ChatMessage', chatMessageSchema);
-const ApiUsage = mongoose.model('ApiUsage', apiUsageSchema);
-const ScriptTag = mongoose.model('ScriptTag', scriptTagSchema);
-const Visitor = mongoose.model('Visitor', visitorSchema);
+// Create models with solution_chatbot prefix
+const Agent = mongoose.model('Agent', agentSchema, 'solution_chatbot_agents');
+const File = mongoose.model('File', fileSchema, 'solution_chatbot_files');
+const ChatSession = mongoose.model('ChatSession', chatSessionSchema, 'solution_chatbot_chat_sessions');
+const ChatMessage = mongoose.model('ChatMessage', chatMessageSchema, 'solution_chatbot_chat_messages');
+const ApiUsage = mongoose.model('ApiUsage', apiUsageSchema, 'solution_chatbot_api_usage');
+const ScriptTag = mongoose.model('ScriptTag', scriptTagSchema, 'solution_chatbot_script_tags');
+const Visitor = mongoose.model('Visitor', visitorSchema, 'solution_chatbot_visitors');
 
 module.exports = {
   Agent,

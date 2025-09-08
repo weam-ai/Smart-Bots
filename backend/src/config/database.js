@@ -1,15 +1,27 @@
 const mongoose = require('mongoose');
+const { DB_CONNECTION, DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT, DB_DATABASE, MONGODB_SERVER_SELECTION_TIMEOUT, MONGODB_SOCKET_TIMEOUT } = require('./env');
 
 // Database connection configuration
 const connectDB = async () => {
   try {
-    const mongoURI = process.env.MONGO_URL || 'mongodb://admin:password@mongodb:27017/chatbot?authSource=admin';
+    const dbConfigure = `${DB_USERNAME}:${DB_PASSWORD}`;
     
+    // Build MongoDB URI based on connection type
+    let mongoURI;
+    if (DB_CONNECTION === 'mongodb+srv') {
+      // MongoDB Atlas - no port number allowed
+      mongoURI = `${DB_CONNECTION}://${dbConfigure}@${DB_HOST}/${DB_DATABASE}?retryWrites=true&w=majority&readPreference=nearest`;
+    } else {
+      // Local MongoDB - include port number
+      mongoURI = `${DB_CONNECTION}://${dbConfigure}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}?retryWrites=true&w=majority&readPreference=nearest`;
+    }
+    
+    console.log("🚀 ~ connectDB ~ mongoURI:", mongoURI)
     const conn = await mongoose.connect(mongoURI, {
       // Modern connection options
       maxPoolSize: 10, // Maintain up to 10 socket connections
-      serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
-      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+      serverSelectionTimeoutMS: MONGODB_SERVER_SELECTION_TIMEOUT, // Keep trying to send operations for 5 seconds
+      socketTimeoutMS: MONGODB_SOCKET_TIMEOUT, // Close sockets after 45 seconds of inactivity
     });
 
     console.log(`MongoDB Connected: ${conn.connection.host}`);

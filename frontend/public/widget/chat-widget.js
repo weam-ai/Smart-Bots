@@ -786,7 +786,7 @@
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          deploymentId: widgetState.config.deploymentId,
+          _id: widgetState.config._id,
           name: name,
           email: email,
           websiteUrl: widgetState.websiteUrl
@@ -891,7 +891,7 @@
    */
   async function sendMessageToBackend(message) {
     // First, get the agent ID from the deployment
-    const deploymentResponse = await fetch(`${CONFIG.API_BASE_URL}/deployments/${widgetState.config.deploymentId}/embed`);
+    const deploymentResponse = await fetch(`${CONFIG.API_BASE_URL}/deployments/${widgetState.config._id}/embed`);
     
     if (!deploymentResponse.ok) {
       throw new Error(`Failed to get deployment info: ${deploymentResponse.status}`);
@@ -910,7 +910,7 @@
         message: message,
         sessionId: widgetState.currentSessionId,
         visitorId: widgetState.visitor?.id || null,
-        deploymentId: widgetState.config.deploymentId
+        _id: widgetState.config._id
       })
     });
     
@@ -1051,10 +1051,10 @@
    * Track analytics
    */
   function trackAnalytics(event, data = {}) {
-    if (!widgetState.config.deploymentId) return;
+    if (!widgetState.config._id) return;
     
     try {
-      fetch(`${CONFIG.API_BASE_URL}/deployments/${widgetState.config.deploymentId}/analytics`, {
+      fetch(`${CONFIG.API_BASE_URL}/deployments/${widgetState.config._id}/analytics`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
