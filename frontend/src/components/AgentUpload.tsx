@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { AgentData } from "@/app/ai-chatbot/[agentId]/page";
 import { useCompleteUpload } from "@/hooks/useUpload";
+import { InlineLoader } from "@/components/ui/Loader";
 
 interface AgentUploadProps {
   agentData: AgentData;
@@ -345,10 +346,12 @@ export default function AgentUpload({
             {uploadedFiles.length > 0 && (
               <div className="flex items-center gap-4">
                 {isUploading && (
-                  <div className="flex items-center gap-2 text-blue-600">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="text-sm">Uploading files...</span>
-                  </div>
+                  <InlineLoader 
+                    variant="dots" 
+                    size="sm" 
+                    text="Uploading files..." 
+                    className="text-blue-600"
+                  />
                 )}
 
                 {allCompleted && allSuccessful && (

@@ -13,6 +13,7 @@ import {
   ArrowRight
 } from 'lucide-react'
 import { AgentData } from '@/app/ai-chatbot/[agentId]/page'
+import { InlineLoader } from '@/components/ui/Loader'
 
 interface TrainingStep {
   id: string
@@ -143,7 +144,7 @@ export default function AgentTraining({ agentData, onTrainingComplete, onBack }:
     if (step.status === 'completed') {
       return <CheckCircle className="h-6 w-6 text-green-500" />
     } else if (step.status === 'processing') {
-      return <Loader2 className="h-6 w-6 text-primary-600 animate-spin" />
+      return <InlineLoader variant="spinner" size="md" className="text-primary-600" />
     } else {
       const icons = [FileText, Zap, Brain, Database, MessageSquare]
       const Icon = icons[index] || FileText

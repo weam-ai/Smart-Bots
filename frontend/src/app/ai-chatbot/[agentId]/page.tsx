@@ -7,6 +7,7 @@ import { httpGet } from '@/services/axios'
 import { Agent } from '@/types/agent'
 import AgentUpload from '@/components/AgentUpload'
 import AgentTraining from '@/components/AgentTraining'
+import { PageLoader } from '@/components/ui/Loader'
 
 export type AgentStep = 'upload' | 'training' | 'playground'
 
@@ -349,18 +350,11 @@ export default function AgentPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading agent...</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="mt-4 text-sm text-primary-600 hover:text-primary-700 underline"
-          >
-            Refresh if stuck
-          </button>
-        </div>
-      </div>
+      <PageLoader 
+        text="Loading agent details..." 
+        showRefresh={true}
+        onRefresh={() => window.location.reload()}
+      />
     )
   }
 

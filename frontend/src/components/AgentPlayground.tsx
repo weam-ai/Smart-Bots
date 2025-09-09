@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { InlineLoader } from '@/components/ui/Loader'
 import { AgentData, AgentFile } from '@/app/ai-chatbot/[agentId]/page'
 import { useChat } from '@/hooks/useChat'
 import toast from 'react-hot-toast'
@@ -312,10 +313,12 @@ export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: Ag
                     <Bot className="h-4 w-4 text-primary-600" />
                   </div>
                   <div className="bg-gray-100 px-4 py-2 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin text-gray-600" />
-                      <span className="text-sm text-gray-600">Thinking...</span>
-                    </div>
+                    <InlineLoader 
+                      variant="wave" 
+                      size="sm" 
+                      text="Thinking..." 
+                      className="text-gray-600"
+                    />
                   </div>
                 </div>
               )}
