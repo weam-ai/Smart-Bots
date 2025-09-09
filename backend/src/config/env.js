@@ -29,6 +29,7 @@ console.log('🔍 DB_CONNECTION:', process.env.DB_CONNECTION);
 
 // Environment Configuration Object
 const envConfig = {
+  BACKEND_API_PREFIX: process.env.BACKEND_API_PREFIX,
   // OpenAI Configuration
   OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
   
@@ -118,6 +119,7 @@ const envConfig = {
 // Validation function
 const validateEnvConfig = () => {
   const requiredFields = [
+    'BACKEND_API_PREFIX',
     'OPENAI_API_KEY',
     'JWT_SECRET',
     'IRON_SESSION_PASSWORD',
@@ -134,7 +136,7 @@ const validateEnvConfig = () => {
 module.exports = {
   envConfig,
   validateEnvConfig,
-  
+  BACKEND_API_PREFIX: envConfig.BACKEND_API_PREFIX,
   // Individual exports for easier access
   OPENAI_API_KEY: envConfig.OPENAI_API_KEY,
   JWT_SECRET: envConfig.JWT_SECRET,

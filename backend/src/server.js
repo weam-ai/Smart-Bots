@@ -5,7 +5,7 @@ const morgan = require('morgan');
 const mongoose = require('mongoose');
 const connectDB = require('./config/database');
 require('dotenv').config();
-const { PORT, NODE_ENV } = require('./config/env');
+const { PORT, NODE_ENV, BACKEND_API_PREFIX } = require('./config/env');
 const app = express();
 
 
@@ -60,14 +60,14 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Routes
-app.use('/api/agents', require('./routes/agents'));
-app.use('/api/chat', require('./routes/chat'));
-app.use('/api/search', require('./routes/search'));
+app.use(`${BACKEND_API_PREFIX}/agents`, require('./routes/agents'));
+app.use(`${BACKEND_API_PREFIX}/chat`, require('./routes/chat'));
+app.use(`${BACKEND_API_PREFIX}/search`, require('./routes/search'));
 // app.use('/api/files', require('./routes/files')); // TODO: Create files route
-app.use('/api/upload', require('./routes/upload'));
-app.use('/api/deployments', require('./routes/deployment'));
-app.use('/api/visitors', require('./routes/visitor'));
-app.use('/api/chat-history', require('./routes/chatHistory'));
+app.use(`${BACKEND_API_PREFIX}/upload`, require('./routes/upload'));
+app.use(`${BACKEND_API_PREFIX}/deployments`, require('./routes/deployment'));
+app.use(`${BACKEND_API_PREFIX}/visitors`, require('./routes/visitor'));
+app.use(`${BACKEND_API_PREFIX}/chat-history`, require('./routes/chatHistory'));
 
 // Add error handling middleware imports
 const { 
@@ -118,19 +118,8 @@ app.options('*', (req, res) => {
   res.sendStatus(200);
 });
 
-// Health check
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'OK', 
-    timestamp: new Date().toISOString(),
-    service: 'AI Chatbot Generator API',
-    version: '1.0.0',
-    database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'
-  });
-});
-
 // API Health check
-app.get('/api/health', (req, res) => {
+app.get(`${BACKEND_API_PREFIX}/health`, (req, res) => {
   res.json({
     success: true,
     data: {
