@@ -14,7 +14,7 @@ import {
   ArrowLeft,
   ArrowRight,
 } from "lucide-react";
-import { AgentData } from "@/app/ai-chatbot/[agentId]/page";
+import { AgentData } from "@/app/[agentId]/page";
 import { useCompleteUpload } from "@/hooks/useUpload";
 import { InlineLoader } from "@/components/ui/Loader";
 

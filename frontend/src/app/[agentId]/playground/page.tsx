@@ -54,7 +54,7 @@ export default function PlaygroundPage() {
         setLoading(true);
         
         // Fetch real agent data
-        const agentResponse = await httpGet<Agent | {agent: Agent}>(`/api/agents/${agentId}`);
+        const agentResponse = await httpGet<Agent | {agent: Agent}>(`/agents/${agentId}`);
         const agent = (agentResponse as any).agent || agentResponse;
         
         if (!agent) {
@@ -64,7 +64,7 @@ export default function PlaygroundPage() {
         // Fetch agent files
         let files: AgentFile[] = [];
         try {
-          const filesResponse = await httpGet<{files: AgentFile[], pagination: any}>(`/api/upload/${agentId}/files`);
+          const filesResponse = await httpGet<{files: AgentFile[], pagination: any}>(`/upload/${agentId}/files`);
           files = filesResponse.files || [];
         } catch (fileError) {
           console.error('Error fetching files:', fileError);

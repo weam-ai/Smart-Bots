@@ -61,11 +61,11 @@ export default function AgentPage() {
           break
         case 3:
           // Navigate to playground page for step 3
-          router.push(`/ai-chatbot/${agentId}/playground?step=3`)
+          router.push(`/${agentId}/playground?step=3`)
           break
         case 4:
           // Navigate to deploy page for step 4
-          router.push(`/ai-chatbot/${agentId}/deploy?step=4`)
+          router.push(`/${agentId}/deploy?step=4`)
           break
         default:
           setCurrentStep('upload')
@@ -124,7 +124,7 @@ export default function AgentPage() {
 
         // Fetch real agent data
         console.log('🔍 Fetching agent data for ID:', agentId)
-        const agentResponse = await httpGet<Agent | {agent: Agent}>(`/api/agents/${agentId}`)
+        const agentResponse = await httpGet<Agent | {agent: Agent}>(`/agents/${agentId}`)
         console.log('📊 Agent response:', agentResponse)
         
         // Handle both direct agent response and wrapped response
@@ -146,7 +146,7 @@ export default function AgentPage() {
         let files: AgentFile[] = []
         try {
           console.log('📁 Fetching files for agent:', agentId)
-          const filesResponse = await httpGet<{files: AgentFile[], pagination: any}>(`/api/upload/${agentId}/files`)
+          const filesResponse = await httpGet<{files: AgentFile[], pagination: any}>(`/upload/${agentId}/files`)
           console.log('📊 Files response:', filesResponse)
           console.log('📊 Files response.files:', filesResponse.files)
           console.log('📊 Files response.pagination:', filesResponse.pagination)
@@ -313,7 +313,7 @@ export default function AgentPage() {
     // After files are uploaded, go to training step
     setCurrentStep('training')
     // Update URL to show step=2
-    router.push(`/ai-chatbot/${agentId}?step=2`)
+    router.push(`/${agentId}?step=2`)
     toast.success(`${files.length} file${files.length !== 1 ? 's' : ''} uploaded successfully!`)
   }
 
@@ -325,7 +325,7 @@ export default function AgentPage() {
     }))
     toast.success('🎉 Training completed! Your agent is ready to deploy.')
     // Navigate to playground page with step=3
-    router.push(`/ai-chatbot/${agentId}/playground?step=3`)
+    router.push(`/${agentId}/playground?step=3`)
   }
 
   const handleBackToUpload = () => {
@@ -338,14 +338,14 @@ export default function AgentPage() {
   }
 
   const handleBackToAgents = () => {
-    router.push('/ai-chatbot?step=1')
+    router.push('/?step=1')
   }
 
   const handleStartTraining = () => {
     console.log('🚀 Starting training process')
     setCurrentStep('training')
     // Update URL to show step=2
-    router.push(`/ai-chatbot/${agentId}?step=2`)
+    router.push(`/${agentId}?step=2`)
   }
 
   if (loading) {

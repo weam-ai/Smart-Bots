@@ -114,7 +114,7 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
   // Fetch agent data
   const fetchAgentData = async () => {
     try {
-      const response = await httpGet<{ name: string }>(`/api/agents/${agentId}`);
+      const response = await httpGet<{ name: string }>(`/agents/${agentId}`);
       setAgentData(response);
     } catch (err) {
       console.error('Error fetching agent data:', err);
@@ -140,7 +140,7 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
           total: number;
           pages: number;
         };
-      }>(`/api/chat-history/agent/${agentId}?${params}`);
+      }>(`/chat-history/agent/${agentId}?${params}`);
 
       setSessions(response.sessions);
       setTotalPages(response.pagination.pages);
@@ -160,7 +160,7 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
       const response = await httpGet<{
         session: ChatSession;
         messages: ChatMessage[];
-      }>(`/api/chat-history/session/${sessionId}`);
+      }>(`/chat-history/session/${sessionId}`);
 
       setSessionMessages(prev => ({ ...prev, [sessionId]: response.messages }));
     } catch (err) {

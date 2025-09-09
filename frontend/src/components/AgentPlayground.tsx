@@ -19,7 +19,7 @@ import {
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { InlineLoader } from '@/components/ui/Loader'
-import { AgentData, AgentFile } from '@/app/ai-chatbot/[agentId]/page'
+import { AgentData, AgentFile } from '@/app/[agentId]/page'
 import { useChat } from '@/hooks/useChat'
 import toast from 'react-hot-toast'
 
@@ -83,7 +83,7 @@ export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: Ag
   const handleDeploy = () => {
     // Save agent first, then navigate to deploy page
     onAgentUpdate(localAgentData)
-    router.push(`/ai-chatbot/${agentData.id}/deploy?step=4`)
+    router.push(`/${agentData.id}/deploy?step=4`)
   }
 
   const formatFileSize = (bytes: number) => {

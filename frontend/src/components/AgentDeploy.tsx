@@ -72,7 +72,7 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
   const fetchDeployments = async () => {
     try {
       setLoading(true)
-      const response = await httpGet<Deployment[]>(`/api/agents/${agentId}/deployments`)
+      const response = await httpGet<Deployment[]>(`/agents/${agentId}/deployments`)
       
       // Handle both array response and object with data property
       const deployments = Array.isArray(response) ? response : (response as any).data || []
@@ -147,7 +147,7 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
     console.log('✅ Form validation passed, sending data:', backendData)
 
     try {
-      const response = await httpPost<{data: Deployment}>(`/api/agents/${agentId}/deployments`, backendData)
+      const response = await httpPost<{data: Deployment}>(`/agents/${agentId}/deployments`, backendData)
       
       // Handle both direct response and response with data property
       const newDeployment = response.data || response
@@ -179,7 +179,7 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
     }
 
     try {
-      const response = await httpPut<{data: Deployment}>(`/api/agents/${agentId}/deployments/${editingDeployment._id}`, backendData)
+      const response = await httpPut<{data: Deployment}>(`/agents/${agentId}/deployments/${editingDeployment._id}`, backendData)
       
       // Handle both direct response and response with data property
       const updatedDeployment = response.data || response
@@ -198,7 +198,7 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
     if (!confirm('Are you sure you want to delete this deployment?')) return
 
     try {
-      await httpDelete(`/api/agents/${agentId}/deployments/${_id}`)
+      await httpDelete(`/agents/${agentId}/deployments/${_id}`)
       setDeployments(prev => prev.filter(d => d._id !== _id))
       toast.success('Deployment deleted successfully!')
     } catch (error: any) {
@@ -209,7 +209,7 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
 
   const handleCopyEmbedCode = async (_id: string) => {
     try {
-      const response = await httpGet<{embedCode: string}>(`/api/deployments/${_id}/embed`)
+      const response = await httpGet<{embedCode: string}>(`/deployments/${_id}/embed`)
       await navigator.clipboard.writeText(response.embedCode)
       toast.success('Embed code copied to clipboard!')
     } catch (error: any) {
@@ -220,7 +220,7 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
 
   const handleViewEmbedCode = async (_id: string) => {
     try {
-      const response = await httpGet<{embedCode: string}>(`/api/deployments/${_id}/embed`)
+      const response = await httpGet<{embedCode: string}>(`/deployments/${_id}/embed`)
       setShowEmbedCode(response.embedCode)
     } catch (error: any) {
       console.error('Error fetching embed code:', error)

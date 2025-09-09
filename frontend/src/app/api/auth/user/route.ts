@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getUserContext } from '@/lib/session';
 
+// Add this export to force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     console.log('🔍 Getting user context from Iron Session...');

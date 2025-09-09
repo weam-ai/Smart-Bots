@@ -12,7 +12,7 @@ import {
   MessageSquare,
   ArrowRight
 } from 'lucide-react'
-import { AgentData } from '@/app/ai-chatbot/[agentId]/page'
+import { AgentData } from '@/app/[agentId]/page'
 import { InlineLoader } from '@/components/ui/Loader'
 
 interface TrainingStep {

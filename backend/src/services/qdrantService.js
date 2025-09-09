@@ -13,7 +13,7 @@ let qdrantClient;
 
 const initializeQdrant = () => {
   if (!qdrantClient) {
-    const qdrantUrl = QDRANT_URL || 'http://localhost:6333';
+    const qdrantUrl = QDRANT_URL;
     const qdrantApiKey = QDRANT_API_KEY;
     
     qdrantClient = new QdrantClient({

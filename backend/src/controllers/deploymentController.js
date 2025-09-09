@@ -5,7 +5,6 @@
 
 const { ScriptTag } = require('../models');
 const { asyncHandler, createServiceError } = require('../utils/errorHelpers');
-const { v4: uuidv4 } = require('uuid');
 const mongoose = require('mongoose');
 const { FRONTEND_URL } = require('../config/env');
 

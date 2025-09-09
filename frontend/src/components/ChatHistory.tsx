@@ -148,7 +148,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ agentId }) => {
           total: number;
           pages: number;
         };
-      }>(`/api/chat-history/agent/${agentId}?${params}`);
+      }>(`/chat-history/agent/${agentId}?${params}`);
 
       setSessions(response.sessions);
       setTotalPages(response.pagination.pages);
@@ -168,7 +168,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ agentId }) => {
       const response = await httpGet<{
         session: ChatSession;
         messages: ChatMessage[];
-      }>(`/api/chat-history/session/${sessionId}`);
+      }>(`/chat-history/session/${sessionId}`);
 
       setSessionMessages(prev => ({ ...prev, [sessionId]: response.messages }));
     } catch (err) {
@@ -187,7 +187,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ agentId }) => {
         ...(statusFilter !== 'all' && { status: statusFilter })
       });
 
-      const response = await fetch(`/api/chat-history/agent/${agentId}/export?${params}`);
+      const response = await fetch(`/chat-history/agent/${agentId}/export?${params}`);
       
       if (!response.ok) {
         throw new Error('Export failed');
