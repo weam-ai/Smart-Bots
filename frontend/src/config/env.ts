@@ -31,45 +31,48 @@ if (!envLoaded) {
 // Environment Configuration Interface
 interface EnvConfig {
   // Iron Session Configuration
-  IRON_SESSION_COOKIE_NAME: string;
-  IRON_SESSION_PASSWORD: string;
+  NEXT_PUBLIC_IRON_SESSION_COOKIE_NAME: string;
+  NEXT_PUBLIC_IRON_SESSION_PASSWORD: string;
   // API Configuration
-  API_TIMEOUT: number;
-  JWT_EXPIRATION_HOURS: number;
-  API_RETRY_DELAY: number;
+  NEXT_PUBLIC_API_TIMEOUT?: number;
+  NEXT_PUBLIC_JWT_EXPIRATION_HOURS?: number;
+  NEXT_PUBLIC_API_RETRY_DELAY?: number;
 
-  BACKEND_API_URL: string;
-  NODE_ENV: string;
+  NEXT_PUBLIC_BACKEND_API_URL: string;
+  NEXT_PUBLIC_BACKEND_API_PREFIX: string;
+  NEXT_PUBLIC_NODE_ENV: string;
+  NEXT_PUBLIC_API_PREFIX: string;
 }
 
 // Environment Configuration with defaults and validation
 export const envConfig: EnvConfig = {
   // Iron Session Configuration
-  IRON_SESSION_COOKIE_NAME: process.env.NEXT_PUBLIC_IRON_SESSION_COOKIE_NAME || process.env.IRON_SESSION_COOKIE_NAME || 'weam',
-  IRON_SESSION_PASSWORD: process.env.NEXT_PUBLIC_IRON_SESSION_PASSWORD || process.env.IRON_SESSION_PASSWORD || '',
+  NEXT_PUBLIC_IRON_SESSION_COOKIE_NAME: process.env.NEXT_PUBLIC_IRON_SESSION_COOKIE_NAME || process.env.IRON_SESSION_COOKIE_NAME || 'weam',
+  NEXT_PUBLIC_IRON_SESSION_PASSWORD: process.env.NEXT_PUBLIC_IRON_SESSION_PASSWORD || process.env.IRON_SESSION_PASSWORD || '',
   
   // API Configuration
-  API_TIMEOUT: parseInt(process.env.API_TIMEOUT || '30000', 10),
-  JWT_EXPIRATION_HOURS: parseInt(process.env.JWT_EXPIRATION_HOURS || '24', 10),
-  API_RETRY_DELAY: parseInt(process.env.API_RETRY_DELAY || '1000', 10),
+  NEXT_PUBLIC_API_TIMEOUT: process.env.NEXT_PUBLIC_API_TIMEOUT ? parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT, 10) : undefined,
+  NEXT_PUBLIC_JWT_EXPIRATION_HOURS: process.env.NEXT_PUBLIC_JWT_EXPIRATION_HOURS ? parseInt(process.env.NEXT_PUBLIC_JWT_EXPIRATION_HOURS, 10) : undefined,
+  NEXT_PUBLIC_API_RETRY_DELAY: process.env.NEXT_PUBLIC_API_RETRY_DELAY ? parseInt(process.env.NEXT_PUBLIC_API_RETRY_DELAY, 10) : undefined  ,
   
-  BACKEND_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
-
-  NODE_ENV: process.env.NODE_ENV || 'development',
+  NEXT_PUBLIC_BACKEND_API_URL: process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:5000',
+  NEXT_PUBLIC_BACKEND_API_PREFIX: process.env.NEXT_PUBLIC_BACKEND_API_PREFIX || '/ai-chatbot-api',
+  NEXT_PUBLIC_NODE_ENV: process.env.NEXT_PUBLIC_NODE_ENV || 'development',
+  NEXT_PUBLIC_API_PREFIX: process.env.NEXT_PUBLIC_API_PREFIX || '/ai-chatbot',
 };
 
 // Validation function
 export const validateEnvConfig = (): void => {
   const requiredFields: (keyof EnvConfig)[] = [
-    'IRON_SESSION_COOKIE_NAME',
-    'IRON_SESSION_PASSWORD',
-    'BACKEND_API_URL',
-
-    'API_TIMEOUT',
-    'JWT_EXPIRATION_HOURS',
-    'API_RETRY_DELAY',
-    'BACKEND_API_URL',
-    'NODE_ENV',
+    'NEXT_PUBLIC_IRON_SESSION_COOKIE_NAME',
+    'NEXT_PUBLIC_IRON_SESSION_PASSWORD',
+    'NEXT_PUBLIC_API_TIMEOUT',
+    'NEXT_PUBLIC_JWT_EXPIRATION_HOURS',
+    'NEXT_PUBLIC_API_RETRY_DELAY',
+    'NEXT_PUBLIC_BACKEND_API_URL',
+    'NEXT_PUBLIC_BACKEND_API_PREFIX',
+    'NEXT_PUBLIC_NODE_ENV',
+    'NEXT_PUBLIC_API_PREFIX',
   ];
 
   const missingFields = requiredFields.filter(field => !envConfig[field]);
@@ -81,11 +84,13 @@ export const validateEnvConfig = (): void => {
 
 // Export individual configurations for easier access
 export const {
-  IRON_SESSION_COOKIE_NAME,
-  IRON_SESSION_PASSWORD,
-  API_TIMEOUT,
-  JWT_EXPIRATION_HOURS,
-  API_RETRY_DELAY,
-  BACKEND_API_URL,
-  NODE_ENV,
+  NEXT_PUBLIC_IRON_SESSION_COOKIE_NAME,
+  NEXT_PUBLIC_IRON_SESSION_PASSWORD,
+  NEXT_PUBLIC_API_TIMEOUT,
+  NEXT_PUBLIC_JWT_EXPIRATION_HOURS,
+  NEXT_PUBLIC_API_RETRY_DELAY,
+  NEXT_PUBLIC_BACKEND_API_URL,
+  NEXT_PUBLIC_BACKEND_API_PREFIX,
+  NEXT_PUBLIC_NODE_ENV,
+  NEXT_PUBLIC_API_PREFIX,
 } = envConfig;

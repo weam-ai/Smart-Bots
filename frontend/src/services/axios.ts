@@ -8,14 +8,14 @@ import toast from 'react-hot-toast'
 import { API_CONFIG, HTTP_STATUS, ERROR_MESSAGES, HEADERS, STORAGE_KEYS } from '@/utils/constants'
 import { getAuthHeaders } from '@/utils/auth'
 import type { ApiResponse } from '@/types/api'
-import { NODE_ENV } from '@/config/env'
+import { NEXT_PUBLIC_BACKEND_API_PREFIX, NEXT_PUBLIC_NODE_ENV } from '@/config/env'
 
 // Authentication state
 let authToken: string | null = null
 
 // Create axios instance
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: API_CONFIG.BASE_URL,
+  baseURL: API_CONFIG.BASE_URL+NEXT_PUBLIC_BACKEND_API_PREFIX,
   timeout: API_CONFIG.TIMEOUT,
   withCredentials: API_CONFIG.WITH_CREDENTIALS,
 })
@@ -115,7 +115,7 @@ const handleRequest = async (config: InternalAxiosRequestConfig): Promise<Intern
     config.headers[HEADERS.X_REQUEST_ID] = generateRequestId()
 
     // Log request in development
-    if (NODE_ENV === 'development') {
+    if (NEXT_PUBLIC_NODE_ENV === 'development') {
       console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`, {
         headers: config.headers,
         data: config.data,
@@ -151,7 +151,7 @@ const handleRequestError = (error: any): Promise<never> => {
  */
 const handleResponse = (response: AxiosResponse): AxiosResponse => {
   // Log successful response in development
-  if (NODE_ENV === 'development') {
+  if (NEXT_PUBLIC_NODE_ENV === 'development') {
     console.log(`✅ API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`, {
       status: response.status,
       data: response.data,

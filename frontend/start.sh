@@ -2,10 +2,10 @@
 
 if [ "$NODE_ENV" = "development" ]; then
   echo "🚀 Starting in development mode..."
-  pnpm run dev
+  pnpm run dev -p 3001
 else
   echo "🏗️ Building for production..."
   pnpm run build
   echo "🚀 Starting production server..."
-  pnpm run start
+  pnpm run start -p 3001
 fi

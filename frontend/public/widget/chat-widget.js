@@ -40,6 +40,33 @@
   let elements = {};
 
   /**
+   * Load configuration dynamically from API
+   */
+  async function loadConfig() {
+    try {
+      console.log('🔧 Loading widget configuration...');
+      
+      // Try to get the base URL for the API call
+      const baseUrl = window.location.origin;
+      // Extract basePath from current URL or use default
+      const currentPath = window.location.pathname;
+      const basePath = currentPath.includes('/ai-chatbot') ? '/ai-chatbot' : '';
+      const response = await fetch(`${baseUrl}${basePath}/api/widget/config`);
+      
+      if (response.ok) {
+        const dynamicConfig = await response.json();
+        CONFIG = { ...CONFIG, ...dynamicConfig };
+        console.log('✅ Widget configuration loaded:', CONFIG);
+      } else {
+        console.warn('⚠️ Failed to load widget config, using defaults');
+      }
+    } catch (error) {
+      console.warn('⚠️ Error loading widget config:', error);
+      // Continue with default configuration
+    }
+  }
+
+  /**
    * Generate a unique session ID
    */
   function generateSessionId() {
@@ -49,8 +76,11 @@
   /**
    * Initialize the widget
    */
-  function init(config) {
+  async function init(config) {
     console.log('🤖 AI Chatbot Widget initializing...', config);
+    
+    // Load dynamic configuration first
+    await loadConfig();
     
     if (widgetState.isInitialized) {
       console.warn('Widget already initialized');
@@ -1102,7 +1132,9 @@
 
   // Auto-initialize if config is provided in global scope
   if (window.aiChatbotConfig) {
-    init(window.aiChatbotConfig);
+    init(window.aiChatbotConfig).catch(error => {
+      console.error('❌ Failed to initialize widget:', error);
+    });
   }
 
 })();

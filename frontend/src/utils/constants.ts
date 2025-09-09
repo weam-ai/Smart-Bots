@@ -3,14 +3,15 @@
  * Centralized configuration and constants
  */
 
-import { BACKEND_API_URL, API_TIMEOUT } from '@/config/env';
+import { NEXT_PUBLIC_BACKEND_API_URL, NEXT_PUBLIC_API_TIMEOUT } from '@/config/env';
 
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: BACKEND_API_URL,
-  TIMEOUT: API_TIMEOUT,
+  BASE_URL: NEXT_PUBLIC_BACKEND_API_URL,
+  TIMEOUT: NEXT_PUBLIC_API_TIMEOUT,
   WITH_CREDENTIALS: true,
 } as const
+console.log("🚀 ~ API_CONFIG:", API_CONFIG)
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -24,32 +25,32 @@ export const API_ENDPOINTS = {
   
   // Agents
   AGENTS: {
-    BASE: '/api/agents',
-    BY_ID: (id: string) => `/api/agents/${id}`,
+    BASE: '/agents',
+    BY_ID: (id: string) => `/agents/${id}`,
   },
   
   // File Upload
   UPLOAD: {
-    BY_AGENT: (agentId: string) => `/api/upload/${agentId}`,
+    BY_AGENT: (agentId: string) => `/upload/${agentId}`,
   },
   
   // Chat
   CHAT: {
-    BY_AGENT: (agentId: string) => `/api/chat/${agentId}/message`,
-    SESSIONS: (agentId: string) => `/api/chat/${agentId}/sessions`,
+    BY_AGENT: (agentId: string) => `/chat/${agentId}/message`,
+    SESSIONS: (agentId: string) => `/chat/${agentId}/sessions`,
     SESSION_MESSAGES: (agentId: string, sessionId: string) => 
-      `/api/chat/${agentId}/sessions/${sessionId}/messages`,
+      `/chat/${agentId}/sessions/${sessionId}/messages`,
   },
   
   // Search
   SEARCH: {
-    BY_AGENT: (agentId: string) => `/api/search/${agentId}`,
-    STATS: (agentId: string) => `/api/search/${agentId}/stats`,
-    TEST: (agentId: string) => `/api/search/${agentId}/test`,
+    BY_AGENT: (agentId: string) => `/search/${agentId}`,
+    STATS: (agentId: string) => `/search/${agentId}/stats`,
+    TEST: (agentId: string) => `/search/${agentId}/test`,
   },
   
   // Health
-  HEALTH: '/api/health',
+  HEALTH: '/health',
 } as const
 
 // HTTP Status Codes

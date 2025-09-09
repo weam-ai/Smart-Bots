@@ -108,7 +108,6 @@ const envConfig = {
   MONGO_EXPRESS_PASSWORD: process.env.MONGO_EXPRESS_PASSWORD || 'admin',
   
   // Widget Configuration
-  WIDGET_API_URL: process.env.WIDGET_API_URL || 'http://localhost:5000/api',
   WIDGET_SCRIPT_URL: process.env.WIDGET_SCRIPT_URL || 'http://localhost:3001/widget/chat-widget.js',
   
   // Environment Settings

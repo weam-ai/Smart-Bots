@@ -1,17 +1,3 @@
-// Auth utility for JWT token generation and user context
-import { getIronSession } from 'iron-session';
-import { IRON_SESSION_COOKIE_NAME, IRON_SESSION_PASSWORD, NODE_ENV } from '@/config/env';
-
-// Iron Session configuration (matching your main app)
-const ironOptions = {
-  cookieName: IRON_SESSION_COOKIE_NAME,
-  password: IRON_SESSION_PASSWORD,
-  cookieOptions: {
-    httpOnly: true,
-    secure: NODE_ENV === 'production',
-  },
-};
-
 // User context interface
 export interface UserContext {
   userId: string;
@@ -28,7 +14,7 @@ export const getUserContext = async (): Promise<UserContext | null> => {
     console.log('🔍 Getting user context from Iron Session API...');
     
     // Call the API route to get user context
-    const response = await fetch('/api/auth/user', {
+    const response = await fetch('/ai-chatbot/api/auth/user', {
       method: 'GET',
       credentials: 'include', // Include cookies
     });

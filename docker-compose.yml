@@ -4,6 +4,11 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_BACKEND_API_URL=${NEXT_PUBLIC_BACKEND_API_URL}
+        - NEXT_PUBLIC_BACKEND_API_PREFIX=${NEXT_PUBLIC_BACKEND_API_PREFIX}
+        - NEXT_PUBLIC_API_PREFIX=${NEXT_PUBLIC_API_PREFIX}
+        - NEXT_PUBLIC_DOMAIN_URL=${NEXT_PUBLIC_DOMAIN_URL}
     ports:
       - "3001:3001"
     env_file:
