@@ -6,9 +6,9 @@ const dotenv = require('dotenv');
 const path = require('path');
 
 // Load environment variables from .env file
-const envPath = path.join(process.cwd(), '../.env');
+const envPath = path.join(process.cwd(), '.env');
 console.log("🚀 ~ envPath from backend:", envPath)
-const result = dotenv.config({ path: envPath });
+const result = dotenv.config();
 
 if (result.error) {
   console.log(`⚠️ Failed to load .env from: ${envPath}`);
