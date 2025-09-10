@@ -15,7 +15,7 @@ let authToken: string | null = null
 
 // Create axios instance
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: API_CONFIG.BASE_URL+NEXT_PUBLIC_BACKEND_API_PREFIX,
+  baseURL: API_CONFIG.BASE_URL,
   timeout: API_CONFIG.TIMEOUT,
   withCredentials: API_CONFIG.WITH_CREDENTIALS,
 })
