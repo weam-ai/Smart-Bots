@@ -2,19 +2,24 @@
  * Environment Configuration
  * Centralized configuration using dotenv
  */
-// import path from 'path';
+import dotenv from 'dotenv';
 
-// // Load environment variables from .env file
-// const envPath = path.join(process.cwd(), '.env');
-// console.log("🚀 ~ envPath from frontend:", envPath)
-// const result = require('dotenv').config();
+// Load environment variables from .env file
+// Try multiple possible paths for .env file
+const possiblePaths = [
+  '/usr/src/app/.env',               // Docker container root (mounted .env file)
 
-// if (result.error) {
-//   console.log(`⚠️ Failed to load .env from: ${envPath}`);
-//   console.log('Using environment variables from Docker/system environment');
-// } else {
-//   console.log(`✅ .env file loaded from: ${envPath}`);
-// }
+];
+
+let envLoaded = false;
+for (const envPath of possiblePaths) {
+  const result = dotenv.config({ path: envPath });
+  if (!result.error) {
+    console.log(`✅ .env file loaded from: ${envPath}`);
+    envLoaded = true;
+    break;
+  }
+}
 
 // Environment Configuration Interface
 interface EnvConfig {
