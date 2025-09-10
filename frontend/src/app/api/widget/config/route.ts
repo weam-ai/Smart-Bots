@@ -11,7 +11,7 @@ export async function GET() {
     const backendUrl =  envConfig.NEXT_PUBLIC_BACKEND_API_URL
     
     const config = {
-      API_BASE_URL: `${backendUrl}${envConfig.NEXT_PUBLIC_BACKEND_API_PREFIX}`,
+      API_BASE_URL: `${backendUrl}`,
       WIDGET_VERSION: '1.0.0',
       // Add any other dynamic configuration here
       NODE_ENV: envConfig.NEXT_PUBLIC_NODE_ENV,

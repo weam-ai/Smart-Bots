@@ -90,9 +90,9 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-8">
           <div className="card text-center">
-            <div className="text-3xl font-bold text-primary-600 mb-2">
+            <div className="text-3xl font-bold text-blue-600 mb-2">
               {isLoadingAgents ? (
                 <Loader2 className="h-8 w-8 animate-spin mx-auto" />
               ) : (
@@ -101,7 +101,7 @@ export default function Home() {
             </div>
             <div className="text-sm text-gray-600">Company Agents</div>
           </div>
-          <div className="card text-center">
+          {/* <div className="card text-center">
             <div className="text-3xl font-bold text-green-600 mb-2">
               {isLoadingAgents ? (
                 <Loader2 className="h-8 w-8 animate-spin mx-auto" />
@@ -120,7 +120,7 @@ export default function Home() {
               )}
             </div>
             <div className="text-sm text-gray-600">Total Messages</div>
-          </div>
+          </div> */}
         </div>
 
         {/* Agents Grid */}
@@ -161,7 +161,7 @@ export default function Home() {
 
           {/* Agents List */}
           {!isLoadingAgents && !agentsError && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
               {(agents?.length || 0) === 0 ? (
                 <div className="col-span-full card text-center py-8">
                   <Bot className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -177,7 +177,7 @@ export default function Home() {
                   {/* Create New Agent Card - First in grid */}
                   <div className="card-hover border-2 border-dashed border-gray-300 hover:border-primary-400 transition-colors cursor-pointer">
                     <div 
-                      className="flex flex-col items-center justify-center text-center py-8"
+                      className="flex flex-col items-center justify-center text-center py-1"
                       onClick={handleCreateNewAgent}
                     >
                       <div className="h-12 w-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
@@ -231,14 +231,14 @@ export default function Home() {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-1">
+                          {/* <div className="flex items-center gap-1">
                             <FileText className="h-4 w-4 text-gray-400" />
                             <span className="text-gray-600">0 files</span>
-                          </div>
-                          <div className="flex items-center gap-1">
+                          </div> */}
+                          {/* <div className="flex items-center gap-1">
                             <Users className="h-4 w-4 text-gray-400" />
                             <span className="text-gray-600">{agent.metadata?.totalSessions || 0} sessions</span>
-                          </div>
+                          </div> */}
                         </div>
                       </div>
 

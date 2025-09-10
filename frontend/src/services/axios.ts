@@ -8,14 +8,14 @@ import toast from 'react-hot-toast'
 import { API_CONFIG, HTTP_STATUS, ERROR_MESSAGES, HEADERS, STORAGE_KEYS } from '@/utils/constants'
 import { getAuthHeaders } from '@/utils/auth'
 import type { ApiResponse } from '@/types/api'
-import { NEXT_PUBLIC_BACKEND_API_PREFIX, NEXT_PUBLIC_NODE_ENV } from '@/config/env'
+import {  NEXT_PUBLIC_NODE_ENV } from '@/config/env'
 
 // Authentication state
 let authToken: string | null = null
 
 // Create axios instance
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: API_CONFIG.BASE_URL+NEXT_PUBLIC_BACKEND_API_PREFIX,
+  baseURL: API_CONFIG.BASE_URL,
   timeout: API_CONFIG.TIMEOUT,
   withCredentials: API_CONFIG.WITH_CREDENTIALS,
 })

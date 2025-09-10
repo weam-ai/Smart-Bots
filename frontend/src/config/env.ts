@@ -39,7 +39,6 @@ interface EnvConfig {
   NEXT_PUBLIC_API_RETRY_DELAY?: number;
 
   NEXT_PUBLIC_BACKEND_API_URL: string;
-  NEXT_PUBLIC_BACKEND_API_PREFIX: string;
   NEXT_PUBLIC_NODE_ENV: string;
   NEXT_PUBLIC_API_PREFIX: string;
 }
@@ -56,7 +55,6 @@ export const envConfig: EnvConfig = {
   NEXT_PUBLIC_API_RETRY_DELAY: process.env.NEXT_PUBLIC_API_RETRY_DELAY ? parseInt(process.env.NEXT_PUBLIC_API_RETRY_DELAY, 10) : undefined  ,
   
   NEXT_PUBLIC_BACKEND_API_URL: process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:5000',
-  NEXT_PUBLIC_BACKEND_API_PREFIX: process.env.NEXT_PUBLIC_BACKEND_API_PREFIX || '/ai-chatbot-api',
   NEXT_PUBLIC_NODE_ENV: process.env.NEXT_PUBLIC_NODE_ENV || 'development',
   NEXT_PUBLIC_API_PREFIX: process.env.NEXT_PUBLIC_API_PREFIX || '/ai-chatbot',
 };
@@ -70,7 +68,6 @@ export const validateEnvConfig = (): void => {
     'NEXT_PUBLIC_JWT_EXPIRATION_HOURS',
     'NEXT_PUBLIC_API_RETRY_DELAY',
     'NEXT_PUBLIC_BACKEND_API_URL',
-    'NEXT_PUBLIC_BACKEND_API_PREFIX',
     'NEXT_PUBLIC_NODE_ENV',
     'NEXT_PUBLIC_API_PREFIX',
   ];
@@ -90,7 +87,6 @@ export const {
   NEXT_PUBLIC_JWT_EXPIRATION_HOURS,
   NEXT_PUBLIC_API_RETRY_DELAY,
   NEXT_PUBLIC_BACKEND_API_URL,
-  NEXT_PUBLIC_BACKEND_API_PREFIX,
   NEXT_PUBLIC_NODE_ENV,
   NEXT_PUBLIC_API_PREFIX,
 } = envConfig;
