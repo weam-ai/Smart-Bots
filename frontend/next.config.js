@@ -2,6 +2,12 @@
 const nextConfig = {
   basePath: process.env.NEXT_PUBLIC_API_PREFIX || '/ai-chatbot',
   assetPrefix: process.env.NEXT_PUBLIC_API_BASE_URL || '/ai-chatbot',
+  output: 'standalone',
+  trailingSlash: true,
+  // Disable static optimization to prevent usePathname context errors
+  experimental: {
+    esmExternals: false,
+  },
   // env: {
   //   NEXT_PUBLIC_DOMAIN_URL: process.env.NEXT_PUBLIC_DOMAIN_URL || 'http://localhost:3001',
   // },

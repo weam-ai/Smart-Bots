@@ -3,11 +3,10 @@
  * Centralized configuration and constants
  */
 
-import { NEXT_PUBLIC_BACKEND_API_URL } from '@/config/env';
 
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: NEXT_PUBLIC_BACKEND_API_URL,
+  BASE_URL: 'https://dev.weam.ai/ai-chatbot-api',
   TIMEOUT: 30000,
   WITH_CREDENTIALS: true,
 } as const
