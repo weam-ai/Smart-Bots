@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 // Load environment variables from .env file
 // Try multiple possible paths for .env file
 const possiblePaths = [
-  '/usr/src/app/.env',               // Docker container root (mounted .env file)
+  '/app/.env',               // Docker container root (mounted .env file)
 
 ];
 
