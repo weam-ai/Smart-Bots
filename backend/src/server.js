@@ -32,7 +32,8 @@ app.use(cors({
       'http://frontend:3000',
       'http://127.0.0.1:3000',
       'http://127.0.0.1:3001',
-      'http://127.0.0.1:3002'
+      'http://127.0.0.1:3002',
+      'https://dev.weam.ai'
     ];
     
     if (allowedOrigins.includes(origin)) {
@@ -103,7 +104,8 @@ app.options('*', (req, res) => {
       'http://localhost:3001', 
       'http://frontend:3000',
       'http://127.0.0.1:3000',
-      'http://127.0.0.1:3001'
+      'http://127.0.0.1:3001',
+      'https://dev.weam.ai'
     ];
     
     if (!origin || allowedOrigins.includes(origin)) {
