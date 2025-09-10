@@ -8,7 +8,7 @@ export async function GET() {
   try {
     console.log('🔧 Generating widget configuration...');
     
-    const backendUrl =  envConfig.NEXT_PUBLIC_BACKEND_API_URL || 'https://dev.weam.ai/ai-chatbot-api'
+    const backendUrl = 'https://dev.weam.ai/ai-chatbot-api'
     console.log("🚀 ~ GET ~ backendUrl:", backendUrl)
     
     const config = {

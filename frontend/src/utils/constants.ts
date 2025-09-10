@@ -3,12 +3,12 @@
  * Centralized configuration and constants
  */
 
-import { NEXT_PUBLIC_BACKEND_API_URL, NEXT_PUBLIC_API_TIMEOUT } from '@/config/env';
+import { NEXT_PUBLIC_BACKEND_API_URL } from '@/config/env';
 
 // API Configuration
 export const API_CONFIG = {
   BASE_URL: NEXT_PUBLIC_BACKEND_API_URL,
-  TIMEOUT: NEXT_PUBLIC_API_TIMEOUT,
+  TIMEOUT: 30000,
   WITH_CREDENTIALS: true,
 } as const
 console.log("🚀 ~ API_CONFIG:", API_CONFIG)
