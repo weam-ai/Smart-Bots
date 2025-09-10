@@ -8,6 +8,9 @@ import { useAgentOperations } from '@/hooks/useAgents'
 import CreateAgentModal from '@/components/CreateAgentModal'
 import type { Agent, CreateAgentPayload } from '@/types/agent'
 
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic'
+
 export default function Home() {
   const router = useRouter()
   const searchParams = useSearchParams()

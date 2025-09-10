@@ -6,6 +6,9 @@ import { httpGet } from '@/services/axios';
 import { Agent } from '@/types/agent';
 import AgentPlayground from '@/components/AgentPlayground';
 
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+
 export interface AgentFile {
   _id: string
   originalFilename: string

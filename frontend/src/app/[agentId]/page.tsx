@@ -9,6 +9,9 @@ import AgentUpload from '@/components/AgentUpload'
 import AgentTraining from '@/components/AgentTraining'
 import { PageLoader } from '@/components/ui/Loader'
 
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic'
+
 export type AgentStep = 'upload' | 'training' | 'playground'
 
 export interface AgentFile {
