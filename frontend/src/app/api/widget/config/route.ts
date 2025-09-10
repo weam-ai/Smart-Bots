@@ -8,7 +8,8 @@ export async function GET() {
   try {
     console.log('🔧 Generating widget configuration...');
     
-    const backendUrl =  envConfig.NEXT_PUBLIC_BACKEND_API_URL
+    const backendUrl =  envConfig.NEXT_PUBLIC_BACKEND_API_URL || 'https://dev.weam.ai/ai-chatbot-api'
+    console.log("🚀 ~ GET ~ backendUrl:", backendUrl)
     
     const config = {
       API_BASE_URL: `${backendUrl}`,
@@ -26,7 +27,7 @@ export async function GET() {
       { 
         error: 'Failed to generate widget configuration',
         fallback: {
-          API_BASE_URL: 'http://localhost:5000/ai-chatbot-api',
+          API_BASE_URL: 'https://dev.weam.ai/ai-chatbot-api',
           WIDGET_VERSION: '1.0.0'
         }
       },
