@@ -2,7 +2,7 @@
  * Environment Configuration
  * Centralized configuration using dotenv
  */
-const dotenv = require('dotenv').config();
+const dotenv = require('dotenv');
 
 // Load environment variables from .env file
 // Try multiple possible paths for .env file
@@ -23,6 +23,9 @@ for (const envPath of possiblePaths) {
 console.log('🔍 DB_HOST:', process.env.DB_HOST);
 console.log('🔍 DB_CONNECTION:', process.env.DB_CONNECTION);
 
+if (!envLoaded) {
+  console.log('⚠️ No .env file found, using environment variables from Docker back');
+}
 // Environment Configuration Object
 const envConfig = {
   BACKEND_API_PREFIX: process.env.BACKEND_API_PREFIX,

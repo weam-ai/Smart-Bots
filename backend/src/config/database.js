@@ -16,7 +16,6 @@ const connectDB = async () => {
       mongoURI = `${DB_CONNECTION}://${dbConfigure}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}?retryWrites=true&w=majority&readPreference=nearest`;
     }
     
-    console.log("🚀 ~ connectDB ~ mongoURI:", mongoURI)
     const conn = await mongoose.connect(mongoURI, {
       // Modern connection options
       maxPoolSize: 10, // Maintain up to 10 socket connections
