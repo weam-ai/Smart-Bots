@@ -83,10 +83,10 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
 
   // Navigation step definitions with query strings
   const navigationSteps = {
-    1: `/ai-chatbot?step=1`, // Main agent page
-    2: `/ai-chatbot/${agentId}?step=2`, // Agent detail page
-    3: `/ai-chatbot/${agentId}/playground?step=3`, // Playground page
-    4: `/ai-chatbot/${agentId}/deploy?step=4`, // Deploy page with chat history
+    1: `/${agentId}?step=1`, // Main agent page
+    2: `/${agentId}?step=2`, // Agent detail page
+    3: `/${agentId}/playground?step=3`, // Playground page
+    4: `/${agentId}/deploy?step=4`, // Deploy page with chat history
   };
 
   // Handle back navigation
