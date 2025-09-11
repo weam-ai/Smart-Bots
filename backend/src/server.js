@@ -13,36 +13,7 @@ const app = express();
 app.use(helmet());
 // app.use(compression()); // Temporarily disabled
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    // Allow all localhost ports (for development convenience)
-    if (origin.startsWith('http://localhost:') || 
-        origin.startsWith('http://127.0.0.1:') ||
-        origin.startsWith('http://frontend:')) {
-      return callback(null, true);
-    }
-    
-    // Production origins
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://localhost:3002', 
-      'http://frontend:3000',
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:3001',
-      'http://127.0.0.1:3002',
-      'https://dev.weam.ai'
-    ];
-    
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log(`🚫 CORS blocked origin: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: '*',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: [
