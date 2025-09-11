@@ -5,7 +5,7 @@
 
 const agentService = require('../services/agentService')
 const openaiService = require('../services/openaiService')
-const qdrantService = require('../services/qdrantService')
+const pineconeService = require('../services/pineconeService')
 const { ChatSession, ChatMessage, Visitor } = require('../models')
 const { v4: uuidv4 } = require('uuid')
 
@@ -76,14 +76,13 @@ const sendMessage = async (req, res) => {
 
     // 3. Search similar chunks
     console.log('🔍 Searching for similar chunks...')
-    const searchResult = await qdrantService.searchSimilar(
+    const searchResult = await pineconeService.searchSimilar(
+      companyId,
       agentId,
       queryEmbedding,
       {
         limit: 5,
-        threshold: 0.3,
-        companyId: agentId, // Using agentId as companyId for now
-        userId: 'chat-user' // Default user for chat
+        threshold: 0.3
       }
     )
 

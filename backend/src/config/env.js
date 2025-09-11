@@ -43,9 +43,8 @@ const envConfig = {
   DB_USERNAME: process.env.DB_USERNAME,
   DB_PASSWORD: process.env.DB_PASSWORD,
   
-  // Vector Database
-  QDRANT_URL: process.env.QDRANT_URL,
-  QDRANT_API_KEY: process.env.QDRANT_API_KEY,
+  // Vector Database (Pinecone)
+  PINECONE_API_KEY: process.env.PINECONE_API_KEY,
   
   // Redis Configuration
   REDIS_URL: process.env.REDIS_URL,
@@ -91,7 +90,6 @@ const envConfig = {
   PORT: parseInt(process.env.PORT || '5000', 10),
   
   // Service Ports
-  QDRANT_PORT: parseInt(process.env.QDRANT_PORT || '6333', 10),
   MINIO_API_PORT: parseInt(process.env.MINIO_API_PORT || '9000', 10),
   MINIO_CONSOLE_PORT: parseInt(process.env.MINIO_CONSOLE_PORT || '9001', 10),
   
@@ -146,8 +144,7 @@ module.exports = {
   DB_PORT: envConfig.DB_PORT,
   DB_USERNAME: envConfig.DB_USERNAME,
   DB_PASSWORD: envConfig.DB_PASSWORD,
-  QDRANT_URL: envConfig.QDRANT_URL,
-  QDRANT_API_KEY: envConfig.QDRANT_API_KEY,
+  PINECONE_API_KEY: envConfig.PINECONE_API_KEY,
   REDIS_URL: envConfig.REDIS_URL,
   REDIS_HOST: envConfig.REDIS_HOST,
   REDIS_PORT: envConfig.REDIS_PORT,
@@ -164,7 +161,6 @@ module.exports = {
   CORS_ORIGIN_PROD: envConfig.CORS_ORIGIN_PROD,
   FRONTEND_URL: envConfig.FRONTEND_URL,
   FRONTEND_PORT: envConfig.FRONTEND_PORT,
-  QDRANT_PORT: envConfig.QDRANT_PORT,
   MINIO_API_PORT: envConfig.MINIO_API_PORT,
   MINIO_CONSOLE_PORT: envConfig.MINIO_CONSOLE_PORT,
   USE_MINIO: envConfig.USE_MINIO,

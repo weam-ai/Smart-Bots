@@ -172,12 +172,13 @@ const processFileParallel = async (stream, filename, mimetype, agentId, getConte
     if (processingResult.embeddings && processingResult.chunks) {
       try {
         console.log(`📦 Storing embeddings in Qdrant for file ${fileDoc._id}`);
-        const qdrantService = require('./qdrantService');
+        const pineconeService = require('./pineconeService');
         
-        // Get context (form fields) when needed for Qdrant storage
+        // Get context (form fields) when needed for Pinecone storage
         const context = getContext();
         
-        const qdrantResult = await qdrantService.storeEmbeddings(
+        const pineconeResult = await pineconeService.storeEmbeddings(
+          context.companyId,
           agentId,
           fileDoc._id,
           processingResult.chunks,
@@ -185,10 +186,10 @@ const processFileParallel = async (stream, filename, mimetype, agentId, getConte
           context
         );
         
-        // Update file document with Qdrant information
-        fileDoc.metadata.qdrant = {
-          pointsCount: qdrantResult.pointsStored,
-          collectionName: qdrantResult.collectionName,
+        // Update file document with Pinecone information
+        fileDoc.metadata.pinecone = {
+          vectorsCount: pineconeResult.vectorsStored,
+          indexName: pineconeResult.indexName,
           indexedAt: new Date()
         };
         fileDoc.metadata.processing = {
@@ -362,13 +363,13 @@ const prepareForAIProcessing = async (buffer, mimetype, filename) => {
     
     console.log(`✅ Text chunking completed: ${chunkingResult.totalChunks} chunks`);
     
-    // Step 3: Generate embeddings and store in Qdrant
+    // Step 3: Generate embeddings and store in Pinecone
     console.log(`🤖 Starting OpenAI embeddings generation for ${filename}`);
     const openaiService = require('./openaiService');
-    const qdrantService = require('./qdrantService');
+    const pineconeService = require('./pineconeService');
     
     let embeddings = null;
-    let qdrantResult = null;
+    let pineconeResult = null;
     
     try {
       // Generate embeddings for chunks
@@ -382,7 +383,7 @@ const prepareForAIProcessing = async (buffer, mimetype, filename) => {
       embeddings = embeddingResult;
       console.log(`✅ Generated ${embeddingResult.totalEmbeddings} embeddings (${embeddingResult.totalTokens} tokens)`);
       
-      // Store embeddings in Qdrant (will be called after file doc is created)
+      // Store embeddings in Pinecone (will be called after file doc is created)
       // For now, we'll return the embeddings to be stored later
       
     } catch (embeddingError) {

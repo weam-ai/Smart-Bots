@@ -15,7 +15,7 @@ const {
 const documentParser = require('../services/documentParser');
 const textChunkingService = require('../services/textChunkingService');
 const openaiService = require('../services/openaiService');
-const qdrantService = require('../services/qdrantService');
+const pineconeService = require('../services/pineconeService');
 const s3Service = require('../services/s3Service');
 const documentQueueService = require('../services/documentQueueService');
 const { File } = require('../models');
@@ -211,17 +211,18 @@ const processEmbeddingGeneration = async (job) => {
 };
 
 /**
- * Process Qdrant storage job
+ * Process Pinecone storage job
  */
-const processQdrantStorage = async (job) => {
+const processPineconeStorage = async (job) => {
   const { fileId, agentId, chunks, embeddings, userId, companyId } = job.data;
   
   try {
     await job.updateProgress(10);
-    console.log(`📦 Starting Qdrant storage for file ${fileId}`);
+    console.log(`📦 Starting Pinecone storage for file ${fileId}`);
     
-    // Store embeddings in Qdrant
-    const storageResult = await qdrantService.storeEmbeddings(
+    // Store embeddings in Pinecone
+    const storageResult = await pineconeService.storeEmbeddings(
+      companyId,
       agentId,
       fileId,
       chunks,
@@ -231,12 +232,12 @@ const processQdrantStorage = async (job) => {
     
     await job.updateProgress(80);
     
-    // Update file document with Qdrant results
+    // Update file document with Pinecone results
     await File.findByIdAndUpdate(fileId, {
-      'processing.qdrant.status': 'completed',
-      'processing.qdrant.collectionName': storageResult.collectionName,
-      'processing.qdrant.pointsStored': storageResult.pointsStored,
-      'processing.qdrant.completedAt': new Date(),
+      'processing.pinecone.status': 'completed',
+      'processing.pinecone.indexName': storageResult.indexName,
+      'processing.pinecone.vectorsStored': storageResult.vectorsStored,
+      'processing.pinecone.completedAt': new Date(),
       
       // Mark overall processing as complete
       'processing.status': 'completed',
@@ -327,7 +328,7 @@ const processJob = async (job) => {
         break;
         
       case JOB_TYPES.STORE_EMBEDDINGS:
-        result = await processQdrantStorage(job);
+        result = await processPineconeStorage(job);
         break;
         
       default:

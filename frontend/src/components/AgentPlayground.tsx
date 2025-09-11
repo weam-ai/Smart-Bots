@@ -258,7 +258,7 @@ export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: Ag
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900">{localAgentData.name}</h3>
-                  <p className="text-xs text-gray-500">Powered by JAY</p>
+                  <p className="text-xs text-gray-500">Powered by Weam</p>
                 </div>
               </div>
               <button
@@ -348,7 +348,7 @@ export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: Ag
                 </button>
               </div>
               <p className="text-xs text-gray-500 mt-2 text-center">
-                🙋‍♀️ Hi! I am JAY AI, ask me anything about JAY!
+                🙋‍♀️ Hi! I am Weam AI, ask me anything about Weam!
               </p>
             </div>
           </div>

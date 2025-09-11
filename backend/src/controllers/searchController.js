@@ -1,5 +1,6 @@
 const openaiService = require('../services/openaiService');
-const qdrantService = require('../services/qdrantService');
+const pineconeService = require('../services/pineconeService');
+const agentService = require('../services/agentService');
 const { asyncHandler, createValidationError } = require('../utils/errorHelpers');
 
 /**
@@ -38,6 +39,21 @@ const searchDocuments = async (reqOrParams, res = null, returnRaw = false) => {
 
   console.log(`🔍 Search request for agent ${agentId}: "${query.substring(0, 100)}..."`);
 
+  // If companyId is not provided, fetch it from agent data
+  if (!companyId) {
+    try {
+      const agent = await agentService.getAgentById(agentId);
+      if (!agent) {
+        throw new Error('Agent not found');
+      }
+      companyId = agent.companyId;
+      console.log(`📋 Retrieved companyId from agent: ${companyId}`);
+    } catch (error) {
+      console.error('❌ Failed to fetch agent data:', error);
+      throw createValidationError('Agent not found or invalid');
+    }
+  }
+
   try {
     // Step 1: Generate embedding for the search query
     console.log(`🤖 Generating embedding for query...`);
@@ -53,8 +69,9 @@ const searchDocuments = async (reqOrParams, res = null, returnRaw = false) => {
       threshold: threshold || 0.7
     };
 
-    console.log(`📦 Searching Qdrant with options:`, searchOptions);
-    const searchResults = await qdrantService.searchSimilar(
+    console.log(`📦 Searching Pinecone with options:`, searchOptions);
+    const searchResults = await pineconeService.searchSimilar(
+      companyId,
       agentId,
       queryEmbedding.embeddings[0].embedding,
       searchOptions
@@ -209,8 +226,9 @@ const testSearch = asyncHandler(async (req, res) => {
         // Generate embedding for test query
         const queryEmbedding = await openaiService.generateEmbeddings([query]);
         
-        // Search Qdrant
-        const searchResults = await qdrantService.searchSimilar(
+        // Search Pinecone
+        const searchResults = await pineconeService.searchSimilar(
+          companyId,
           agentId,
           queryEmbedding.embeddings[0].embedding,
           { limit: 3, threshold: 0.5 }

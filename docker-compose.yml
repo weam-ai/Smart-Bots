@@ -43,7 +43,6 @@ services:
     depends_on:
       - minio
       - mongodb
-      - qdrant
       - redis
     networks:
       - app-network
@@ -79,15 +78,6 @@ services:
     networks:
       - app-network
 
-  qdrant:
-    image: qdrant/qdrant:latest
-    container_name: ai-chatbot-qdrant
-    ports:
-      - "6334:6333"
-    volumes:
-      - qdrant_data:/qdrant/storage
-    networks:
-      - app-network
 
   redis:
     image: redis:7-alpine
@@ -128,7 +118,6 @@ services:
 
 volumes:
   mongo_data:
-  qdrant_data:
   redis_data:
   minio_data:
 
