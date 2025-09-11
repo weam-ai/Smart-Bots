@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# ai-chatbot
-=======
 # AI Chatbot Generator
 
 Create and deploy intelligent AI chatbots from your documents using RAG (Retrieval Augmented Generation) technology.
@@ -217,5 +214,4 @@ For issues and questions:
 
 ---
 
-Built with ❤️ using Next.js, Node.js, and OpenAI
->>>>>>> 273f7355a5ec6da64f79bcc72cc8eea4b622a7e6
+Built with ❤️ using WEAM
