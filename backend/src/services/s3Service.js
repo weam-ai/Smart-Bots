@@ -20,6 +20,7 @@ const createS3Client = () => {
       secretAccessKey: AWS_SECRET_ACCESS_KEY || 'minioadmin'
     }
   };
+  console.log("🚀 ~ createS3Client ~ config:", config)
 
   // MinIO configuration for development
   if (isMinIO) {
@@ -81,7 +82,7 @@ const initializeBucket = async () => {
 const generateS3Key = (agentId, filename, fileHash) => {
   const timestamp = Date.now();
   const sanitizedFilename = filename.replace(/[^a-zA-Z0-9.-]/g, '_');
-  return `agents/${agentId}/files/${timestamp}_${fileHash.substring(0, 8)}_${sanitizedFilename}`;
+  return `ai-chatbot-files/${agentId}_${timestamp}_${fileHash.substring(0, 8)}_${sanitizedFilename}`;
 };
 
 /**
