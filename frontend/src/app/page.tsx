@@ -22,7 +22,6 @@ export default function Home() {
     isCreating,
     refetch,
   } = useAgentOperations()
-    console.log("🚀 ~ Home ~ agents:", agents)
 
   // Ensure URL shows step=1 for main page
   useEffect(() => {
