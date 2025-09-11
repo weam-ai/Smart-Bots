@@ -188,7 +188,7 @@ const processFileForQueue = async (buffer, mimetype, filename, agentId, context)
     
     // Step 3: Upload to S3
     console.log(`☁️  Uploading ${filename} to S3...`);
-    const s3Key = `uploads/${agentId}/${Date.now()}-${filename}`;
+    const s3Key = `ai-chatbot-files/${Date.now()}-${filename}`;
     const s3Result = await s3Service.uploadBuffer(buffer, s3Key, correctedMimeType);
     
     console.log(`✅ S3 upload successful: ${s3Result.s3Url}`);

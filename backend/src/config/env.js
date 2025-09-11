@@ -70,8 +70,8 @@ const envConfig = {
   RATE_LIMIT_VISITOR_PROD: parseInt(process.env.RATE_LIMIT_VISITOR_PROD || '20', 10),
   
   // AWS S3 Configuration
-  AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID || 'minioadmin',
-  AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || 'minioadmin',
+  AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID || '',
+  AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || '',
   AWS_S3_BUCKET_NAME: process.env.AWS_S3_BUCKET_NAME,
   AWS_S3_REGION: process.env.AWS_S3_REGION || 'us-east-1',
   
@@ -95,9 +95,9 @@ const envConfig = {
   
   // Development Settings (MinIO for S3)
   USE_MINIO: process.env.USE_MINIO === 'true',
-  MINIO_ENDPOINT: process.env.USE_MINIO === 'true' ? 'http://minio:9000' : (process.env.MINIO_ENDPOINT || 'http://localhost:9000'),
-  MINIO_ROOT_USER: process.env.MINIO_ROOT_USER || 'minioadmin',
-  MINIO_ROOT_PASSWORD: process.env.MINIO_ROOT_PASSWORD || 'minioadmin',
+  MINIO_ENDPOINT: process.env.USE_MINIO === 'true' ? 'http://minio:9000' : '',
+  MINIO_ROOT_USER: process.env.MINIO_ROOT_USER || '',
+  MINIO_ROOT_PASSWORD: process.env.MINIO_ROOT_PASSWORD || '',
   
   // MongoDB Express (Development)
   MONGO_EXPRESS_PORT: parseInt(process.env.MONGO_EXPRESS_PORT || '8081', 10),

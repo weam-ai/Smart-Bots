@@ -16,8 +16,8 @@ const createS3Client = () => {
   const config = {
     region: AWS_S3_REGION || 'us-east-1',
     credentials: {
-      accessKeyId: AWS_ACCESS_KEY_ID || 'minioadmin',
-      secretAccessKey: AWS_SECRET_ACCESS_KEY || 'minioadmin'
+      accessKeyId: AWS_ACCESS_KEY_ID || '',
+      secretAccessKey: AWS_SECRET_ACCESS_KEY || ''
     }
   };
   console.log("🚀 ~ createS3Client ~ config:", config)
@@ -37,7 +37,7 @@ const createS3Client = () => {
 };
 
 let s3Client = null;
-const BUCKET_NAME = AWS_S3_BUCKET_NAME || 'ai-chatbot-files';
+const BUCKET_NAME = AWS_S3_BUCKET_NAME || 'weam-dev-01-frontend-media';
 
 // Lazy initialization of S3 client
 const getS3Client = () => {
@@ -82,7 +82,7 @@ const initializeBucket = async () => {
 const generateS3Key = (agentId, filename, fileHash) => {
   const timestamp = Date.now();
   const sanitizedFilename = filename.replace(/[^a-zA-Z0-9.-]/g, '_');
-  return `ai-chatbot-files/${agentId}_${timestamp}_${fileHash.substring(0, 8)}_${sanitizedFilename}`;
+  return `ai-chatbot-files/${timestamp}_${fileHash.substring(0, 8)}_${sanitizedFilename}`;
 };
 
 /**
