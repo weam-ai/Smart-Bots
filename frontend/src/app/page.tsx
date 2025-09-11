@@ -90,8 +90,8 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="card text-center">
+        <div className="grid grid-cols-1 gap-6 mb-8">
+          <div className="card text-center ">
             <div className="text-3xl font-bold text-primary-600 mb-2">
               {isLoadingAgents ? (
                 <Loader2 className="h-8 w-8 animate-spin mx-auto" />
@@ -101,7 +101,7 @@ export default function Home() {
             </div>
             <div className="text-sm text-gray-600">Company Agents</div>
           </div>
-          <div className="card text-center">
+          {/* <div className="card text-center">
             <div className="text-3xl font-bold text-green-600 mb-2">
               {isLoadingAgents ? (
                 <Loader2 className="h-8 w-8 animate-spin mx-auto" />
@@ -110,8 +110,8 @@ export default function Home() {
               )}
             </div>
             <div className="text-sm text-gray-600">Total Sessions</div>
-          </div>
-          <div className="card text-center">
+          </div> */}
+          {/* <div className="card text-center">
             <div className="text-3xl font-bold text-blue-600 mb-2">
               {isLoadingAgents ? (
                 <Loader2 className="h-8 w-8 animate-spin mx-auto" />
@@ -120,7 +120,7 @@ export default function Home() {
               )}
             </div>
             <div className="text-sm text-gray-600">Total Messages</div>
-          </div>
+          </div> */}
         </div>
 
         {/* Agents Grid */}
