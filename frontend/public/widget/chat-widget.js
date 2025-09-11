@@ -8,7 +8,7 @@
 
   // Configuration
   const CONFIG = {
-    API_BASE_URL: 'http://localhost:5000/ai-chatbot-api',
+    API_BASE_URL: 'http://dev.weam.ai/ai-chatbot-api',
     WIDGET_VERSION: '1.0.0',
     DEFAULT_SETTINGS: {
       theme: 'light',
@@ -47,16 +47,16 @@
       console.log('🔧 Loading widget configuration...');
       
       // Try to get the base URL for the API call
-      const baseUrl = window.location.origin;
+      // const baseUrl = window.location.origin;
       // Extract basePath from current URL or use default
-      const currentPath = window.location.pathname;
-      const basePath = currentPath.includes('/ai-chatbot') ? '/ai-chatbot' : '';
-      const response = await fetch(`${baseUrl}${basePath}/api/widget/config`);
+      // const currentPath = window.location.pathname;
+      // const basePath = currentPath.includes('/ai-chatbot') ? '/ai-chatbot' : '';
+      // const response = await fetch(`${baseUrl}${basePath}/api/widget/config`);
       
+      console.log('✅ Widget configuration loaded:', CONFIG);
       if (response.ok) {
-        const dynamicConfig = await response.json();
-        CONFIG = { ...CONFIG, ...dynamicConfig };
-        console.log('✅ Widget configuration loaded:', CONFIG);
+        // const dynamicConfig = await response.json();
+        // CONFIG = { ...CONFIG, ...dynamicConfig };
       } else {
         console.warn('⚠️ Failed to load widget config, using defaults');
       }
