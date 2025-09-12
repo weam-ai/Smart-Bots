@@ -9,7 +9,6 @@ import {
   X,
   AlertCircle,
   CheckCircle,
-  Loader2,
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
@@ -98,12 +97,6 @@ export default function AgentUpload({
     (f) => f.file.type === "application/pdf"
   );
 
-  console.log("🚀 ~ uploadedFiles:", uploadedFiles);
-  console.log("🚀 ~ agentData.files:", agentData.files);
-  console.log("🚀 ~ allCompleted:", allCompleted);
-  console.log("🚀 ~ allSuccessful:", allSuccessful);
-  console.log("🚀 ~ hasNewUploads:", hasNewUploads);
-  console.log("🚀 ~ onStartTraining:", onStartTraining);
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}

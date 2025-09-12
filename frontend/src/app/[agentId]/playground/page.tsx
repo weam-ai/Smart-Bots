@@ -5,6 +5,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { httpGet } from '@/services/axios';
 import { Agent } from '@/types/agent';
 import AgentPlayground from '@/components/AgentPlayground';
+import { PageLoader } from '@/components/ui/Loader';
 
 export interface AgentFile {
   _id: string
@@ -122,14 +123,7 @@ export default function PlaygroundPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading playground...</p>
-        </div>
-      </div>
-    );
+    return <PageLoader text="Loading playground..." />;
   }
 
   return (

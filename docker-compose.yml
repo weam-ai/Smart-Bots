@@ -15,7 +15,6 @@ services:
       - .env
     environment:
       - NEXT_PUBLIC_DOMAIN_URL=http://localhost:3001
-      - NODE_ENV=production
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -34,8 +33,6 @@ services:
       - "5000:5000"
     env_file:
       - .env
-    environment:
-      - NODE_ENV=production
     volumes:
       - ./backend:/app
       - /app/node_modules
