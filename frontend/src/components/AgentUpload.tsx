@@ -68,9 +68,9 @@ export default function AgentUpload({
       case "application/pdf":
         return <FileText className="h-5 w-5 text-red-500" />;
       case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-        return <FileText className="h-5 w-5 text-blue-500" />;
+        return <FileText className="h-5 w-5 text-primary-500" />;
       case "application/msword":
-        return <FileText className="h-5 w-5 text-blue-500" />;
+        return <FileText className="h-5 w-5 text-primary-500" />;
       case "text/plain":
         return <File className="h-5 w-5 text-gray-500" />;
       default:
@@ -342,7 +342,7 @@ export default function AgentUpload({
                     variant="dots" 
                     size="sm" 
                     text="Uploading files..." 
-                    className="text-blue-600"
+                    className="text-primary-600"
                   />
                 )}
 

@@ -22,8 +22,11 @@ interface Agent {
   temperature: number
   model: string
   createdAt: string
-  totalSessions?: number
-  totalMessages?: number
+  metadata?: {
+    totalFiles?: number
+    totalSessions?: number
+    totalMessages?: number
+  } 
 }
 
 interface AgentCardProps {
@@ -37,7 +40,7 @@ export default function AgentCard({ agent, onDelete }: AgentCardProps) {
   const getStatusIcon = () => {
     switch (agent.status) {
       case 'uploading':
-        return <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+        return <div className="w-2 h-2 bg-primary-500 rounded-full animate-pulse" />
       case 'training':
         return <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
       case 'trained':
@@ -119,14 +122,12 @@ export default function AgentCard({ agent, onDelete }: AgentCardProps) {
         <div className="flex items-center gap-4 text-sm text-gray-600">
           <div className="flex items-center gap-1">
             <FileText className="h-4 w-4" />
-            <span>{agent.files.length} files</span>
+            <span>{agent.metadata?.totalFiles || 0} files</span>
           </div>
-          {agent.totalSessions !== undefined && (
-            <div className="flex items-center gap-1">
-              <Users className="h-4 w-4" />
-              <span>{agent.totalSessions} sessions</span>
-            </div>
-          )}
+          <div className="flex items-center gap-1">
+            <Users className="h-4 w-4" />
+            <span>{agent.metadata?.totalSessions || 0} sessions</span>
+          </div>
         </div>
 
         <div className="text-xs text-gray-500">

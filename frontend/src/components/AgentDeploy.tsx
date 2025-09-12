@@ -322,7 +322,7 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
                   <h3 className="font-semibold text-gray-900 mb-1">{deployment?.name || 'Unnamed Deployment'}</h3>
                   <p className="text-sm text-gray-600 mb-2">{deployment?.description || 'No description'}</p>
                   {deployment?.websiteUrl && (
-                    <div className="flex items-center gap-1 text-sm text-blue-600">
+                    <div className="flex items-center gap-1 text-sm text-primary-600">
                       <ExternalLink className="h-4 w-4" />
                       <a href={deployment.websiteUrl} target="_blank" rel="noopener noreferrer">
                         {deployment.websiteUrl}
@@ -364,7 +364,7 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleCopyEmbedCode(deployment?._id)}
-                  className="flex items-center gap-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                  className="flex items-center gap-1 px-3 py-1 text-sm bg-primary-100 text-primary-700 rounded-md hover:bg-primary-200 transition-colors"
                 >
                   <Copy className="h-4 w-4" />
                   Copy Code
@@ -554,7 +554,7 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
                     ...prev, 
                     settings: { ...prev.settings, autoOpen: e.target.checked }
                   }))}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                 />
                 <label htmlFor="autoOpen" className="ml-2 block text-sm text-gray-700">
                   Auto-open chatbot when page loads

@@ -197,7 +197,7 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'active':
-        return <Clock className="h-4 w-4 text-blue-500" />;
+        return <Clock className="h-4 w-4 text-primary-500" />;
       case 'ended':
         return <CheckCircle className="h-4 w-4 text-green-500" />;
       case 'paused':
@@ -211,7 +211,7 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-primary-100 text-primary-800';
       case 'ended':
         return 'bg-green-100 text-green-800';
       case 'paused':
@@ -269,7 +269,7 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
             onClick={() => setActiveTab('deploy')}
             className={`py-4 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'deploy'
-                ? 'border-blue-500 text-blue-600'
+                ? 'border-primary-500 text-primary-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
@@ -282,7 +282,7 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
             onClick={() => setActiveTab('chat-history')}
             className={`py-4 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'chat-history'
-                ? 'border-blue-500 text-blue-600'
+                ? 'border-primary-500 text-primary-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
@@ -353,7 +353,7 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
                       <div
                         key={session._id}
                         className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                          selectedSession === session._id ? 'bg-blue-50 border-r-2 border-blue-500' : ''
+                          selectedSession === session._id ? 'bg-primary-50 border-r-2 border-primary-500' : ''
                         }`}
                         onClick={() => toggleSession(session._id)}
                       >
@@ -422,7 +422,7 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
                   <div className="flex-1 overflow-y-auto p-4">
                     {loadingMessages[selectedSession] ? (
                       <div className="flex items-center justify-center h-full">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
                       </div>
                     ) : (
                       <div className="space-y-4">
@@ -436,18 +436,18 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
                           (sessionMessages[selectedSession] || []).map((message, index) => (
                             <div key={index} className={`flex gap-3 ${message.messageType === 'user' ? 'justify-end' : 'justify-start'}`}>
                               {message.messageType === 'assistant' && (
-                                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                  <MessageSquare className="h-4 w-4 text-blue-600"/>
+                                <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                  <MessageSquare className="h-4 w-4 text-primary-600"/>
                                 </div>
                               )}
                               <div className={`max-w-md px-4 py-3 rounded-lg ${
                                 message.messageType === 'user'
-                                  ? 'bg-blue-600 text-white'
+                                  ? 'bg-primary-600 text-white'
                                   : 'bg-gray-100 text-gray-900'
                               }`}>
                                 <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                                 <p className={`text-xs mt-2 ${
-                                  message.messageType === 'user' ? 'text-blue-100' : 'text-gray-500'
+                                  message.messageType === 'user' ? 'text-primary-100' : 'text-gray-500'
                                 }`}>
                                   {formatDate(message.createdAt)}
                                 </p>
