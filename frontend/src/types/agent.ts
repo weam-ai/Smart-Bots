@@ -26,6 +26,7 @@ export type Agent = {
   isPublic?: boolean
   tags?: string[]
   metadata?: {
+    totalFiles?: number
     totalSessions?: number
     totalMessages?: number
     lastUsed?: string

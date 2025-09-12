@@ -5,6 +5,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @layer base {
+  :root {
+    --color-primary: #6637EC;
+    --color-primary-50: #f5f3ff;
+    --color-primary-100: #ede9fe;
+    --color-primary-200: #ddd6fe;
+    --color-primary-300: #c4b5fd;
+    --color-primary-400: #a78bfa;
+    --color-primary-500: #6637EC;
+    --color-primary-600: #5b2dd9;
+    --color-primary-700: #4c1d95;
+    --color-primary-800: #3b1a78;
+    --color-primary-900: #2d1b69;
+  }
+  
   html {
     font-family: 'Inter', system-ui, sans-serif;
   }
@@ -44,7 +58,7 @@
   }
   
   .status-uploading {
-    @apply status-badge bg-blue-100 text-blue-800;
+    @apply status-badge bg-primary-100 text-primary-800;
   }
   
   .status-training {

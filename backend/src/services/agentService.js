@@ -1,4 +1,4 @@
-const { Agent } = require('../models');
+const { Agent, File, ChatSession } = require('../models');
 
 // Get all agents (deprecated - use getAgentsByCompany instead)
 const getAllAgents = async () => {
@@ -14,7 +14,58 @@ const getAllAgents = async () => {
 const getAgentsByCompany = async (companyId) => {
   try {
     const agents = await Agent.find({ companyId }).sort({ createdAt: -1 });
-    return agents;
+    
+    // Add file count and session count for each agent
+    const agentsWithCounts = await Promise.all(
+      agents.map(async (agent) => {
+        try {
+          // Get file count for this agent
+          const fileCount = await File.countDocuments({ 
+            agent: agent._id, 
+            companyId: companyId,
+            status: { $in: ['completed', 'processing'] } // Only count successfully uploaded files
+          });
+          
+          // Get session count for this agent
+          const sessionCount = await ChatSession.countDocuments({ 
+            agent: agent._id, 
+            companyId: companyId 
+          });
+          
+          // Get total messages for this agent
+          const totalMessages = await ChatSession.aggregate([
+            { $match: { agent: agent._id, companyId: companyId } },
+            { $group: { _id: null, totalMessages: { $sum: '$totalMessages' } } }
+          ]);
+          
+          const messageCount = totalMessages.length > 0 ? totalMessages[0].totalMessages : 0;
+          
+          return {
+            ...agent.toObject(),
+            metadata: {
+              ...agent.metadata,
+              totalFiles: fileCount,
+              totalSessions: sessionCount,
+              totalMessages: messageCount
+            }
+          };
+        } catch (error) {
+          console.error(`Error getting counts for agent ${agent._id}:`, error);
+          // Return agent with zero counts if there's an error
+          return {
+            ...agent.toObject(),
+            metadata: {
+              ...agent.metadata,
+              totalFiles: 0,
+              totalSessions: 0,
+              totalMessages: 0
+            }
+          };
+        }
+      })
+    );
+    
+    return agentsWithCounts;
   } catch (error) {
     throw new Error(`Failed to fetch agents for company: ${error.message}`);
   }
@@ -36,7 +87,55 @@ const getAgentById = async (id) => {
 const getAgentByIdAndCompany = async (id, companyId) => {
   try {
     const agent = await Agent.findOne({ _id: id, companyId });
-    return agent;
+    
+    if (!agent) {
+      return null;
+    }
+    
+    try {
+      // Get file count for this agent
+      const fileCount = await File.countDocuments({ 
+        agent: agent._id, 
+        companyId: companyId,
+        status: { $in: ['completed', 'processing'] } // Only count successfully uploaded files
+      });
+      
+      // Get session count for this agent
+      const sessionCount = await ChatSession.countDocuments({ 
+        agent: agent._id, 
+        companyId: companyId 
+      });
+      
+      // Get total messages for this agent
+      const totalMessages = await ChatSession.aggregate([
+        { $match: { agent: agent._id, companyId: companyId } },
+        { $group: { _id: null, totalMessages: { $sum: '$totalMessages' } } }
+      ]);
+      
+      const messageCount = totalMessages.length > 0 ? totalMessages[0].totalMessages : 0;
+      
+      return {
+        ...agent.toObject(),
+        metadata: {
+          ...agent.metadata,
+          totalFiles: fileCount,
+          totalSessions: sessionCount,
+          totalMessages: messageCount
+        }
+      };
+    } catch (error) {
+      console.error(`Error getting counts for agent ${agent._id}:`, error);
+      // Return agent with zero counts if there's an error
+      return {
+        ...agent.toObject(),
+        metadata: {
+          ...agent.metadata,
+          totalFiles: 0,
+          totalSessions: 0,
+          totalMessages: 0
+        }
+      };
+    }
   } catch (error) {
     throw new Error(`Failed to fetch agent: ${error.message}`);
   }

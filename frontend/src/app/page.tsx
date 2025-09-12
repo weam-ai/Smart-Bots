@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Plus, Bot, FileText, Users, Calendar, Play, Loader2 } from 'lucide-react'
+import { Plus, Bot, FileText, Users, Calendar, Play, Loader2, ArrowLeft } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { useAgentOperations } from '@/hooks/useAgents'
 import CreateAgentModal from '@/components/CreateAgentModal'
@@ -22,17 +22,16 @@ export default function Home() {
     isCreating,
     refetch,
   } = useAgentOperations()
-    console.log("🚀 ~ Home ~ agents:", agents)
 
   // Ensure URL shows step=1 for main page
   useEffect(() => {
     const currentStep = searchParams.get('step')
-    if (!currentStep || currentStep !== '1') {
-      // Replace current URL with step=1 parameter
-      const newUrl = new URL(window.location.href)
-      newUrl.searchParams.set('step', '1')
-      window.history.replaceState({}, '', newUrl.toString())
-    }
+    // if (!currentStep || currentStep !== '1') {
+    //   // Replace current URL with step=1 parameter
+    //   const newUrl = new URL(window.location.href)
+    //   newUrl.searchParams.set('step', '1')
+    //   window.history.replaceState({}, '', newUrl.toString())
+    // }
   }, [searchParams])
 
   const handleCreateNewAgent = () => {
@@ -41,12 +40,9 @@ export default function Home() {
 
   const handleCreateSubmit = async (agentData: CreateAgentPayload) => {
     const newAgent = await createAgent(agentData)
-    console.log('🎯 Created agent:', newAgent)
-    console.log('🆔 Agent ID:', newAgent?._id)
     
     if (newAgent && newAgent._id) {
       setShowCreateModal(false)
-      console.log('🚀 Navigating to:', `/${newAgent._id}?step=2`)
       router.push(`/${newAgent._id}?step=1`)
     } else {
       console.error('❌ No agent ID available for navigation')
@@ -68,7 +64,7 @@ export default function Home() {
               <h1 className="ml-2 text-xl font-semibold text-gray-900">AI Chatbot Agents</h1>
             </div>
             <button
-              onClick={handleCreateNewAgent}
+              onClick={() => {window.location.assign('/')}}
               className="btn-primary inline-flex items-center gap-2"
               disabled={isCreating}
             >
@@ -79,8 +75,8 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                  <Plus className="h-4 w-4" />
-                  New Agent
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to Weam
                 </>
               )}
             </button>
@@ -232,7 +228,7 @@ export default function Home() {
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-1">
                             <FileText className="h-4 w-4 text-gray-400" />
-                            <span className="text-gray-600">0 files</span>
+                            <span className="text-gray-600">{agent.metadata?.totalFiles || 0} files</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <Users className="h-4 w-4 text-gray-400" />

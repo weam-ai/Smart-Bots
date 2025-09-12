@@ -55,7 +55,7 @@ export default function AgentTraining({ agentData, onTrainingComplete, onBack }:
     {
       id: 'indexing',
       name: 'Vector Indexing',
-      description: 'Storing vectors in Qdrant database for fast retrieval',
+      description: 'Storing vectors in Pinecone database for fast retrieval',
       status: 'pending',
       progress: 0
     },
@@ -311,7 +311,7 @@ export default function AgentTraining({ agentData, onTrainingComplete, onBack }:
                 <div className="flex items-start gap-2">
                   <Database className="h-4 w-4 text-primary-600 mt-0.5" />
                   <div>
-                    <p className="font-medium">Qdrant Database</p>
+                    <p className="font-medium">Pinecone Database</p>
                     <p className="text-gray-600">Fast vector similarity search</p>
                   </div>
                 </div>

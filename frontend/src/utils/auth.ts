@@ -11,8 +11,6 @@ export interface UserContext {
  */
 export const getUserContext = async (): Promise<UserContext | null> => {
   try {
-    console.log('🔍 Getting user context from Iron Session API...');
-    
     // Call the API route to get user context
     const response = await fetch('/ai-chatbot/api/auth/user', {
       method: 'GET',
@@ -38,7 +36,6 @@ export const getUserContext = async (): Promise<UserContext | null> => {
       roleCode: result.data.roleCode
     };
 
-    console.log('✅ User context from Iron Session API:', userContext);
     return userContext;
   } catch (error) {
     console.error('❌ Failed to get user context:', error);
@@ -72,7 +69,6 @@ export const generateJWTToken = async (): Promise<string | null> => {
     // For testing, we'll use a simple base64 token
     // In production, your main app should generate proper JWT tokens
     const token = btoa(JSON.stringify(tokenPayload));
-    console.log('🔑 Generated JWT token:', token);
     return token;
   } catch (error) {
     console.error('❌ Failed to generate JWT token:', error);
