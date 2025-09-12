@@ -55,19 +55,19 @@ const envConfig = {
   
   // Rate Limiting Configuration
   RATE_LIMIT_GENERAL_DEV: parseInt(process.env.RATE_LIMIT_GENERAL_DEV || '1000000000', 10),
-  RATE_LIMIT_GENERAL_PROD: parseInt(process.env.RATE_LIMIT_GENERAL_PROD || '100', 10),
+  RATE_LIMIT_GENERAL_PROD: parseInt('10000', 10),
   RATE_LIMIT_UPLOAD_DEV: parseInt(process.env.RATE_LIMIT_UPLOAD_DEV || '1000', 10),
-  RATE_LIMIT_UPLOAD_PROD: parseInt(process.env.RATE_LIMIT_UPLOAD_PROD || '20', 10),
+  RATE_LIMIT_UPLOAD_PROD: parseInt('20000', 10),
   RATE_LIMIT_CHAT_DEV: parseInt(process.env.RATE_LIMIT_CHAT_DEV || '1000', 10),
-  RATE_LIMIT_CHAT_PROD: parseInt(process.env.RATE_LIMIT_CHAT_PROD || '5', 10),
+  RATE_LIMIT_CHAT_PROD: parseInt('5000', 10),
   RATE_LIMIT_DEPLOYMENT_DEV: parseInt(process.env.RATE_LIMIT_DEPLOYMENT_DEV || '1000', 10),
-  RATE_LIMIT_DEPLOYMENT_PROD: parseInt(process.env.RATE_LIMIT_DEPLOYMENT_PROD || '5', 10),
+  RATE_LIMIT_DEPLOYMENT_PROD: parseInt('5000', 10),
   RATE_LIMIT_SEARCH_DEV: parseInt(process.env.RATE_LIMIT_SEARCH_DEV || '1000', 10),
-  RATE_LIMIT_SEARCH_PROD: parseInt(process.env.RATE_LIMIT_SEARCH_PROD || '5', 10),
+  RATE_LIMIT_SEARCH_PROD: parseInt('5000', 10),
   RATE_LIMIT_API_USAGE_DEV: parseInt(process.env.RATE_LIMIT_API_USAGE_DEV || '1000', 10),
-  RATE_LIMIT_API_USAGE_PROD: parseInt(process.env.RATE_LIMIT_API_USAGE_PROD || '50', 10),
+  RATE_LIMIT_API_USAGE_PROD: parseInt('5000', 10),
   RATE_LIMIT_VISITOR_DEV: parseInt(process.env.RATE_LIMIT_VISITOR_DEV || '1000', 10),
-  RATE_LIMIT_VISITOR_PROD: parseInt(process.env.RATE_LIMIT_VISITOR_PROD || '20', 10),
+  RATE_LIMIT_VISITOR_PROD: parseInt('20000', 10),
   
   // AWS S3 Configuration
   AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID || '',
