@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { 
   ArrowLeft, 
@@ -8,10 +8,8 @@ import {
   FileText,
   Settings,
   Save,
-  MessageSquare,
   Bot,
   User,
-  Loader2,
   RotateCcw,
   Download,
   Globe

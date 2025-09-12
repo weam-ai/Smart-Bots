@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Copy, ExternalLink, Settings, Eye, Trash2, Plus, Globe, Code, BarChart3 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { httpGet, httpPost, httpPut, httpDelete } from '@/services/axios'
+import { PageLoader } from '@/components/ui/Loader'
 
 interface Deployment {
   _id: string
@@ -280,11 +281,7 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    )
+    return <PageLoader text="Loading deployment..." />;
   }
 
   return (
