@@ -167,7 +167,6 @@ export default function Home() {
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">No agents yet</h3>
                   <p className="text-gray-600 mb-4">Create your first AI agent to get started.</p>
                   <button onClick={handleCreateNewAgent} className="btn-primary">
-                    <Plus className="h-4 w-4 mr-2" />
                     Create Your First Agent
                   </button>
                 </div>

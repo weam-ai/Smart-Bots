@@ -6,18 +6,14 @@ import { httpGet } from '../services/axios';
 import { 
   MessageSquare, 
   User, 
-  Calendar, 
-  Search, 
-  Filter, 
+  Search,  
   Download, 
-  Eye,
-  ChevronDown,
-  ChevronRight,
   Clock,
   CheckCircle,
   XCircle,
   ArrowLeft
 } from 'lucide-react';
+import { PageLoader } from '@/components/ui/Loader';
 
 interface ChatSession {
   _id: string;
@@ -265,9 +261,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ agentId }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
+      <PageLoader text="Loading chat history..." />
     );
   }
 
