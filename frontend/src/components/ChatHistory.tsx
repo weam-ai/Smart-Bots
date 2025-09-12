@@ -231,7 +231,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ agentId }) => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'active':
-        return <Clock className="h-4 w-4 text-blue-500" />;
+        return <Clock className="h-4 w-4 text-primary-500" />;
       case 'ended':
         return <CheckCircle className="h-4 w-4 text-green-500" />;
       case 'paused':
@@ -245,7 +245,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ agentId }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-primary-100 text-primary-800';
       case 'ended':
         return 'bg-green-100 text-green-800';
       case 'paused':
@@ -302,7 +302,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ agentId }) => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => handleExport('json')}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
             >
               <Download className="h-4 w-4" />
               Export JSON
@@ -328,7 +328,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ agentId }) => {
                 <div key={step} className="flex items-center">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                     step === currentStep 
-                      ? 'bg-blue-600 text-white' 
+                      ? 'bg-primary-600 text-white' 
                       : step < currentStep 
                         ? 'bg-green-500 text-white' 
                         : 'bg-gray-200 text-gray-600'
@@ -336,7 +336,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ agentId }) => {
                     {step}
                   </div>
                   <span className={`ml-2 text-xs ${
-                    step === currentStep ? 'text-blue-600 font-medium' : 'text-gray-500'
+                    step === currentStep ? 'text-primary-600 font-medium' : 'text-gray-500'
                   }`}>
                     {step === 1 ? 'Main' : step === 2 ? 'Detail' : step === 3 ? 'Playground' : step === 4 ? 'Deploy' : 'History'}
                   </span>
@@ -397,7 +397,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ agentId }) => {
                   <div
                     key={session._id}
                     className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                      selectedSession === session._id ? 'bg-blue-50 border-r-2 border-blue-500' : ''
+                      selectedSession === session._id ? 'bg-primary-50 border-r-2 border-primary-500' : ''
                     }`}
                     onClick={() => toggleSession(session._id)}
                   >
@@ -491,7 +491,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ agentId }) => {
               <div className="flex-1 overflow-y-auto p-4">
                 {loadingMessages[selectedSession] ? (
                   <div className="flex items-center justify-center h-full">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -505,18 +505,18 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ agentId }) => {
                       (sessionMessages[selectedSession] || []).map((message, index) => (
                         <div key={index} className={`flex gap-3 ${message.messageType === 'user' ? 'justify-end' : 'justify-start'}`}>
                           {message.messageType === 'assistant' && (
-                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                              <MessageSquare className="h-4 w-4 text-blue-600"/>
+                            <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                              <MessageSquare className="h-4 w-4 text-primary-600"/>
                             </div>
                           )}
                           <div className={`max-w-md px-4 py-3 rounded-lg ${
                             message.messageType === 'user'
-                              ? 'bg-blue-600 text-white'
+                              ? 'bg-primary-600 text-white'
                               : 'bg-gray-100 text-gray-900'
                           }`}>
                             <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                             <p className={`text-xs mt-2 ${
-                              message.messageType === 'user' ? 'text-blue-100' : 'text-gray-500'
+                              message.messageType === 'user' ? 'text-primary-100' : 'text-gray-500'
                             }`}>
                               {formatDate(message.createdAt)}
                             </p>

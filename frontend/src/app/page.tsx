@@ -228,7 +228,7 @@ export default function Home() {
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-1">
                             <FileText className="h-4 w-4 text-gray-400" />
-                            <span className="text-gray-600">0 files</span>
+                            <span className="text-gray-600">{agent.metadata?.totalFiles || 0} files</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <Users className="h-4 w-4 text-gray-400" />
