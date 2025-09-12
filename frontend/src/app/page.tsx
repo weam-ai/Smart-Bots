@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Plus, Bot, FileText, Users, Calendar, Play, Loader2 } from 'lucide-react'
+import { Plus, Bot, FileText, Users, Calendar, Play, Loader2, ArrowLeft } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { useAgentOperations } from '@/hooks/useAgents'
 import CreateAgentModal from '@/components/CreateAgentModal'
@@ -26,12 +26,12 @@ export default function Home() {
   // Ensure URL shows step=1 for main page
   useEffect(() => {
     const currentStep = searchParams.get('step')
-    if (!currentStep || currentStep !== '1') {
-      // Replace current URL with step=1 parameter
-      const newUrl = new URL(window.location.href)
-      newUrl.searchParams.set('step', '1')
-      window.history.replaceState({}, '', newUrl.toString())
-    }
+    // if (!currentStep || currentStep !== '1') {
+    //   // Replace current URL with step=1 parameter
+    //   const newUrl = new URL(window.location.href)
+    //   newUrl.searchParams.set('step', '1')
+    //   window.history.replaceState({}, '', newUrl.toString())
+    // }
   }, [searchParams])
 
   const handleCreateNewAgent = () => {
@@ -67,7 +67,7 @@ export default function Home() {
               <h1 className="ml-2 text-xl font-semibold text-gray-900">AI Chatbot Agents</h1>
             </div>
             <button
-              onClick={handleCreateNewAgent}
+              onClick={() => {window.location.assign('/')}}
               className="btn-primary inline-flex items-center gap-2"
               disabled={isCreating}
             >
@@ -78,8 +78,8 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                  <Plus className="h-4 w-4" />
-                  New Agent
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to Weam
                 </>
               )}
             </button>
