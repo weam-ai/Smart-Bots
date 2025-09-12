@@ -81,7 +81,6 @@ export default function AgentUpload({
   // Files upload automatically, so we just need to handle completion
   const handleFilesCompleted = useCallback(() => {
     if (allCompleted && allSuccessful && uploadedFiles.length > 0) {
-      console.log("✅ All files uploaded successfully, proceeding to training");
       const files = uploadedFiles.map((f) => f.file);
       onFilesUploaded(files);
     }

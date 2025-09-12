@@ -93,8 +93,6 @@ export const useCreateAgent = () => {
 
   const createAgent = useCallback(async (agentData: CreateAgentPayload): Promise<Agent | null> => {
     try {
-      console.log('🚀 Starting agent creation process...')
-      console.log('📝 Input agent data:', agentData)
       
       setIsLoading(true)
       setError(null)
@@ -108,16 +106,7 @@ export const useCreateAgent = () => {
         _id: agentId
       }
       
-      console.log('🆔 Generated agent ID:', agentId)
-      console.log('📤 Final agent data to send:', agentDataWithId)
-      console.log('🌐 API endpoint:', API_ENDPOINTS.AGENTS.BASE)
-      
       const newAgent = await httpPost<Agent>(API_ENDPOINTS.AGENTS.BASE, agentDataWithId)
-      
-      console.log('✅ Agent creation successful!')
-      console.log('📊 Created agent response:', newAgent)
-      console.log('🆔 Agent ID in response:', newAgent?._id)
-      console.log('📝 Agent name:', newAgent?.name)
       
       toast.success(`Agent "${newAgent.name}" created successfully!`)
       return newAgent
@@ -132,7 +121,6 @@ export const useCreateAgent = () => {
       toast.error(message)
       return null
     } finally {
-      console.log('🏁 Agent creation process finished')
       setIsLoading(false)
     }
   }, [])

@@ -87,28 +87,21 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
   }
 
   const validateForm = () => {
-    console.log('🔍 Starting form validation...')
-    console.log('📝 Form data:', formData)
     
     // Validate required fields
     if (!formData.name.trim()) {
-      console.log('❌ Validation failed: Name is required')
       toast.error('Deployment name is required')
       return false
     }
 
     // Validate size format (CSS size pattern: number + unit)
     const sizePattern = /^\d+(px|%|rem|em)$/
-    console.log('📏 Validating width:', formData.settings.size.width, 'Pattern test:', sizePattern.test(formData.settings.size.width))
     if (!sizePattern.test(formData.settings.size.width)) {
-      console.log('❌ Validation failed: Invalid width format')
       toast.error('Width must be a valid CSS size (e.g., 400px, 50%, 20rem)')
       return false
     }
     
-    console.log('📏 Validating height:', formData.settings.size.height, 'Pattern test:', sizePattern.test(formData.settings.size.height))
     if (!sizePattern.test(formData.settings.size.height)) {
-      console.log('❌ Validation failed: Invalid height format')
       toast.error('Height must be a valid CSS size (e.g., 600px, 80%, 30rem)')
       return false
     }
@@ -116,24 +109,18 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
     // Validate website URL if provided
     if (formData.websiteUrl && formData.websiteUrl.trim()) {
       const url = formData.websiteUrl.trim()
-      console.log('🌐 Validating URL:', url)
       // Allow localhost URLs and URLs with protocols
       if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('localhost:') && !url.includes('.')) {
-        console.log('❌ Validation failed: Invalid URL format')
         toast.error('Please enter a valid website URL (e.g., https://example.com or localhost:3002)')
         return false
       }
     }
 
-    console.log('✅ All validations passed')
     return true
   }
 
   const handleCreateDeployment = async () => {
-    console.log('🔍 Validating form data:', formData)
-    
     if (!validateForm()) {
-      console.log('❌ Form validation failed')
       return
     }
 
@@ -145,7 +132,6 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
         : formData.websiteUrl
     }
 
-    console.log('✅ Form validation passed, sending data:', backendData)
 
     try {
       const response = await httpPost<{data: Deployment}>(`/agents/${agentId}/deployments`, backendData)

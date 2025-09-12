@@ -44,8 +44,6 @@
    */
   async function loadConfig() {
     try {
-      console.log('🔧 Loading widget configuration...');
-      
       // Try to get the base URL for the API call
       // const baseUrl = window.location.origin;
       // Extract basePath from current URL or use default
@@ -53,7 +51,6 @@
       // const basePath = currentPath.includes('/ai-chatbot') ? '/ai-chatbot' : '';
       // const response = await fetch(`${baseUrl}${basePath}/api/widget/config`);
       
-      console.log('✅ Widget configuration loaded:', CONFIG);
       if (response.ok) {
         // const dynamicConfig = await response.json();
         // CONFIG = { ...CONFIG, ...dynamicConfig };
@@ -77,8 +74,6 @@
    * Initialize the widget
    */
   async function init(config) {
-    console.log('🤖 AI Chatbot Widget initializing...', config);
-    
     // Load dynamic configuration first
     await loadConfig();
     
@@ -118,7 +113,6 @@
     }
     
     widgetState.isInitialized = true;
-    console.log('✅ AI Chatbot Widget initialized successfully');
     
     // Track widget view
     trackAnalytics('view');
@@ -840,7 +834,6 @@
 
         // Generate a session ID for this conversation
         widgetState.currentSessionId = generateSessionId();
-        console.log('🆔 Generated session ID:', widgetState.currentSessionId);
         
         // Hide identity form and show chat
         widgetState.showIdentityForm = false;
@@ -855,8 +848,6 @@
         
         // Add welcome message with visitor name
         addMessage('assistant', `Hi ${name}! ${widgetState.config.welcomeMessage}`);
-        
-        console.log('✅ Visitor created/updated:', widgetState.visitor);
       } else {
         throw new Error(result.error?.message || 'Failed to create visitor account');
       }
@@ -891,11 +882,9 @@
     try {
       // Send message to backend
       const response = await sendMessageToBackend(message);
-      console.log('🤖 Chat widget received response:', response);
       
       if (response.success) {
         // Add assistant response
-        console.log('🤖 Adding assistant message:', response.data.content);
         addMessage('assistant', response.data.content);
         
         // Update session ID if new
@@ -944,8 +933,6 @@
       })
     });
     
-    console.log('📤 Sending message with sessionId:', widgetState.currentSessionId);
-    
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -957,7 +944,6 @@
    * Add message to chat
    */
   function addMessage(type, content) {
-    console.log('🤖 addMessage called:', { type, content });
     const messageElement = document.createElement('div');
     messageElement.className = `ai-chatbot-message ${type}`;
     

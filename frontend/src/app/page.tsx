@@ -22,7 +22,6 @@ export default function Home() {
     isCreating,
     refetch,
   } = useAgentOperations()
-    console.log("🚀 ~ Home ~ agents:", agents)
 
   // Ensure URL shows step=1 for main page
   useEffect(() => {
@@ -41,12 +40,9 @@ export default function Home() {
 
   const handleCreateSubmit = async (agentData: CreateAgentPayload) => {
     const newAgent = await createAgent(agentData)
-    console.log('🎯 Created agent:', newAgent)
-    console.log('🆔 Agent ID:', newAgent?._id)
     
     if (newAgent && newAgent._id) {
       setShowCreateModal(false)
-      console.log('🚀 Navigating to:', `/${newAgent._id}?step=2`)
       router.push(`/${newAgent._id}?step=1`)
     } else {
       console.error('❌ No agent ID available for navigation')

@@ -132,7 +132,6 @@ export const useFileUpload = () => {
       )
 
       // Show success/error messages based on results
-      console.log('📊 Response structure:', response)
       
       if (response.data?.summary?.successful > 0) {
         toast.success(`${response.data.summary.successful} file(s) uploaded successfully!`)
@@ -256,15 +255,11 @@ export const useCompleteUpload = () => {
   const isUploadingRef = useRef(false)
 
   const performUpload = useCallback(async (agentId: string, filesToUpload?: File[]): Promise<boolean> => {
-    console.log('🚀 Starting upload for agent:', agentId)
-    
     // Use provided files or fall back to uploadedFiles state
     const files = filesToUpload || uploadedFiles.map(f => f.file)
-    console.log('📁 Files to upload:', files.length)
     
     // Prevent multiple simultaneous uploads
     if (isUploadingRef.current) {
-      console.log('⏳ Upload already in progress, skipping')
       return false
     }
     
@@ -280,19 +275,14 @@ export const useCompleteUpload = () => {
     // If using uploadedFiles state, set all files to uploading status
     if (!filesToUpload && uploadedFiles.length > 0) {
       uploadedFiles.forEach(fileInfo => {
-        console.log('📤 Setting file to uploading:', fileInfo.file.name)
         updateFileStatus(fileInfo.id, 'uploading', 0)
       })
     }
 
     try {
-      console.log('📡 Calling uploadFiles with:', files.map(f => f.name))
-      
       const response = await uploadFiles(agentId, files)
-      console.log('📡 Upload response:', response)
       
       if (response) {
-        console.log('✅ Upload successful')
         // Mark all files as successful (only if using uploadedFiles state)
         if (!filesToUpload && uploadedFiles.length > 0) {
           uploadedFiles.forEach(fileInfo => {
@@ -338,13 +328,7 @@ export const useCompleteUpload = () => {
 
 
   const handleFilesSelected = useCallback(async (files: File[], agentId: string) => {
-    console.log('📁 Files selected:', files.map(f => ({ name: f.name, type: f.type, size: f.size })))
-    console.log('🤖 Agent ID for upload:', agentId)
-    
     const { validFiles, errors } = validateFiles(files)
-    
-    console.log('✅ Valid files:', validFiles.length)
-    console.log('❌ Validation errors:', errors.length)
     
     // Show validation errors
     errors.forEach(error => {
@@ -354,14 +338,13 @@ export const useCompleteUpload = () => {
 
     // Add valid files and upload immediately
     if (validFiles.length > 0) {
-      console.log('📤 Adding valid files and starting automatic upload')
       addFiles(validFiles)
       
       // Upload files directly (bypassing state race condition)
       try {
         const success = await performUpload(agentId, validFiles)
         if (success) {
-          console.log('✅ Automatic upload completed successfully')
+          // Upload completed successfully
         } else {
           console.error('❌ Automatic upload failed')
         }

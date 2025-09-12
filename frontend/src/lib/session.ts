@@ -51,7 +51,6 @@ export async function getUserContext(): Promise<{
 } | null> {
   try {
     const session = await getSession();
-    console.log("🚀 ~ getUserContext ~ session:", session)
     
     // Check if session has user data (nested under 'user' property)
     const userData = session.user || session;
