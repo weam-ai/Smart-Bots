@@ -258,7 +258,7 @@ export default function AgentTraining({ agentData, onTrainingComplete, onBack }:
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Documents Info */}
-            <div className="card">
+            {/* <div className="card">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Documents</h3>
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
@@ -278,10 +278,10 @@ export default function AgentTraining({ agentData, onTrainingComplete, onBack }:
                   <span className="font-medium">{agentData.temperature}</span>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* File List */}
-            <div className="card">
+            {/* <div className="card">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Files Being Processed</h3>
               <div className="space-y-2">
                 {agentData.files.map((file, index) => (
@@ -295,7 +295,7 @@ export default function AgentTraining({ agentData, onTrainingComplete, onBack }:
                   </div>
                 ))}
               </div>
-            </div>
+            </div> */}
 
             {/* Training Info */}
             <div className="card">
