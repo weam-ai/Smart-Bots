@@ -263,8 +263,8 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
       </header>
 
       {/* Tab Navigation */}
-      <div className="bg-white border-b border-gray-200 px-6">
-        <div className="flex space-x-8">
+      <div className="bg-white border-b border-gray-200 px-6 flex justify-around">
+        <div className="flex space-around space-x-8">
           <button
             onClick={() => setActiveTab('deploy')}
             className={`py-4 px-1 border-b-2 font-medium text-sm ${
