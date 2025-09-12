@@ -114,14 +114,6 @@ const handleRequest = async (config: InternalAxiosRequestConfig): Promise<Intern
     // Add request ID for tracking
     config.headers[HEADERS.X_REQUEST_ID] = generateRequestId()
 
-    // Log request in development
-    if (NEXT_PUBLIC_NODE_ENV === 'development') {
-      console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`, {
-        headers: config.headers,
-        data: config.data,
-      })
-    }
-
     return config
   } catch (error) {
     console.error('❌ Failed to add auth headers:', error)
@@ -152,10 +144,7 @@ const handleRequestError = (error: any): Promise<never> => {
 const handleResponse = (response: AxiosResponse): AxiosResponse => {
   // Log successful response in development
   if (NEXT_PUBLIC_NODE_ENV === 'development') {
-    console.log(`✅ API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`, {
-      status: response.status,
-      data: response.data,
-    })
+    // Development logging removed for cleaner production code
   }
 
   return response

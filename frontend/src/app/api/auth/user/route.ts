@@ -6,8 +6,6 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    console.log('🔍 Getting user context from Iron Session...');
-    
     const userContext = await getUserContext();
     
     if (!userContext) {
@@ -16,8 +14,6 @@ export async function GET() {
         error: 'Failed to get user context'
       }, { status: 500 });
     }
-
-    console.log('✅ User context from Iron Session:', userContext);
     
     return NextResponse.json({
       success: true,

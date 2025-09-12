@@ -65,7 +65,7 @@ export type FileProcessingInfo = {
     textExtraction: ProcessingStage
     chunking: ProcessingStage
     embeddings: ProcessingStage
-    qdrant: ProcessingStage
+    pinecone: ProcessingStage
   }
   error?: string
   completedAt?: string

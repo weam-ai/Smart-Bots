@@ -15,7 +15,6 @@ let envLoaded = false;
 for (const envPath of possiblePaths) {
   const result = dotenv.config({ path: envPath });
   if (!result.error) {
-    console.log(`✅ .env file loaded from: ${envPath}`);
     envLoaded = true;
     break;
   }
