@@ -41,8 +41,6 @@ export default function AgentPage() {
   const searchParams = useSearchParams()
   const agentId = params.agentId as string
   
-  console.log('🔍 Agent page params:', params)
-  console.log('🆔 Agent ID from params:', agentId)
 
   const [currentStep, setCurrentStep] = useState<AgentStep>('upload')
   const [hasNewUploads, setHasNewUploads] = useState(false)
@@ -78,7 +76,7 @@ export default function AgentPage() {
   
   // Debug step changes
   useEffect(() => {
-    console.log('🎯 Current step changed to:', currentStep)
+    // Step change tracking removed for cleaner code
   }, [currentStep])
   const [loading, setLoading] = useState(true)
   const [agentData, setAgentData] = useState<AgentData>({
@@ -108,7 +106,6 @@ export default function AgentPage() {
         // Check if this is a demo agent first
         const demoAgents = ['demo-agent-1', 'demo-agent-2', 'demo-agent-3']
         if (demoAgents.includes(agentId)) {
-          console.log('🎭 Demo agent detected:', agentId)
           setAgentData(prev => ({
             ...prev,
             name: getDemoAgentName(agentId),
@@ -116,20 +113,16 @@ export default function AgentPage() {
             trainingProgress: 100,
             files: getDemoFiles(agentId)
           }))
-          console.log('🎭 Demo agent - setting step to playground')
           setCurrentStep('playground')
           setLoading(false)
           return
         }
 
         // Fetch real agent data
-        console.log('🔍 Fetching agent data for ID:', agentId)
         const agentResponse = await httpGet<Agent | {agent: Agent}>(`/agents/${agentId}`)
-        console.log('📊 Agent response:', agentResponse)
         
         // Handle both direct agent response and wrapped response
         const agent = (agentResponse as any).agent || agentResponse
-        console.log('📝 Extracted agent:', agent)
         
         if (!agent) {
           console.error('❌ No agent found in response')
@@ -145,15 +138,8 @@ export default function AgentPage() {
         // Fetch agent files with error handling
         let files: AgentFile[] = []
         try {
-          console.log('📁 Fetching files for agent:', agentId)
           const filesResponse = await httpGet<{files: AgentFile[], pagination: any}>(`/upload/${agentId}/files`)
-          console.log('📊 Files response:', filesResponse)
-          console.log('📊 Files response.files:', filesResponse.files)
-          console.log('📊 Files response.pagination:', filesResponse.pagination)
-          
           files = filesResponse.files || []
-          console.log('📁 Extracted files:', files)
-          console.log('📁 Number of files:', files.length)
         } catch (fileError: any) {
           console.error('❌ Error fetching files:', fileError)
           console.error('❌ File error details:', {
@@ -166,14 +152,6 @@ export default function AgentPage() {
         }
 
         // Update agent data
-        console.log('📝 Setting agent data with:', {
-          id: agent._id,
-          name: agent.name,
-          systemPrompt: agent.systemPrompt,
-          temperature: agent.temperature,
-          model: agent.model,
-          files: files
-        })
         
         setAgentData({
           id: agent._id,
@@ -187,7 +165,6 @@ export default function AgentPage() {
         })
 
         // Always start at step 1 (upload) when opening an agent
-        console.log('🎯 Always starting at upload step when opening agent')
         setCurrentStep('upload')
 
       } catch (error: any) {
@@ -196,7 +173,6 @@ export default function AgentPage() {
         // Handle rate limiting with retry
         if (error?.response?.status === 429 && retryCount < 2) {
           const delay = Math.pow(2, retryCount) * 1000 // Exponential backoff: 1s, 2s, 4s
-          console.log(`Rate limited, retrying in ${delay}ms...`)
           setTimeout(() => {
             fetchAgentData(retryCount + 1)
           }, delay)
@@ -338,14 +314,18 @@ export default function AgentPage() {
   }
 
   const handleBackToAgents = () => {
-    router.push('/?step=1')
+    router.push('/')
   }
 
   const handleStartTraining = () => {
-    console.log('🚀 Starting training process')
     setCurrentStep('training')
     // Update URL to show step=2
     router.push(`/${agentId}?step=2`)
+  }
+
+  const handleStartTesting = () => {
+    // Navigate to playground page with step=3
+    router.push(`/${agentId}/playground?step=3`);
   }
 
   if (loading) {
@@ -366,6 +346,7 @@ export default function AgentPage() {
           onFilesUploaded={handleFilesUploaded}
           onBack={handleBackToAgents}
           onStartTraining={handleStartTraining}
+          onStartTesting={handleStartTesting}
           hasNewUploads={hasNewUploads}
         />
       )}

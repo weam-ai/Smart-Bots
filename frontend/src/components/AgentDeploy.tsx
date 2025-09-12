@@ -87,28 +87,21 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
   }
 
   const validateForm = () => {
-    console.log('🔍 Starting form validation...')
-    console.log('📝 Form data:', formData)
     
     // Validate required fields
     if (!formData.name.trim()) {
-      console.log('❌ Validation failed: Name is required')
       toast.error('Deployment name is required')
       return false
     }
 
     // Validate size format (CSS size pattern: number + unit)
     const sizePattern = /^\d+(px|%|rem|em)$/
-    console.log('📏 Validating width:', formData.settings.size.width, 'Pattern test:', sizePattern.test(formData.settings.size.width))
     if (!sizePattern.test(formData.settings.size.width)) {
-      console.log('❌ Validation failed: Invalid width format')
       toast.error('Width must be a valid CSS size (e.g., 400px, 50%, 20rem)')
       return false
     }
     
-    console.log('📏 Validating height:', formData.settings.size.height, 'Pattern test:', sizePattern.test(formData.settings.size.height))
     if (!sizePattern.test(formData.settings.size.height)) {
-      console.log('❌ Validation failed: Invalid height format')
       toast.error('Height must be a valid CSS size (e.g., 600px, 80%, 30rem)')
       return false
     }
@@ -116,24 +109,18 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
     // Validate website URL if provided
     if (formData.websiteUrl && formData.websiteUrl.trim()) {
       const url = formData.websiteUrl.trim()
-      console.log('🌐 Validating URL:', url)
       // Allow localhost URLs and URLs with protocols
       if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('localhost:') && !url.includes('.')) {
-        console.log('❌ Validation failed: Invalid URL format')
         toast.error('Please enter a valid website URL (e.g., https://example.com or localhost:3002)')
         return false
       }
     }
 
-    console.log('✅ All validations passed')
     return true
   }
 
   const handleCreateDeployment = async () => {
-    console.log('🔍 Validating form data:', formData)
-    
     if (!validateForm()) {
-      console.log('❌ Form validation failed')
       return
     }
 
@@ -145,7 +132,6 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
         : formData.websiteUrl
     }
 
-    console.log('✅ Form validation passed, sending data:', backendData)
 
     try {
       const response = await httpPost<{data: Deployment}>(`/agents/${agentId}/deployments`, backendData)
@@ -289,12 +275,6 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <button
-            onClick={onBack}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-2"
-          >
-            ← Back to Playground
-          </button>
           <h1 className="text-3xl font-bold text-gray-900">Deploy Your Chatbot</h1>
           <p className="text-gray-600 mt-2">
             Create deployments to embed your chatbot on any website
@@ -336,7 +316,7 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
                   <h3 className="font-semibold text-gray-900 mb-1">{deployment?.name || 'Unnamed Deployment'}</h3>
                   <p className="text-sm text-gray-600 mb-2">{deployment?.description || 'No description'}</p>
                   {deployment?.websiteUrl && (
-                    <div className="flex items-center gap-1 text-sm text-blue-600">
+                    <div className="flex items-center gap-1 text-sm text-primary-600">
                       <ExternalLink className="h-4 w-4" />
                       <a href={deployment.websiteUrl} target="_blank" rel="noopener noreferrer">
                         {deployment.websiteUrl}
@@ -378,7 +358,7 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleCopyEmbedCode(deployment?._id)}
-                  className="flex items-center gap-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                  className="flex items-center gap-1 px-3 py-1 text-sm bg-primary-100 text-primary-700 rounded-md hover:bg-primary-200 transition-colors"
                 >
                   <Copy className="h-4 w-4" />
                   Copy Code
@@ -568,7 +548,7 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
                     ...prev, 
                     settings: { ...prev.settings, autoOpen: e.target.checked }
                   }))}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                 />
                 <label htmlFor="autoOpen" className="ml-2 block text-sm text-gray-700">
                   Auto-open chatbot when page loads

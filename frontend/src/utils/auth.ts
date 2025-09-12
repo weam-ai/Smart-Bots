@@ -11,8 +11,6 @@ export interface UserContext {
  */
 export const getUserContext = async (): Promise<UserContext | null> => {
   try {
-    console.log('🔍 Getting user context from Iron Session API...');
-    
     // Call the API route to get user context
     const response = await fetch('/ai-chatbot/api/auth/user', {
       method: 'GET',

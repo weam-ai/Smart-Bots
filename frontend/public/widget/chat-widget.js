@@ -44,8 +44,6 @@
    */
   async function loadConfig() {
     try {
-      console.log('🔧 Loading widget configuration...');
-      
       // Try to get the base URL for the API call
       // const baseUrl = window.location.origin;
       // Extract basePath from current URL or use default
@@ -53,7 +51,6 @@
       // const basePath = currentPath.includes('/ai-chatbot') ? '/ai-chatbot' : '';
       // const response = await fetch(`${baseUrl}${basePath}/api/widget/config`);
       
-      console.log('✅ Widget configuration loaded:', CONFIG);
       if (response.ok) {
         // const dynamicConfig = await response.json();
         // CONFIG = { ...CONFIG, ...dynamicConfig };
@@ -77,8 +74,6 @@
    * Initialize the widget
    */
   async function init(config) {
-    console.log('🤖 AI Chatbot Widget initializing...', config);
-    
     // Load dynamic configuration first
     await loadConfig();
     
@@ -110,6 +105,18 @@
       }
     }
     
+    // Set initial state - widget starts with floating icon visible
+    widgetState.isOpen = false;
+    widgetState.isMinimized = true;
+    
+    // Ensure floating icon is visible on initialization
+    if (elements.widget) {
+      elements.widget.classList.add('minimized');
+      elements.widget.style.display = 'block';
+      elements.container.style.display = 'none';
+      elements.minimized.style.display = 'flex';
+    }
+    
     // Auto-open if configured
     if (widgetState.config.autoOpen) {
       setTimeout(() => {
@@ -118,10 +125,19 @@
     }
     
     widgetState.isInitialized = true;
-    console.log('✅ AI Chatbot Widget initialized successfully');
     
     // Track widget view
     trackAnalytics('view');
+    
+    // Add global keyboard shortcut to reopen widget (Ctrl+Shift+C)
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+        e.preventDefault();
+        if (elements.widget.style.display === 'none') {
+          showWidget();
+        }
+      }
+    });
   }
 
   /**
@@ -144,7 +160,7 @@
     
     // Create widget HTML
     widget.innerHTML = `
-      <div class="ai-chatbot-container">
+      <div class="ai-chatbot-container" style="display: none;">
         <!-- Chat Header -->
         <div class="ai-chatbot-header">
           <div class="ai-chatbot-header-content">
@@ -199,16 +215,7 @@
 
         <!-- Chat Messages -->
         <div class="ai-chatbot-messages" id="ai-chatbot-messages" style="display: ${widgetState.showIdentityForm ? 'none' : 'block'};">
-          <div class="ai-chatbot-welcome">
-            <div class="ai-chatbot-welcome-avatar">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-              </svg>
-            </div>
-            <div class="ai-chatbot-welcome-text">
-              ${widgetState.config.welcomeMessage}
-            </div>
-          </div>
+          <!-- Welcome message will be added dynamically when visitor submits identity form -->
         </div>
         
         <!-- Chat Input -->
@@ -230,14 +237,14 @@
       </div>
       
       <!-- Minimized State -->
-      <div class="ai-chatbot-minimized" style="display: none;">
+      <div class="ai-chatbot-minimized" style="display: flex;">
         <div class="ai-chatbot-minimized-content">
           <div class="ai-chatbot-minimized-avatar">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
             </svg>
           </div>
-          <div class="ai-chatbot-minimized-text">AI Assistant</div>
+          
         </div>
       </div>
     `;
@@ -320,8 +327,8 @@
     const isLight = theme === 'light' || (theme === 'auto' && !window.matchMedia('(prefers-color-scheme: dark)').matches);
     
     const colors = isLight ? {
-      primary: '#3b82f6',
-      primaryHover: '#2563eb',
+      primary: '#8b5cf6',        // Purple theme
+      primaryHover: '#7c3aed',   // Darker purple
       background: '#ffffff',
       surface: '#f8fafc',
       text: '#1f2937',
@@ -329,8 +336,8 @@
       border: '#e5e7eb',
       shadow: 'rgba(0, 0, 0, 0.1)'
     } : {
-      primary: '#60a5fa',
-      primaryHover: '#3b82f6',
+      primary: '#a78bfa',        // Purple theme for dark mode
+      primaryHover: '#8b5cf6',   // Darker purple for dark mode
       background: '#1f2937',
       surface: '#374151',
       text: '#f9fafb',
@@ -345,6 +352,22 @@
         line-height: 1.5;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+      }
+      
+      /* When minimized, widget should only show floating icon */
+      .ai-chatbot-widget.minimized {
+        width: 70px !important;
+        height: 70px !important;
+        position: fixed !important;
+        bottom: 20px !important;
+        right: 20px !important;
+        z-index: 999999 !important;
+      }
+      
+      /* When chat is open, position container above the floating icon */
+      .ai-chatbot-widget:not(.minimized) {
+        bottom: 100px !important; /* Position above the 70px floating icon + 30px margin */
+        right: 20px !important;
       }
       
       .ai-chatbot-container {
@@ -424,7 +447,7 @@
         padding: 16px;
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 16px;
       }
       
       .ai-chatbot-welcome {
@@ -458,6 +481,22 @@
         display: flex;
         gap: 12px;
         align-items: flex-start;
+        margin-bottom: 8px;
+      }
+      
+      .ai-chatbot-message:last-child {
+        margin-bottom: 0;
+      }
+      
+      /* Reduce spacing for consecutive messages from same sender */
+      .ai-chatbot-message + .ai-chatbot-message.user,
+      .ai-chatbot-message + .ai-chatbot-message.assistant {
+        margin-top: -4px;
+      }
+      
+      .ai-chatbot-message.user + .ai-chatbot-message.user,
+      .ai-chatbot-message.assistant + .ai-chatbot-message.assistant {
+        margin-top: -8px;
       }
       
       .ai-chatbot-message.user {
@@ -486,12 +525,13 @@
       
       .ai-chatbot-message-content {
         background: ${colors.surface};
-        padding: 12px 16px;
+        padding: 14px 18px;
         border-radius: 18px;
         color: ${colors.text};
         font-size: 14px;
         max-width: 80%;
         word-wrap: break-word;
+        line-height: 1.5;
       }
       
       .ai-chatbot-message.user .ai-chatbot-message-content {
@@ -649,8 +689,8 @@
       }
       
       .ai-chatbot-minimized {
-        width: 60px;
-        height: 60px;
+        width: 50px;
+        height: 50px;
         border-radius: 50%;
         background: ${colors.primary};
         color: white;
@@ -660,6 +700,10 @@
         cursor: pointer;
         box-shadow: 0 4px 16px ${colors.shadow};
         transition: all 0.2s;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000000;
       }
       
       .ai-chatbot-minimized:hover {
@@ -775,8 +819,8 @@
     // Close button
     elements.closeBtn.addEventListener('click', closeWidget);
     
-    // Minimized widget click
-    elements.minimized.addEventListener('click', openWidget);
+    // Minimized widget click - toggle chat open/close
+    elements.minimized.addEventListener('click', toggleWidget);
   }
 
   /**
@@ -840,7 +884,6 @@
 
         // Generate a session ID for this conversation
         widgetState.currentSessionId = generateSessionId();
-        console.log('🆔 Generated session ID:', widgetState.currentSessionId);
         
         // Hide identity form and show chat
         widgetState.showIdentityForm = false;
@@ -856,7 +899,12 @@
         // Add welcome message with visitor name
         addMessage('assistant', `Hi ${name}! ${widgetState.config.welcomeMessage}`);
         
-        console.log('✅ Visitor created/updated:', widgetState.visitor);
+        // Focus input after welcome message
+        setTimeout(() => {
+          if (elements.input) {
+            elements.input.focus();
+          }
+        }, 200);
       } else {
         throw new Error(result.error?.message || 'Failed to create visitor account');
       }
@@ -891,11 +939,9 @@
     try {
       // Send message to backend
       const response = await sendMessageToBackend(message);
-      console.log('🤖 Chat widget received response:', response);
       
       if (response.success) {
         // Add assistant response
-        console.log('🤖 Adding assistant message:', response.data.content);
         addMessage('assistant', response.data.content);
         
         // Update session ID if new
@@ -913,6 +959,13 @@
       addMessage('assistant', 'Sorry, I encountered an error. Please try again.');
     } finally {
       setLoadingState(false);
+      
+      // Focus input after message is processed
+      setTimeout(() => {
+        if (elements.input) {
+          elements.input.focus();
+        }
+      }, 100);
     }
   }
 
@@ -944,8 +997,6 @@
       })
     });
     
-    console.log('📤 Sending message with sessionId:', widgetState.currentSessionId);
-    
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -957,25 +1008,35 @@
    * Add message to chat
    */
   function addMessage(type, content) {
-    console.log('🤖 addMessage called:', { type, content });
     const messageElement = document.createElement('div');
     messageElement.className = `ai-chatbot-message ${type}`;
+    
+    // Check if this is a consecutive message from the same sender
+    const lastMessage = elements.messages.lastElementChild;
+    const isConsecutive = lastMessage && lastMessage.classList.contains(type);
     
     const avatar = document.createElement('div');
     avatar.className = 'ai-chatbot-message-avatar';
     
-    if (type === 'user') {
-      avatar.innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-        </svg>
-      `;
+    // Only show avatar if it's not a consecutive message from the same sender
+    if (!isConsecutive) {
+      if (type === 'user') {
+        avatar.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          </svg>
+        `;
+      } else {
+        avatar.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+        `;
+      }
     } else {
-      avatar.innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-        </svg>
-      `;
+      // For consecutive messages, add a spacer instead of avatar
+      avatar.style.width = '24px';
+      avatar.style.height = '24px';
     }
     
     const contentElement = document.createElement('div');
@@ -1034,21 +1095,40 @@
   }
 
   /**
+   * Toggle widget (open if closed, close if open)
+   */
+  function toggleWidget() {
+    if (!widgetState.isInitialized) return;
+    
+    if (widgetState.isOpen) {
+      closeWidget();
+    } else {
+      openWidget();
+    }
+  }
+
+  /**
    * Open widget
    */
   function openWidget() {
     if (!widgetState.isInitialized) return;
     
+    // Remove minimized class to restore full size
+    elements.widget.classList.remove('minimized');
+    
     elements.widget.style.display = 'block';
     elements.container.style.display = 'flex';
-    elements.minimized.style.display = 'none';
+    // Keep floating icon visible above the container
+    elements.minimized.style.display = 'flex';
     
     widgetState.isOpen = true;
     widgetState.isMinimized = false;
     
     // Focus input
     setTimeout(() => {
-      elements.input.focus();
+      if (elements.input) {
+        elements.input.focus();
+      }
     }, 100);
   }
 
@@ -1058,6 +1138,9 @@
   function minimizeWidget() {
     if (!widgetState.isInitialized) return;
     
+    // Add minimized class to widget
+    elements.widget.classList.add('minimized');
+    
     elements.container.style.display = 'none';
     elements.minimized.style.display = 'flex';
     
@@ -1066,15 +1149,21 @@
   }
 
   /**
-   * Close widget
+   * Close widget (show floating icon)
    */
   function closeWidget() {
     if (!widgetState.isInitialized) return;
     
-    elements.widget.style.display = 'none';
+    // Add minimized class to widget
+    elements.widget.classList.add('minimized');
+    
+    // Show floating icon, hide chat container
+    elements.widget.style.display = 'block';
+    elements.container.style.display = 'none';
+    elements.minimized.style.display = 'flex';
     
     widgetState.isOpen = false;
-    widgetState.isMinimized = false;
+    widgetState.isMinimized = true;
   }
 
   /**
@@ -1107,12 +1196,30 @@
   }
 
   /**
+   * Show widget (show floating icon)
+   */
+  function showWidget() {
+    if (!widgetState.isInitialized) return;
+    
+    // Add minimized class to widget
+    elements.widget.classList.add('minimized');
+    
+    elements.widget.style.display = 'block';
+    elements.container.style.display = 'none';
+    elements.minimized.style.display = 'flex';
+    
+    widgetState.isOpen = false;
+    widgetState.isMinimized = true;
+  }
+
+  /**
    * Public API
    */
   window.AIChatbotWidget = {
     init: init,
     open: openWidget,
     close: closeWidget,
+    show: showWidget,
     minimize: minimizeWidget,
     sendMessage: (message) => {
       if (elements.input) {

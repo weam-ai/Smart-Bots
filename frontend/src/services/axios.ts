@@ -52,45 +52,60 @@ const handleAuthError = (): void => {
 /**
  * Handle specific HTTP error status codes
  */
-const handleHttpError = (status: number, errorData?: ApiResponse): void => {
+const handleHttpError = (status: number, errorData?: ApiResponse, url?: string): void => {
   const errorMessage = errorData?.error?.message
+  
+  // Determine context-specific error message based on URL
+  const getContextualError = (defaultMessage: string): string => {
+    if (!url) return defaultMessage
+    
+    if (url.includes('/upload')) {
+      return errorMessage || ERROR_MESSAGES.UPLOAD_ERROR
+    } else if (url.includes('/agents')) {
+      return errorMessage || ERROR_MESSAGES.AGENT_ERROR
+    } else if (url.includes('/chat')) {
+      return errorMessage || ERROR_MESSAGES.CHAT_ERROR
+    }
+    
+    return errorMessage || defaultMessage
+  }
 
   switch (status) {
     case HTTP_STATUS.BAD_REQUEST:
-      toast.error(errorMessage || ERROR_MESSAGES.VALIDATION_ERROR)
+      toast.error(getContextualError(ERROR_MESSAGES.VALIDATION_ERROR))
       break
 
     case HTTP_STATUS.UNAUTHORIZED:
-      toast.error(errorMessage || ERROR_MESSAGES.AUTH_REQUIRED)
+      toast.error(getContextualError(ERROR_MESSAGES.AUTH_REQUIRED))
       handleAuthError()
       break
 
     case HTTP_STATUS.FORBIDDEN:
-      toast.error(errorMessage || ERROR_MESSAGES.ACCESS_DENIED)
+      toast.error(getContextualError(ERROR_MESSAGES.ACCESS_DENIED))
       break
 
     case HTTP_STATUS.NOT_FOUND:
-      toast.error(errorMessage || ERROR_MESSAGES.NOT_FOUND)
+      toast.error(getContextualError(ERROR_MESSAGES.NOT_FOUND))
       break
 
     case HTTP_STATUS.UNPROCESSABLE_ENTITY:
-      toast.error(errorMessage || ERROR_MESSAGES.VALIDATION_ERROR)
+      toast.error(getContextualError(ERROR_MESSAGES.VALIDATION_ERROR))
       break
 
     case HTTP_STATUS.TOO_MANY_REQUESTS:
-      toast.error(errorMessage || ERROR_MESSAGES.RATE_LIMITED)
+      toast.error(getContextualError(ERROR_MESSAGES.RATE_LIMITED))
       break
 
     case HTTP_STATUS.INTERNAL_SERVER_ERROR:
-      toast.error(errorMessage || ERROR_MESSAGES.SERVER_ERROR)
+      toast.error(getContextualError(ERROR_MESSAGES.SERVER_ERROR))
       break
 
     case HTTP_STATUS.SERVICE_UNAVAILABLE:
-      toast.error(errorMessage || ERROR_MESSAGES.SERVICE_UNAVAILABLE)
+      toast.error(getContextualError(ERROR_MESSAGES.SERVICE_UNAVAILABLE))
       break
 
     default:
-      toast.error(errorMessage || ERROR_MESSAGES.UNEXPECTED_ERROR)
+      toast.error(getContextualError(ERROR_MESSAGES.UNEXPECTED_ERROR))
   }
 }
 
@@ -113,14 +128,6 @@ const handleRequest = async (config: InternalAxiosRequestConfig): Promise<Intern
 
     // Add request ID for tracking
     config.headers[HEADERS.X_REQUEST_ID] = generateRequestId()
-
-    // Log request in development
-    if (NEXT_PUBLIC_NODE_ENV === 'development') {
-      console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`, {
-        headers: config.headers,
-        data: config.data,
-      })
-    }
 
     return config
   } catch (error) {
@@ -152,10 +159,22 @@ const handleRequestError = (error: any): Promise<never> => {
 const handleResponse = (response: AxiosResponse): AxiosResponse => {
   // Log successful response in development
   if (NEXT_PUBLIC_NODE_ENV === 'development') {
-    console.log(`✅ API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`, {
-      status: response.status,
-      data: response.data,
-    })
+    // Development logging removed for cleaner production code
+  }
+
+  // Show success toast for certain operations
+  const url = response.config?.url || ''
+  const method = response.config?.method?.toUpperCase() || ''
+  
+  // Only show success toasts for specific operations to avoid spam
+  if (method === 'POST' && url.includes('/agents')) {
+    toast.success('Agent created successfully!')
+  } else if (method === 'PUT' && url.includes('/agents')) {
+    toast.success('Agent updated successfully!')
+  } else if (method === 'DELETE' && url.includes('/agents')) {
+    toast.success('Agent deleted successfully!')
+  } else if (method === 'POST' && url.includes('/upload')) {
+    toast.success('Files uploaded successfully!')
   }
 
   return response
@@ -175,6 +194,17 @@ const handleResponseError = (error: AxiosError): Promise<never> => {
     url: error.config?.url,
   })
 
+  // Handle specific error types
+  if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+    toast.error(ERROR_MESSAGES.TIMEOUT_ERROR)
+    return Promise.reject(error)
+  }
+
+  if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+    toast.error(ERROR_MESSAGES.CONNECTION_ERROR)
+    return Promise.reject(error)
+  }
+
   // Network errors (no response received)
   if (!response && request) {
     toast.error(ERROR_MESSAGES.NETWORK_ERROR)
@@ -183,7 +213,7 @@ const handleResponseError = (error: AxiosError): Promise<never> => {
 
   // HTTP errors (response received with error status)
   if (response) {
-    handleHttpError(response.status, response.data as ApiResponse)
+    handleHttpError(response.status, response.data as ApiResponse, error.config?.url)
   } else {
     toast.error(ERROR_MESSAGES.REQUEST_FAILED)
   }
@@ -228,6 +258,35 @@ axiosInstance.interceptors.response.use(handleResponse, handleResponseError)
 
 // Load auth token on initialization
 loadAuthToken()
+
+// ==================== UTILITY FUNCTIONS ====================
+
+/**
+ * Show error toast with custom message
+ */
+export const showErrorToast = (message: string): void => {
+  toast.error(message)
+}
+
+/**
+ * Show success toast with custom message
+ */
+export const showSuccessToast = (message: string): void => {
+  toast.success(message)
+}
+
+/**
+ * Show info toast with custom message
+ */
+export const showInfoToast = (message: string): void => {
+  toast(message, {
+    icon: 'ℹ️',
+    style: {
+      background: '#3b82f6',
+      color: '#fff',
+    },
+  })
+}
 
 // ==================== AUTH FUNCTIONS ====================
 

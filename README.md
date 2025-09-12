@@ -15,7 +15,7 @@ Create and deploy intelligent AI chatbots from your documents using RAG (Retriev
 
 - **Frontend**: Next.js 14, TypeScript, Tailwind CSS
 - **Backend**: Node.js, Express, TypeScript
-- **Database**: MongoDB (user data), Qdrant (vector database)
+- **Database**: MongoDB (user data), PineCone (vector database)
 - **Queue**: Redis + BullMQ
 - **AI**: OpenAI API (GPT models + embeddings)
 - **Deployment**: Docker Compose
@@ -57,7 +57,6 @@ This will start:
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8000
 - MongoDB: localhost:27017
-- Qdrant: http://localhost:6333
 - Redis: localhost:6379
 
 ### 4. Access the Application
@@ -82,7 +81,7 @@ Open http://localhost:3000 in your browser to start creating AI agents!
 3. **Training**: 
    - Documents are automatically processed
    - Text is chunked and vectorized
-   - Stored in Qdrant for fast retrieval
+   - Stored in Pinecone for fast retrieval
 
 4. **Test in Playground**:
    - Chat with your AI agent
@@ -126,7 +125,6 @@ npm run dev
 ### Database Access
 
 - **MongoDB**: Use MongoDB Compass or mongo shell
-- **Qdrant**: Access at http://localhost:6333/dashboard
 - **Redis**: Use redis-cli or RedisInsight
 
 ## API Endpoints
@@ -168,7 +166,7 @@ npm run dev
 │ - Embed Widget  │    │ - RAG Pipeline  │    │ │  Sessions)  │ │
 └─────────────────┘    └─────────────────┘    │ └─────────────┘ │
                                               │ ┌─────────────┐ │
-                                              │ │   Qdrant    │ │
+                                              │ │  Pinecone   │ │
                                               │ │ (Vectors)   │ │
                                               │ └─────────────┘ │
                                               │ ┌─────────────┐ │
@@ -181,8 +179,8 @@ npm run dev
 ## Data Flow
 
 1. **Document Upload**: Files → Backend → MongoDB (metadata) + Disk (content)
-2. **Training**: Parse → Chunk → Embed → Qdrant (vectors)
-3. **Chat**: Query → Qdrant Search → Context → LLM → Response
+2. **Training**: Parse → Chunk → Embed → Pinecone (vectors)
+3. **Chat**: Query → PineCone Search → Context → LLM → Response
 4. **Embed**: Script → iframe → Backend API → Chat Interface
 
 ## Security Features

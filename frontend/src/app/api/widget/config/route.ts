@@ -6,8 +6,6 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    console.log('🔧 Generating widget configuration...');
-    
     const backendUrl =  envConfig.NEXT_PUBLIC_BACKEND_API_URL
     
     const config = {
@@ -17,8 +15,6 @@ export async function GET() {
       NODE_ENV: envConfig.NEXT_PUBLIC_NODE_ENV,
     };
 
-    console.log('✅ Widget configuration generated:', config);
-    
     return NextResponse.json(config);
   } catch (error) {
     console.error('❌ Error generating widget config:', error);

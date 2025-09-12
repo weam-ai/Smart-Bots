@@ -127,13 +127,13 @@ export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: Ag
                 <Globe className="h-4 w-4" />
                 Deploy
               </button>
-              <button
+              {/* <button
                 onClick={saveAgent}
                 className="btn-primary inline-flex items-center gap-2"
               >
                 <Save className="h-4 w-4" />
                 Save to agent
-              </button>
+              </button> */}
             </div>
           </div>
         </div>

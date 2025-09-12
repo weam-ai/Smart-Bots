@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { httpGet } from '@/services/axios';
 import { Agent } from '@/types/agent';
 import AgentPlayground from '@/components/AgentPlayground';
@@ -35,6 +35,7 @@ export default function PlaygroundPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const agentId = params.agentId as string;
+  const router = useRouter();
   
   const [loading, setLoading] = useState(true);
   const [agentData, setAgentData] = useState<AgentData>({
@@ -119,7 +120,7 @@ export default function PlaygroundPage() {
 
   const handleBack = () => {
     // Navigate back to agent detail page (step 2)
-    window.history.back();
+    router.push(`/${agentId}?step=1`);
   };
 
   if (loading) {

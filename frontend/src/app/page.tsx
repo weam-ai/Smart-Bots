@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Plus, Bot, FileText, Users, Calendar, Play, Loader2 } from 'lucide-react'
+import { Plus, Bot, FileText, Users, Calendar, Play, Loader2, ArrowLeft } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { useAgentOperations } from '@/hooks/useAgents'
 import CreateAgentModal from '@/components/CreateAgentModal'
@@ -26,12 +26,12 @@ export default function Home() {
   // Ensure URL shows step=1 for main page
   useEffect(() => {
     const currentStep = searchParams.get('step')
-    if (!currentStep || currentStep !== '1') {
-      // Replace current URL with step=1 parameter
-      const newUrl = new URL(window.location.href)
-      newUrl.searchParams.set('step', '1')
-      window.history.replaceState({}, '', newUrl.toString())
-    }
+    // if (!currentStep || currentStep !== '1') {
+    //   // Replace current URL with step=1 parameter
+    //   const newUrl = new URL(window.location.href)
+    //   newUrl.searchParams.set('step', '1')
+    //   window.history.replaceState({}, '', newUrl.toString())
+    // }
   }, [searchParams])
 
   const handleCreateNewAgent = () => {
@@ -40,12 +40,9 @@ export default function Home() {
 
   const handleCreateSubmit = async (agentData: CreateAgentPayload) => {
     const newAgent = await createAgent(agentData)
-    console.log('🎯 Created agent:', newAgent)
-    console.log('🆔 Agent ID:', newAgent?._id)
     
     if (newAgent && newAgent._id) {
       setShowCreateModal(false)
-      console.log('🚀 Navigating to:', `/${newAgent._id}?step=2`)
       router.push(`/${newAgent._id}?step=1`)
     } else {
       console.error('❌ No agent ID available for navigation')
@@ -67,7 +64,7 @@ export default function Home() {
               <h1 className="ml-2 text-xl font-semibold text-gray-900">AI Chatbot Agents</h1>
             </div>
             <button
-              onClick={handleCreateNewAgent}
+              onClick={() => {window.location.assign('/')}}
               className="btn-primary inline-flex items-center gap-2"
               disabled={isCreating}
             >
@@ -78,8 +75,8 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                  <Plus className="h-4 w-4" />
-                  New Agent
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to Weam
                 </>
               )}
             </button>
@@ -89,8 +86,8 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 gap-6 mb-8">
-          <div className="card text-center ">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="card text-center"> 
             <div className="text-3xl font-bold text-primary-600 mb-2">
               {isLoadingAgents ? (
                 <Loader2 className="h-8 w-8 animate-spin mx-auto" />
@@ -100,8 +97,8 @@ export default function Home() {
             </div>
             <div className="text-sm text-gray-600">Company Agents</div>
           </div>
-          {/* <div className="card text-center">
-            <div className="text-3xl font-bold text-green-600 mb-2">
+          <div className="card text-center">
+            <div className="text-3xl font-bold text-primary-600 mb-2">
               {isLoadingAgents ? (
                 <Loader2 className="h-8 w-8 animate-spin mx-auto" />
               ) : (
@@ -109,9 +106,9 @@ export default function Home() {
               )}
             </div>
             <div className="text-sm text-gray-600">Total Sessions</div>
-          </div> */}
-          {/* <div className="card text-center">
-            <div className="text-3xl font-bold text-blue-600 mb-2">
+          </div>
+          <div className="card text-center">
+            <div className="text-3xl font-bold text-primary-600 mb-2">
               {isLoadingAgents ? (
                 <Loader2 className="h-8 w-8 animate-spin mx-auto" />
               ) : (
@@ -119,7 +116,7 @@ export default function Home() {
               )}
             </div>
             <div className="text-sm text-gray-600">Total Messages</div>
-          </div> */}
+          </div>
         </div>
 
         {/* Agents Grid */}
@@ -182,16 +179,12 @@ export default function Home() {
                         <Plus className="h-6 w-6 text-primary-600" />
                       </div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">Create New Agent</h3>
-                      <p className="text-sm text-gray-600 mb-4">
+                      <p className="text-sm text-gray-600">
                         Upload documents and train a new AI chatbot
                       </p>
                       {isCreating ? (
                         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
-                      ) : (
-                        <div className="btn-primary text-sm px-4 py-2">
-                          Get Started
-                        </div>
-                      )}
+                      ) : null}
                     </div>
                   </div>
 
@@ -218,7 +211,7 @@ export default function Home() {
                              agent.status === 'completed' ? 'Ready' :
                              agent.status === 'training' ? 'Training' :
                              agent.status === 'creating' ? 'Creating' :
-                             'Error'}
+                             'Not Ready'}
                           </span>
                         </div>
                       </div>
@@ -231,7 +224,7 @@ export default function Home() {
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-1">
                             <FileText className="h-4 w-4 text-gray-400" />
-                            <span className="text-gray-600">0 files</span>
+                            <span className="text-gray-600">{agent.metadata?.totalFiles || 0} files</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <Users className="h-4 w-4 text-gray-400" />

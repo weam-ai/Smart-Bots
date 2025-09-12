@@ -68,9 +68,9 @@ export default function AgentUpload({
       case "application/pdf":
         return <FileText className="h-5 w-5 text-red-500" />;
       case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-        return <FileText className="h-5 w-5 text-blue-500" />;
+        return <FileText className="h-5 w-5 text-primary-500" />;
       case "application/msword":
-        return <FileText className="h-5 w-5 text-blue-500" />;
+        return <FileText className="h-5 w-5 text-primary-500" />;
       case "text/plain":
         return <File className="h-5 w-5 text-gray-500" />;
       default:
@@ -81,7 +81,6 @@ export default function AgentUpload({
   // Files upload automatically, so we just need to handle completion
   const handleFilesCompleted = useCallback(() => {
     if (allCompleted && allSuccessful && uploadedFiles.length > 0) {
-      console.log("✅ All files uploaded successfully, proceeding to training");
       const files = uploadedFiles.map((f) => f.file);
       onFilesUploaded(files);
     }
@@ -343,7 +342,7 @@ export default function AgentUpload({
                     variant="dots" 
                     size="sm" 
                     text="Uploading files..." 
-                    className="text-blue-600"
+                    className="text-primary-600"
                   />
                 )}
 
@@ -365,21 +364,54 @@ export default function AgentUpload({
               </div>
             )}
 
-            {!hasNewUploads &&
-              !(
-                allCompleted &&
-                allSuccessful &&
-                (agentData.files.length > 0 || uploadedFiles.length > 0)
-              ) &&
-              onStartTraining && (
-                <button
-                  onClick={onStartTraining}
-                  className="btn-primary inline-flex items-center gap-2"
-                >
-                  <ArrowRight className="h-4 w-4" />
-                  Train Chatbot
-                </button>
-              )}
+            {/* Button Logic based on file states */}
+            {(() => {
+              const hasUploadedFiles = uploadedFiles.length > 0;
+              const hasExistingFiles = agentData.files.length > 0;
+              const canTrain = allCompleted && allSuccessful;
+
+              // Case 1: No new uploads but has existing files -> Show "Test Chatbot" button
+              if (!hasNewUploads && !hasUploadedFiles && hasExistingFiles) {
+                return (
+                  <button
+                    onClick={onStartTesting}
+                    className="btn-primary inline-flex items-center gap-2"
+                  >
+                    <ArrowRight className="h-4 w-4" />
+                    Test Chatbot
+                  </button>
+                );
+              }
+
+              // Case 2: No files at all -> Disable "Train Chatbot" button
+              if (!hasUploadedFiles && !hasExistingFiles) {
+                return (
+                  <button
+                    className="btn-primary inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={true}
+                  >
+                    <ArrowRight className="h-4 w-4" />
+                    Train Chatbot
+                  </button>
+                );
+              }
+
+              // Case 3 & 4: Has uploaded files (with or without existing files) -> Enable "Train Chatbot" button
+              if (hasUploadedFiles && onStartTraining) {
+                return (
+                  <button
+                    onClick={onStartTraining}
+                    className="btn-primary inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={isUploading}
+                  >
+                    <ArrowRight className="h-4 w-4" />
+                    Train Chatbot
+                  </button>
+                );
+              }
+
+              return null;
+            })()}
           </div>
         </div>
       </main>
