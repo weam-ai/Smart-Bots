@@ -86,8 +86,8 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 gap-6 mb-8">
-          <div className="card text-center ">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="card text-center"> 
             <div className="text-3xl font-bold text-primary-600 mb-2">
               {isLoadingAgents ? (
                 <Loader2 className="h-8 w-8 animate-spin mx-auto" />
@@ -97,8 +97,8 @@ export default function Home() {
             </div>
             <div className="text-sm text-gray-600">Company Agents</div>
           </div>
-          {/* <div className="card text-center">
-            <div className="text-3xl font-bold text-green-600 mb-2">
+          <div className="card text-center">
+            <div className="text-3xl font-bold text-primary-600 mb-2">
               {isLoadingAgents ? (
                 <Loader2 className="h-8 w-8 animate-spin mx-auto" />
               ) : (
@@ -106,9 +106,9 @@ export default function Home() {
               )}
             </div>
             <div className="text-sm text-gray-600">Total Sessions</div>
-          </div> */}
-          {/* <div className="card text-center">
-            <div className="text-3xl font-bold text-blue-600 mb-2">
+          </div>
+          <div className="card text-center">
+            <div className="text-3xl font-bold text-primary-600 mb-2">
               {isLoadingAgents ? (
                 <Loader2 className="h-8 w-8 animate-spin mx-auto" />
               ) : (
@@ -116,7 +116,7 @@ export default function Home() {
               )}
             </div>
             <div className="text-sm text-gray-600">Total Messages</div>
-          </div> */}
+          </div>
         </div>
 
         {/* Agents Grid */}
@@ -179,16 +179,12 @@ export default function Home() {
                         <Plus className="h-6 w-6 text-primary-600" />
                       </div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">Create New Agent</h3>
-                      <p className="text-sm text-gray-600 mb-4">
+                      <p className="text-sm text-gray-600">
                         Upload documents and train a new AI chatbot
                       </p>
                       {isCreating ? (
                         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
-                      ) : (
-                        <div className="btn-primary text-sm px-4 py-2">
-                          Get Started
-                        </div>
-                      )}
+                      ) : null}
                     </div>
                   </div>
 
@@ -215,7 +211,7 @@ export default function Home() {
                              agent.status === 'completed' ? 'Ready' :
                              agent.status === 'training' ? 'Training' :
                              agent.status === 'creating' ? 'Creating' :
-                             'Error'}
+                             'Not Ready'}
                           </span>
                         </div>
                       </div>
