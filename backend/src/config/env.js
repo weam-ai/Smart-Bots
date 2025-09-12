@@ -173,5 +173,6 @@ module.exports = {
   WIDGET_API_URL: envConfig.WIDGET_API_URL,
   WIDGET_SCRIPT_URL: envConfig.WIDGET_SCRIPT_URL,
   NODE_ENV: envConfig.NODE_ENV,
-  PORT: envConfig.PORT
+  PORT: envConfig.PORT,
+  RATE_LIMIT_GENERAL_PROD: envConfig.RATE_LIMIT_GENERAL_PROD,
 };

@@ -1,5 +1,6 @@
 const rateLimit = require('express-rate-limit');
 const { NODE_ENV, RATE_LIMIT_GENERAL_PROD } = require('../config/env');
+console.log("🚀 ~ RATE_LIMIT_GENERAL_PROD:", RATE_LIMIT_GENERAL_PROD)
 
 /**
  * Rate Limiting Middleware Configuration
