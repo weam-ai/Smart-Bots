@@ -5,15 +5,19 @@ const morgan = require('morgan');
 const mongoose = require('mongoose');
 const connectDB = require('./config/database');
 require('dotenv').config();
-const { PORT, NODE_ENV, BACKEND_API_PREFIX } = require('./config/env');
+const { PORT, NODE_ENV, BACKEND_API_PREFIX, CORS_ORIGIN_DEV  } = require('./config/env');
+console.log("🚀 ~ CORS_ORIGIN_DEV:", CORS_ORIGIN_DEV)
 const app = express();
+// Add this to your server.js after line 10
+app.set('trust proxy', true);
 
 
 // Middleware
 app.use(helmet());
 // app.use(compression()); // Temporarily disabled
-app.use(cors({
-  origin: '*',
+// CORS configuration
+const corsOptions = {
+  origin: CORS_ORIGIN_DEV ? CORS_ORIGIN_DEV.split(',') : [/weam\.ai$/],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: [
@@ -24,9 +28,10 @@ app.use(cors({
     'Authorization',
     'X-Request-ID'
   ],
-  exposedHeaders: ['X-Request-ID'],
-  maxAge: 86400 // 24 hours
-}));
+  exposedHeaders: ['X-Request-ID']
+};
+
+app.use(cors(corsOptions));
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -56,38 +61,8 @@ app.use(requestLogger);
 app.use(responseTimeLogger);
 app.use(developmentErrorLogger);
 
-// Handle preflight requests explicitly
+// Handle preflight requests explicitly (CORS middleware should handle this, but keeping as backup)
 app.options('*', (req, res) => {
-  const origin = req.headers.origin;
-  
-  // Allow all localhost and frontend container origins in development
-  if (NODE_ENV !== 'production') {
-    if (!origin || 
-        origin.startsWith('http://localhost:') || 
-        origin.startsWith('http://127.0.0.1:') ||
-        origin.startsWith('http://frontend:')) {
-      res.header('Access-Control-Allow-Origin', origin || '*');
-    }
-  } else {
-    // Production - be more strict
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:3001', 
-      'http://frontend:3000',
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:3001',
-      'https://dev.weam.ai'
-    ];
-    
-    if (!origin || allowedOrigins.includes(origin)) {
-      res.header('Access-Control-Allow-Origin', origin || allowedOrigins[0]);
-    }
-  }
-  
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Request-ID');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Max-Age', '86400');
   res.sendStatus(200);
 });
 
@@ -156,9 +131,11 @@ const initializeQueue = async () => {
     
     // Start background workers
     const { startDocumentWorker, startEmbeddingWorker } = require('./workers/documentWorker');
+    const { createDeletionWorker } = require('./workers/deletionWorker');
     
     const documentWorker = startDocumentWorker();
     const embeddingWorker = startEmbeddingWorker();
+    const deletionWorker = createDeletionWorker();
     
     console.log('✅ Queue system and workers initialized');
     
@@ -167,6 +144,7 @@ const initializeQueue = async () => {
       console.log('🔄 Shutting down workers...');
       await documentWorker.close();
       await embeddingWorker.close();
+      await deletionWorker.close();
       console.log('✅ Workers shut down gracefully');
     });
     

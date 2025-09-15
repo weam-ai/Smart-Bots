@@ -155,8 +155,6 @@ export default function AgentUpload({
 
   // Handle remove uploaded file (from the "Uploaded Files" section)
   const handleRemoveUploadedFile = async (fileId: string, status: string) => {
-    console.log("🚀 ~ handleRemoveUploadedFile ~ status:", status)
-    console.log("🚀 ~ handleRemoveUploadedFile ~ fileId:", fileId)
     
     if (status === 'success') {
       // If file was successfully uploaded, we need to delete it from the server
