@@ -291,7 +291,7 @@ export const useCompleteUpload = () => {
         }
         
         // Show success toast
-        toast.success(`Successfully uploaded ${files.length} file(s)!`)
+        // toast.success(`Successfully uploaded ${files.length} file(s)!`)
         return true
       } else {
         console.error('❌ Upload failed - no response')

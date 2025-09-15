@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import toast from "react-hot-toast";
 import {
   Upload,
   FileText,
@@ -12,10 +13,13 @@ import {
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
+  Trash2,
 } from "lucide-react";
 import { AgentData } from "@/app/[agentId]/page";
 import { useCompleteUpload } from "@/hooks/useUpload";
+import { useDeleteFile, useDeleteFileImmediate } from "@/hooks";
 import { InlineLoader } from "@/components/ui/Loader";
+import { axiosInstance } from "@/services/axios";
 
 interface AgentUploadProps {
   agentData: AgentData;
@@ -47,6 +51,15 @@ export default function AgentUpload({
     constraints,
     isUploading,
   } = useCompleteUpload();
+
+  // File deletion hook
+  const { deleteFile, isDeleting, error: deleteError, clearError, deletionJob, checkDeletionStatus, clearDeletionJob } = useDeleteFile();
+  const { deleteFileImmediate, isDeleting: isDeletingImmediate, error: deleteImmediateError, clearError: clearImmediateError } = useDeleteFileImmediate();
+
+  // State for managing already uploaded files
+  const [existingFiles, setExistingFiles] = useState(agentData.files || []);
+  const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -83,13 +96,170 @@ export default function AgentUpload({
     if (allCompleted && allSuccessful && uploadedFiles.length > 0) {
       const files = uploadedFiles.map((f) => f.file);
       onFilesUploaded(files);
+      
+      // Clear the uploaded files from local state since they're now in "Already Uploaded Files"
+      // This prevents them from showing in both sections
+      setTimeout(() => {
+        clearFiles();
+        toast.success(`Files moved to "Already Uploaded Files" section`, {
+          duration: 3000,
+          icon: '📁',
+        });
+      }, 1000); // Small delay to let the user see the success state
     }
-  }, [allCompleted, allSuccessful, uploadedFiles, onFilesUploaded]);
+  }, [allCompleted, allSuccessful, uploadedFiles, onFilesUploaded, clearFiles]);
 
   // Call handleFilesCompleted when upload status changes
   useEffect(() => {
     handleFilesCompleted();
   }, [handleFilesCompleted]);
+
+  // Update existing files when agentData changes
+  useEffect(() => {
+    setExistingFiles(agentData.files || []);
+  }, [agentData.files]);
+
+  // Check deletion job status periodically
+  useEffect(() => {
+    if (!deletionJob) return;
+
+    const interval = setInterval(async () => {
+      const isCompleted = await checkDeletionStatus(deletionJob.jobId);
+      if (isCompleted) {
+        // Job completed, remove file from list and clear the deletion job
+        setExistingFiles(prev => prev.filter(file => file._id !== deletionJob.fileId));
+        clearDeletionJob();
+      }
+    }, 2000); // Check every 2 seconds
+
+    return () => clearInterval(interval);
+  }, [deletionJob, checkDeletionStatus]);
+
+  // Handle file deletion
+  const handleDeleteFile = async (fileId: string) => {
+    setDeletingFileId(fileId);
+    clearError();
+
+    // Use background deletion for files in "Already Uploaded Files" section
+    const success = await deleteFile(agentData.id, fileId);
+    
+    if (success) {
+      // Remove file from local state (optimistic update)
+      setExistingFiles(prev => prev.filter(file => file._id !== fileId));
+      console.log("🗑️ File deletion queued for background processing");
+    }
+    
+    setDeletingFileId(null);
+    setShowDeleteConfirm(null);
+  };
+
+  // Handle remove uploaded file (from the "Uploaded Files" section)
+  const handleRemoveUploadedFile = async (fileId: string, status: string) => {
+    console.log("🚀 ~ handleRemoveUploadedFile ~ status:", status)
+    console.log("🚀 ~ handleRemoveUploadedFile ~ fileId:", fileId)
+    
+    if (status === 'success') {
+      // If file was successfully uploaded, we need to delete it from the server
+      // Find the file in the uploaded files list
+      const fileToRemove = uploadedFiles.find(f => f.id === fileId);
+      if (fileToRemove) {
+        // Find the corresponding file in the existing files (server-side)
+        const serverFile = existingFiles.find(f => f.originalFilename === fileToRemove.file.name);
+        if (serverFile) {
+          // Queue deletion from server (background processing)
+          const success = await deleteFile(agentData.id, serverFile._id);
+          if (success) {
+            // Remove from local uploaded files list immediately (optimistic update)
+            removeFile(fileId);
+            // Remove from existing files list immediately (optimistic update)
+            setExistingFiles(prev => prev.filter(file => file._id !== serverFile._id));
+            toast.success(`File "${fileToRemove.file.name}" queued for deletion`);
+          } else {
+            toast.error(`Failed to queue file deletion for "${fileToRemove.file.name}"`);
+          }
+        } else {
+          // File not found on server, just remove from local list
+          removeFile(fileId);
+        }
+      }
+    } else if (status === 'pending' || status === 'processing') {
+      // File is still being processed, but may already be in database
+      // Find the file in the uploaded files list
+      const fileToRemove = uploadedFiles.find(f => f.id === fileId);
+      if (fileToRemove) {
+        // Check if file exists in database (already uploaded)
+        const serverFile = existingFiles.find(f => f.originalFilename === fileToRemove.file.name);
+        if (serverFile) {
+          // File is in database, delete it immediately (not background processing)
+          const success = await deleteFileImmediate(agentData.id, serverFile._id);
+          if (success) {
+            // Remove from local uploaded files list
+            removeFile(fileId);
+            // Remove from existing files list (optimistic update)
+            setExistingFiles(prev => prev.filter(file => file._id !== serverFile._id));
+          }
+        } else {
+          // File not in existingFiles, but might still be in database with pending status
+          // We need to try to delete it from database using the filename
+          // Since we don't have the database _id, we need to find it by filename
+          try {
+            // Try to find and delete the file by searching for it in the database
+            // We'll need to make an API call to find the file by filename and agent
+            const response = await axiosInstance.get(`/upload/${agentData.id}/files?filename=${encodeURIComponent(fileToRemove.file.name)}`);
+            
+            if (response.data.success && response.data.data.files.length > 0) {
+              // Found the file in database, delete it immediately
+              const dbFile = response.data.data.files[0];
+              const success = await deleteFileImmediate(agentData.id, dbFile._id);
+              if (success) {
+                // Remove from local uploaded files list
+                removeFile(fileId);
+                toast(`File "${fileToRemove.file.name}" deleted from database`, {
+                  icon: '🗑️',
+                  duration: 3000,
+                });
+              } else {
+                // If deletion fails, just remove from local queue
+                removeFile(fileId);
+                toast(`File upload cancelled`, {
+                  icon: 'ℹ️',
+                  duration: 3000,
+                });
+              }
+            } else {
+              // File not found in database, just remove from local queue
+              removeFile(fileId);
+              toast(`File upload cancelled`, {
+                icon: 'ℹ️',
+                duration: 3000,
+              });
+            }
+          } catch (error) {
+            // If there's an error, just remove from local queue
+            removeFile(fileId);
+            toast(`File upload cancelled`, {
+              icon: 'ℹ️',
+              duration: 3000,
+            });
+          }
+        }
+      }
+    } else {
+      // File upload failed or other status, just remove from local list
+      removeFile(fileId);
+    }
+  };
+
+  // Handle delete confirmation
+  const handleDeleteConfirm = (fileId: string) => {
+    setShowDeleteConfirm(fileId);
+    
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirm(null);
+    clearError();
+  };
 
   const totalSize = getTotalSize();
   const hasScannedPDFs = uploadedFiles.some(
@@ -191,20 +361,43 @@ export default function AgentUpload({
         </div>
 
         {/* Already Uploaded Files */}
-        {agentData.files && agentData.files.length > 0 && (
+        {existingFiles && existingFiles.length > 0 && (
           <div className="card mb-8">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900">
                 Already Uploaded Files
               </h3>
               <div className="text-sm text-gray-500">
-                {agentData.files.length} file
-                {agentData.files.length !== 1 ? "s" : ""} ready for training
+                {existingFiles.length} file
+                {existingFiles.length !== 1 ? "s" : ""} ready for training
               </div>
             </div>
 
+            {/* Delete Error Message */}
+            {deleteError && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-red-800">
+                      Delete Failed
+                    </p>
+                    <p className="text-sm text-red-700 mt-1">
+                      {deleteError}
+                    </p>
+                    <button
+                      onClick={clearError}
+                      className="text-sm text-red-600 hover:text-red-800 underline mt-1"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-4">
-              {agentData.files.map((file) => (
+              {existingFiles.map((file) => (
                 <div
                   key={file._id}
                   className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg"
@@ -221,9 +414,33 @@ export default function AgentUpload({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span className="text-sm text-green-600">Ready</span>
+                  <div className="flex items-center gap-4">
+                    {/* Status indicator */}
+                    {deletionJob && deletionJob.fileId === file._id ? (
+                      <div className="flex items-center gap-2">
+                        <InlineLoader variant="dots" size="sm" />
+                        <span className="text-sm text-blue-600">Deleting...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                        <span className="text-sm text-green-600">Ready</span>
+                      </div>
+                    )}
+
+                    {/* Delete Button */}
+                    <button
+                      onClick={() => handleDeleteConfirm(file._id)}
+                      disabled={deletingFileId === file._id || isDeleting || (deletionJob?.fileId === file._id)}
+                      className="p-2 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Delete file"
+                    >
+                      {deletingFileId === file._id ? (
+                        <InlineLoader variant="dots" size="sm" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </button>
                   </div>
                 </div>
               ))}
@@ -293,7 +510,7 @@ export default function AgentUpload({
                     )}
 
                     <button
-                      onClick={() => removeFile(fileInfo.id)}
+                      onClick={() => handleRemoveUploadedFile(fileInfo.id, fileInfo.status)}
                       className="p-1 text-gray-400 hover:text-red-600 transition-colors"
                     >
                       <X className="h-4 w-4" />
@@ -364,24 +581,104 @@ export default function AgentUpload({
               </div>
             )}
 
-            {!hasNewUploads &&
-              !(
-                allCompleted &&
-                allSuccessful &&
-                (agentData.files.length > 0 || uploadedFiles.length > 0)
-              ) &&
-              onStartTraining && (
-                <button
-                  onClick={onStartTraining}
-                  className="btn-primary inline-flex items-center gap-2"
-                >
-                  <ArrowRight className="h-4 w-4" />
-                  Train Chatbot
-                </button>
-              )}
+            {/* Button Logic based on file states */}
+            {(() => {
+              const hasUploadedFiles = uploadedFiles.length > 0;
+              const hasExistingFiles = existingFiles.length > 0;
+              const canTrain = allCompleted && allSuccessful;
+
+              // Case 1: No new uploads but has existing files -> Show "Test Chatbot" button
+              if (!hasNewUploads && !hasUploadedFiles && hasExistingFiles) {
+                return (
+                  <button
+                    onClick={onStartTesting}
+                    className="btn-primary inline-flex items-center gap-2"
+                  >
+                    <ArrowRight className="h-4 w-4" />
+                    Test Chatbot
+                  </button>
+                );
+              }
+
+              // Case 2: No files at all -> Disable "Train Chatbot" button
+              if (!hasUploadedFiles && !hasExistingFiles) {
+                return (
+                  <button
+                    className="btn-primary inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={true}
+                  >
+                    <ArrowRight className="h-4 w-4" />
+                    Train Chatbot
+                  </button>
+                );
+              }
+
+              // Case 3 & 4: Has uploaded files (with or without existing files) -> Enable "Train Chatbot" button
+              if (hasUploadedFiles && onStartTraining) {
+                return (
+                  <button
+                    onClick={onStartTraining}
+                    className="btn-primary inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={isUploading}
+                  >
+                    <ArrowRight className="h-4 w-4" />
+                    Train Chatbot
+                  </button>
+                );
+              }
+
+              return null;
+            })()}
           </div>
         </div>
       </main>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-red-100 rounded-full">
+                <Trash2 className="h-5 w-5 text-red-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Delete File
+              </h3>
+            </div>
+            
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete this file? This action will remove the file from S3 storage, Pinecone vector database, and the local database. This action cannot be undone.
+            </p>
+            
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={handleDeleteCancel}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDeleteFile(showDeleteConfirm)}
+                disabled={isDeleting}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {isDeleting ? (
+                  <>
+                    <InlineLoader variant="dots" size="sm" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4" />
+                    Delete File
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

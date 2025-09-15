@@ -22,7 +22,8 @@ const QUEUE_NAMES = {
   DOCUMENT_PROCESSING: 'document-processing',
   FILE_UPLOAD: 'file-upload',
   EMBEDDING_GENERATION: 'embedding-generation',
-  NOTIFICATIONS: 'notifications'
+  NOTIFICATIONS: 'notifications',
+  FILE_DELETION: 'file-deletion'
 };
 
 // Job types
@@ -36,6 +37,10 @@ const JOB_TYPES = {
   // Batch operations
   BATCH_PROCESS_FILES: 'batch-process-files',
   REPROCESS_FILE: 'reprocess-file',
+  
+  // File deletion
+  DELETE_FILE: 'delete-file',
+  BATCH_DELETE_FILES: 'batch-delete-files',
   
   // Notifications
   SEND_NOTIFICATION: 'send-notification',
@@ -94,6 +99,14 @@ const QUEUE_OPTIONS = {
     ...DEFAULT_JOB_OPTIONS,
     attempts: 2,
     priority: JOB_PRIORITIES.HIGH
+  },
+  
+  [QUEUE_NAMES.FILE_DELETION]: {
+    ...DEFAULT_JOB_OPTIONS,
+    attempts: 3,
+    priority: JOB_PRIORITIES.BACKGROUND,
+    removeOnComplete: 50,
+    removeOnFail: 25
   }
 };
 
@@ -102,7 +115,8 @@ const WORKER_CONCURRENCY = {
   [QUEUE_NAMES.DOCUMENT_PROCESSING]: 3,  // Limit concurrent document processing
   [QUEUE_NAMES.FILE_UPLOAD]: 5,          // More concurrent uploads
   [QUEUE_NAMES.EMBEDDING_GENERATION]: 2, // Limit OpenAI API calls
-  [QUEUE_NAMES.NOTIFICATIONS]: 10        // High concurrency for notifications
+  [QUEUE_NAMES.NOTIFICATIONS]: 10,       // High concurrency for notifications
+  [QUEUE_NAMES.FILE_DELETION]: 5         // Moderate concurrency for deletions
 };
 
 // Create queue instances

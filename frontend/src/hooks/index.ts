@@ -8,6 +8,8 @@ export * from './useAgents'
 
 // File upload hooks
 export * from './useUpload'
+export * from './useDeleteFile'
+export * from './useDeleteFileImmediate'
 
 // Chat hooks
 export * from './useChat'

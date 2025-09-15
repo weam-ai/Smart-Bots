@@ -54,12 +54,46 @@ router.post('/:agentId/files/:fileId/retry',
   uploadController.retryFileProcessing
 );
 
-// DELETE /api/upload/:agentId/files/:fileId - Delete uploaded file
+// DELETE /api/upload/:agentId/files/:fileId - Delete uploaded file (Background Processing)
 router.delete('/:agentId/files/:fileId',
-  validateAgentId,
+  // validateAgentId,
   verifyAgentOwnership,
   jwtAuthMiddleware,
   uploadController.deleteFile
+);
+
+// DELETE /api/upload/:agentId/files/:fileId/immediate - Delete uploaded file immediately
+router.delete('/:agentId/files/:fileId/immediate',
+  // validateAgentId,
+  verifyAgentOwnership,
+  jwtAuthMiddleware,
+  uploadController.deleteFileImmediate
+);
+
+// DELETE /api/upload/:agentId/files/batch - Batch delete files (Background Processing)
+router.delete('/:agentId/files/batch',
+  validateAgentId,
+  verifyAgentOwnership,
+  jwtAuthMiddleware,
+  uploadController.batchDeleteFiles
+);
+
+// GET /api/upload/deletion-status/:jobId - Get deletion job status
+router.get('/deletion-status/:jobId',
+  jwtAuthMiddleware,
+  uploadController.getDeletionStatus
+);
+
+// GET /api/upload/deletion-queue-stats - Get deletion queue statistics
+router.get('/deletion-queue-stats',
+  jwtAuthMiddleware,
+  uploadController.getDeletionQueueStats
+);
+
+// DELETE /api/upload/deletion-job/:jobId - Cancel deletion job
+router.delete('/deletion-job/:jobId',
+  jwtAuthMiddleware,
+  uploadController.cancelDeletionJob
 );
 
 // POST /api/upload/:agentId/fix-status - Fix agent and file status (temporary)

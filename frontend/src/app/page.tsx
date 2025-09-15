@@ -61,7 +61,7 @@ export default function Home() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <Bot className="h-8 w-8 text-primary-600" />
-              <h1 className="ml-2 text-xl font-semibold text-gray-900">AI Chatbot Agents</h1>
+              <h1 className="ml-2 text-xl font-semibold text-gray-900">Weam AI </h1>
             </div>
             <button
               onClick={() => {window.location.assign('/')}}
