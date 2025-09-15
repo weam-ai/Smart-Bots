@@ -42,11 +42,6 @@ export const useDeleteFileImmediate = () => {
         const successData = response.data as ImmediateDeleteResponse;
         console.log('File deleted immediately:', successData.data);
         
-        // Show success toast
-        toast.success(`File "${successData.data.deletedFile.originalName}" deleted immediately`, {
-          duration: 3000,
-          icon: '🗑️',
-        });
         
         return true;
       } else {

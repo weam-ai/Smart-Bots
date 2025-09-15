@@ -239,11 +239,14 @@ const deleteUploadedFile = asyncHandler(async (agentId, fileId) => {
     throw createNotFoundError('File', fileId);
   }
 
+  // Store file data before deletion
+  const fileData = { ...file.toObject() };
+  
   // Delete file from database
   await File.findByIdAndDelete(fileId);
   console.log(`✅ File deleted from database successfully: ${file.originalFilename}`);
 
-  return file;
+  return fileData;
 });
 
 module.exports = {
