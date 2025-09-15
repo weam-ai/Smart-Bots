@@ -1,18 +1,11 @@
-const multer = require('multer');
+const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs').promises;
-const crypto = require('crypto');
 const { File, Agent } = require('../models');
 const { 
-  ALLOWED_MIME_TYPES, 
-  UPLOAD_LIMITS, 
-  MULTER_CONFIG,
-  UPLOAD_ERROR_CODES 
+  UPLOAD_ERROR_CODES,
+  MULTER_CONFIG
 } = require('../constants/fileUpload');
-const { 
-  validateUploadedFiles,
-  performComprehensiveValidation 
-} = require('../validations/fileUploadValidation');
 const { 
   createFileError, 
   createNotFoundError, 
@@ -24,38 +17,10 @@ const {
  */
 
 /**
- * Multer file filter
+ * File Upload Service
+ * Note: This service is used for database operations only.
+ * File uploads are handled by busboyUploadService and queuedUploadService.
  */
-const fileFilter = (req, file, cb) => {
-  console.log(`📄 File filter check: ${file.originalname} (${file.mimetype})`);
-  
-  try {
-    // Basic validation in filter
-    if (!ALLOWED_MIME_TYPES[file.mimetype]) {
-      const allowedTypes = Object.keys(ALLOWED_MIME_TYPES).join(', ');
-      return cb(new Error(`Invalid file type: ${file.mimetype}. Allowed types: ${allowedTypes}`));
-    }
-    
-    cb(null, true);
-  } catch (error) {
-    cb(error);
-  }
-};
-
-/**
- * Multer configuration
- */
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: UPLOAD_LIMITS.MAX_FILE_SIZE,
-    files: UPLOAD_LIMITS.MAX_FILES_PER_UPLOAD,
-    fieldSize: UPLOAD_LIMITS.MAX_FIELD_SIZE,
-    fieldNameSize: UPLOAD_LIMITS.MAX_FIELD_NAME_SIZE,
-    headerPairs: UPLOAD_LIMITS.MAX_HEADER_PAIRS
-  },
-  fileFilter: fileFilter
-});
 
 /**
  * Generate file hash for deduplication
@@ -259,30 +224,32 @@ const getUploadStatus = asyncHandler(async (agentId) => {
 });
 
 /**
- * Delete uploaded file
+ * Delete uploaded file from database only
+ * Note: S3 and Pinecone deletion should be handled by the calling controller
  */
 const deleteUploadedFile = asyncHandler(async (agentId, fileId) => {
   const file = await File.findOne({ _id: fileId, agent: agentId });
+  console.log(`🗑️  Preparing to delete file:`, {
+    id: file?._id,
+    originalName: file?.originalFilename,
+    size: file?.fileSize
+  });
+  
   if (!file) {
     throw createNotFoundError('File', fileId);
   }
 
-  // Delete file from disk
-  try {
-    const filePath = path.join(process.cwd(), 'uploads', agentId, file.storedFilename);
-    await fs.unlink(filePath);
-  } catch (error) {
-    console.warn(`⚠️  Could not delete file from disk: ${error.message}`);
-  }
-
+  // Store file data before deletion
+  const fileData = { ...file.toObject() };
+  
   // Delete file from database
   await File.findByIdAndDelete(fileId);
+  console.log(`✅ File deleted from database successfully: ${file.originalFilename}`);
 
-  return file;
+  return fileData;
 });
 
 module.exports = {
-  upload,
   processUploadedFiles,
   getUploadStatus,
   deleteUploadedFile,

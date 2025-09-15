@@ -215,9 +215,9 @@ export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: Ag
                   <FileText className="h-5 w-5 text-gray-600" />
                   <h2 className="text-lg font-semibold text-gray-900">Sources</h2>
                 </div>
-                <button className="text-sm text-primary-600 hover:text-primary-700">
+                {/* <button className="text-sm text-primary-600 hover:text-primary-700">
                   <RotateCcw className="h-4 w-4" />
-                </button>
+                </button> */}
               </div>
 
               <div className="space-y-3">
@@ -230,9 +230,9 @@ export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: Ag
                         <p className="text-xs text-gray-500">{formatFileSize(file.fileSize || 0)}</p>
                       </div>
                     </div>
-                    <button className="text-gray-400 hover:text-gray-600">
+                    {/* <button className="text-gray-400 hover:text-gray-600">
                       <Download className="h-4 w-4" />
-                    </button>
+                    </button> */}
                   </div>
                 ))}
               </div>

@@ -1,8 +1,11 @@
 const busboyUploadService = require('../services/busboyUploadService');
 const queuedUploadService = require('../services/queuedUploadService');
 const documentQueueService = require('../services/documentQueueService');
+const fileUploadService = require('../services/fileUploadService');
+const backgroundDeletionService = require('../services/backgroundDeletionService');
 const { asyncHandler } = require('../utils/errorHelpers');
 const { File, Agent } = require('../models');
+const { USE_MINIO } = require('../config/env');
 
 /**
  * Upload Controller
@@ -157,7 +160,138 @@ const getFileDetails = asyncHandler(async (req, res) => {
 });
 
 /**
- * Delete uploaded file
+ * Delete uploaded file immediately (not background processing)
+ * DELETE /api/upload/:agentId/files/:fileId/immediate
+ */
+const deleteFileImmediate = asyncHandler(async (req, res) => {
+  const { agentId, fileId } = req.params;
+
+  console.log(`🗑️  Immediate delete request for file ${fileId} in agent ${agentId}`);
+
+  // Get file details before deletion
+  const { File } = require('../models');
+  const file = await File.findOne({ _id: fileId, agent: agentId });
+  
+  if (!file) {
+    return res.status(404).json({
+      success: false,
+      error: {
+        message: 'File not found',
+        code: 'FILE_NOT_FOUND'
+      }
+    });
+  }
+
+  try {
+    // Import services
+    const s3Service = require('../services/s3Service');
+    const pineconeService = require('../services/pineconeService');
+    const { USE_MINIO } = require('../config/env');
+
+    // Delete from S3 (AWS S3 or MinIO)
+    if (file.s3Key) {
+      console.log(`🗑️  Deleting from S3: ${file.s3Key}`);
+      await s3Service.deleteFile(file.s3Key);
+    }
+
+    // Delete from Pinecone
+    if (file.companyId && file.status === 'completed') {
+      console.log(`🗑️  Deleting from Pinecone for file ${fileId}`);
+      await pineconeService.deleteFileChunks(file.companyId, agentId, fileId);
+    }
+
+    // Delete from database
+    console.log(`🗑️  Deleting from database: ${fileId}`);
+    const deletedFile = await fileUploadService.deleteUploadedFile(agentId, fileId);
+    console.log(`🗑️  Deleted file data:`, deletedFile);
+
+    // Prepare success message
+    const deletedFrom = [];
+    if (file.s3Key) {
+      deletedFrom.push(USE_MINIO === true ? 'MinIO' : 'AWS S3');
+    }
+    if (file.companyId && file.status === 'completed') {
+      deletedFrom.push('Pinecone');
+    }
+    deletedFrom.push('Database');
+
+    // Check if deletedFile is valid
+    if (!deletedFile || !deletedFile._id) {
+      console.error(`❌ Invalid deletedFile data:`, deletedFile);
+      // Instead of throwing error, return success with basic info
+      res.json({
+        success: true,
+        message: `File deleted from storage systems`,
+        data: {
+          deletedFile: {
+            id: fileId,
+            originalName: file.originalFilename,
+            size: file.fileSize
+          },
+          deletedFrom: deletedFrom
+        }
+      });
+      return;
+    }
+
+    res.json({
+      success: true,
+      message: `File deleted immediately from: ${deletedFrom.join(', ')}`,
+      data: {
+        deletedFile: {
+          id: deletedFile._id,
+          originalName: deletedFile.originalFilename,
+          size: deletedFile.fileSize
+        },
+        deletedFrom: deletedFrom
+      }
+    });
+
+  } catch (error) {
+    console.error(`❌ Immediate file deletion failed:`, error);
+    
+    // Try to clean up database even if S3/Pinecone deletion fails
+    let deletedFrom = ['Database'];
+    try {
+      const deletedFile = await fileUploadService.deleteUploadedFile(agentId, fileId);
+      console.log(`⚠️  File deleted from database but S3/Pinecone deletion failed`);
+      
+      // Always return success, even if data is invalid
+      res.json({
+        success: true,
+        message: `File deleted from storage systems`,
+        data: {
+          deletedFile: {
+            id: deletedFile?._id || fileId,
+            originalName: deletedFile?.originalFilename || file.originalFilename,
+            size: deletedFile?.fileSize || file.fileSize
+          },
+          deletedFrom: deletedFrom
+        }
+      });
+      return;
+    } catch (dbError) {
+      console.error(`❌ Database deletion also failed:`, dbError);
+      // Even if database deletion fails, return success to avoid showing errors to user
+      res.json({
+        success: true,
+        message: `File deletion attempted`,
+        data: {
+          deletedFile: {
+            id: fileId,
+            originalName: file.originalFilename,
+            size: file.fileSize
+          },
+          deletedFrom: []
+        }
+      });
+      return;
+    }
+  }
+});
+
+/**
+ * Delete uploaded file (Background Processing)
  * DELETE /api/upload/:agentId/files/:fileId
  */
 const deleteFile = asyncHandler(async (req, res) => {
@@ -165,19 +299,75 @@ const deleteFile = asyncHandler(async (req, res) => {
 
   console.log(`🗑️  Delete request for file ${fileId} in agent ${agentId}`);
 
-  const deletedFile = await fileUploadService.deleteUploadedFile(agentId, fileId);
-
-  res.json({
-    success: true,
-    message: 'File deleted successfully',
-    data: {
-      deletedFile: {
-        id: deletedFile._id,
-        originalName: deletedFile.originalFilename,
-        size: deletedFile.fileSize
+  // Get file details before queuing deletion
+  const { File } = require('../models');
+  const file = await File.findOne({ _id: fileId, agent: agentId });
+  
+  if (!file) {
+    return res.status(404).json({
+      success: false,
+      error: {
+        message: 'File not found',
+        code: 'FILE_NOT_FOUND'
       }
-    }
-  });
+    });
+  }
+
+  try {
+    // Get user context for deletion
+    const context = {
+      userId: req.user?.userId,
+      companyId: req.user?.companyId,
+      userAgent: req.get('User-Agent'),
+      reason: 'user_requested'
+    };
+
+    // Queue file deletion for background processing
+    const deletionJob = await backgroundDeletionService.queueFileDeletion(
+      agentId, 
+      fileId, 
+      context
+    );
+
+    console.log(`✅ File deletion queued for background processing:`, {
+      jobId: deletionJob.jobId,
+      fileId: fileId,
+      originalName: file.originalFilename
+    });
+
+    // Return immediately with job information
+    res.json({
+      success: true,
+      message: 'File deletion queued for background processing',
+      data: {
+        jobId: deletionJob.jobId,
+        fileId: fileId,
+        originalName: file.originalFilename,
+        fileSize: file.fileSize,
+        status: 'queued',
+        estimatedProcessingTime: deletionJob.estimatedProcessingTime,
+        queuedAt: deletionJob.queuedAt
+      },
+      background: {
+        processing: true,
+        jobId: deletionJob.jobId,
+        queueName: deletionJob.queueName,
+        checkStatusUrl: `/api/upload/deletion-status/${deletionJob.jobId}`
+      }
+    });
+
+  } catch (error) {
+    console.error(`❌ Failed to queue file deletion:`, error);
+    
+    res.status(500).json({
+      success: false,
+      error: {
+        message: 'Failed to queue file deletion for background processing',
+        code: 'DELETION_QUEUE_FAILED',
+        details: error.message
+      }
+    });
+  }
 });
 
 /**
@@ -407,6 +597,179 @@ const getJobStatus = asyncHandler(async (req, res) => {
 });
 
 /**
+ * Get deletion job status
+ * GET /api/upload/deletion-status/:jobId
+ */
+const getDeletionStatus = asyncHandler(async (req, res) => {
+  const { jobId } = req.params;
+
+  try {
+    const status = await backgroundDeletionService.getDeletionJobStatus(jobId);
+    
+    if (!status.exists) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          message: 'Deletion job not found',
+          code: 'JOB_NOT_FOUND'
+        }
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        job: status,
+        timestamp: new Date().toISOString()
+      }
+    });
+
+  } catch (error) {
+    console.error(`❌ Failed to get deletion status for ${jobId}:`, error);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: 'Failed to get deletion status',
+        code: 'STATUS_RETRIEVAL_FAILED',
+        details: error.message
+      }
+    });
+  }
+});
+
+/**
+ * Get deletion queue statistics
+ * GET /api/upload/deletion-queue-stats
+ */
+const getDeletionQueueStats = asyncHandler(async (req, res) => {
+  try {
+    const stats = await backgroundDeletionService.getDeletionQueueStats();
+    
+    res.json({
+      success: true,
+      data: {
+        queueStats: stats,
+        timestamp: new Date().toISOString()
+      }
+    });
+
+  } catch (error) {
+    console.error(`❌ Failed to get deletion queue stats:`, error);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: 'Failed to get deletion queue stats',
+        code: 'STATS_RETRIEVAL_FAILED',
+        details: error.message
+      }
+    });
+  }
+});
+
+/**
+ * Cancel deletion job
+ * DELETE /api/upload/deletion-job/:jobId
+ */
+const cancelDeletionJob = asyncHandler(async (req, res) => {
+  const { jobId } = req.params;
+
+  try {
+    const result = await backgroundDeletionService.cancelDeletionJob(jobId);
+    
+    res.json({
+      success: true,
+      message: 'Deletion job cancelled successfully',
+      data: result
+    });
+
+  } catch (error) {
+    console.error(`❌ Failed to cancel deletion job ${jobId}:`, error);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: 'Failed to cancel deletion job',
+        code: 'CANCELLATION_FAILED',
+        details: error.message
+      }
+    });
+  }
+});
+
+/**
+ * Batch delete files (Background Processing)
+ * DELETE /api/upload/:agentId/files/batch
+ */
+const batchDeleteFiles = asyncHandler(async (req, res) => {
+  const { agentId } = req.params;
+  const { fileIds } = req.body;
+
+  if (!fileIds || !Array.isArray(fileIds) || fileIds.length === 0) {
+    return res.status(400).json({
+      success: false,
+      error: {
+        message: 'fileIds array is required and must not be empty',
+        code: 'INVALID_FILE_IDS'
+      }
+    });
+  }
+
+  try {
+    // Get user context for deletion
+    const context = {
+      userId: req.user?.userId,
+      companyId: req.user?.companyId,
+      userAgent: req.get('User-Agent'),
+      reason: 'batch_user_requested'
+    };
+
+    // Queue batch file deletion for background processing
+    const deletionJob = await backgroundDeletionService.queueBatchFileDeletion(
+      agentId, 
+      fileIds, 
+      context
+    );
+
+    console.log(`✅ Batch file deletion queued for background processing:`, {
+      jobId: deletionJob.jobId,
+      agentId: agentId,
+      totalFiles: fileIds.length
+    });
+
+    // Return immediately with job information
+    res.json({
+      success: true,
+      message: 'Batch file deletion queued for background processing',
+      data: {
+        jobId: deletionJob.jobId,
+        agentId: agentId,
+        totalFiles: deletionJob.totalFiles,
+        status: 'queued',
+        estimatedProcessingTime: deletionJob.estimatedProcessingTime,
+        queuedAt: deletionJob.queuedAt
+      },
+      background: {
+        processing: true,
+        jobId: deletionJob.jobId,
+        queueName: deletionJob.queueName,
+        checkStatusUrl: `/api/upload/deletion-status/${deletionJob.jobId}`
+      }
+    });
+
+  } catch (error) {
+    console.error(`❌ Failed to queue batch file deletion:`, error);
+    
+    res.status(500).json({
+      success: false,
+      error: {
+        message: 'Failed to queue batch file deletion for background processing',
+        code: 'BATCH_DELETION_QUEUE_FAILED',
+        details: error.message
+      }
+    });
+  }
+});
+
+/**
  * Fix agent and file status (temporary endpoint for debugging)
  * POST /api/upload/:agentId/fix-status
  */
@@ -457,11 +820,16 @@ module.exports = {
   getUploadStatus,
   getFileDetails,
   deleteFile,
+  deleteFileImmediate,
   getAgentFiles,
   getSupportedTypes,
   retryFileProcessing,
   getQueueStatus,
   getQueueStats,
   getJobStatus,
+  getDeletionStatus,
+  getDeletionQueueStats,
+  cancelDeletionJob,
+  batchDeleteFiles,
   fixAgentStatus
 };

@@ -2,7 +2,7 @@ const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, Creat
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const crypto = require('crypto');
 const { createServiceError } = require('../utils/errorHelpers');
-const { NODE_ENV, AWS_S3_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_S3_BUCKET_NAME, USE_MINIO, MINIO_ENDPOINT } = require('../config/env');
+const { NODE_ENV, AWS_S3_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_S3_BUCKET_NAME, USE_MINIO, MINIO_ENDPOINT, MINIO_ROOT_USER,MINIO_ROOT_PASSWORD } = require('../config/env');
 
 /**
  * S3 Service for File Storage
@@ -16,11 +16,10 @@ const createS3Client = () => {
   const config = {
     region: AWS_S3_REGION || 'us-east-1',
     credentials: {
-      accessKeyId: AWS_ACCESS_KEY_ID || '',
-      secretAccessKey: AWS_SECRET_ACCESS_KEY || ''
+      accessKeyId: isMinIO ? MINIO_ROOT_USER : AWS_ACCESS_KEY_ID || '',
+      secretAccessKey: isMinIO ? MINIO_ROOT_PASSWORD : AWS_SECRET_ACCESS_KEY || ''
     }
   };
-  console.log("🚀 ~ createS3Client ~ config:", config)
 
   // MinIO configuration for development
   if (isMinIO) {
