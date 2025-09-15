@@ -275,12 +275,6 @@ export default function AgentDeploy({ agentId, agentName, onBack, onViewHistory 
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <button
-            onClick={onBack}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-2"
-          >
-            ← Back to Playground
-          </button>
           <h1 className="text-3xl font-bold text-gray-900">Deploy Your Chatbot</h1>
           <p className="text-gray-600 mt-2">
             Create deployments to embed your chatbot on any website

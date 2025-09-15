@@ -83,15 +83,20 @@ export const STORAGE_KEYS = {
 // Error Messages
 export const ERROR_MESSAGES = {
   NETWORK_ERROR: 'Network error - Please check your connection',
-  AUTH_REQUIRED: 'Authentication required',
-  ACCESS_DENIED: 'Access denied',
+  AUTH_REQUIRED: 'Authentication required - Please log in',
+  ACCESS_DENIED: 'Access denied - You don\'t have permission',
   NOT_FOUND: 'Resource not found',
-  VALIDATION_ERROR: 'Validation error',
-  RATE_LIMITED: 'Too many requests - Please try again later',
-  SERVER_ERROR: 'Server error - Please try again',
-  SERVICE_UNAVAILABLE: 'Service temporarily unavailable',
-  UNEXPECTED_ERROR: 'An unexpected error occurred',
+  VALIDATION_ERROR: 'Validation error - Please check your input',
+  RATE_LIMITED: 'Too many requests - Please wait a moment and try again',
+  SERVER_ERROR: 'Server error - Please try again later',
+  SERVICE_UNAVAILABLE: 'Service temporarily unavailable - Please try again later',
+  UNEXPECTED_ERROR: 'An unexpected error occurred - Please try again',
   REQUEST_FAILED: 'Request failed - Please try again',
+  TIMEOUT_ERROR: 'Request timed out - Please check your connection',
+  CONNECTION_ERROR: 'Connection error - Please check your internet connection',
+  UPLOAD_ERROR: 'File upload failed - Please try again',
+  AGENT_ERROR: 'Agent operation failed - Please try again',
+  CHAT_ERROR: 'Chat operation failed - Please try again',
 } as const
 
 // File Upload Constants

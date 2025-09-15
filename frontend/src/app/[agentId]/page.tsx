@@ -314,13 +314,18 @@ export default function AgentPage() {
   }
 
   const handleBackToAgents = () => {
-    router.push('/?step=1')
+    router.push('/')
   }
 
   const handleStartTraining = () => {
     setCurrentStep('training')
     // Update URL to show step=2
     router.push(`/${agentId}?step=2`)
+  }
+
+  const handleStartTesting = () => {
+    // Navigate to playground page with step=3
+    router.push(`/${agentId}/playground?step=3`);
   }
 
   if (loading) {
@@ -341,6 +346,7 @@ export default function AgentPage() {
           onFilesUploaded={handleFilesUploaded}
           onBack={handleBackToAgents}
           onStartTraining={handleStartTraining}
+          onStartTesting={handleStartTesting}
           hasNewUploads={hasNewUploads}
         />
       )}
