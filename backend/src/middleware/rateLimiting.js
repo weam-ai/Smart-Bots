@@ -1,6 +1,5 @@
 const rateLimit = require('express-rate-limit');
 const { NODE_ENV, RATE_LIMIT_GENERAL_PROD } = require('../config/env');
-console.log("🚀 ~ RATE_LIMIT_GENERAL_PROD:", RATE_LIMIT_GENERAL_PROD)
 
 /**
  * Rate Limiting Middleware Configuration
@@ -9,7 +8,7 @@ console.log("🚀 ~ RATE_LIMIT_GENERAL_PROD:", RATE_LIMIT_GENERAL_PROD)
 // General API rate limiting
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: NODE_ENV === 'development' ? 1000000000 : RATE_LIMIT_GENERAL_PROD, // More lenient in development
+  max: NODE_ENV === 'development' ? 1000 : RATE_LIMIT_GENERAL_PROD, // More lenient in development
   message: {
     error: 'Too many requests from this IP, please try again later.',
     code: 'RATE_LIMIT_EXCEEDED',

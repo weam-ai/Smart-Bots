@@ -15,8 +15,6 @@ const redisConnection = {
   maxRetriesPerRequest: null  // Required by BullMQ
 };
 
-console.log(`🔗 BullMQ Redis config: ${REDIS_URL}`);
-
 // Queue names
 const QUEUE_NAMES = {
   DOCUMENT_PROCESSING: 'document-processing',

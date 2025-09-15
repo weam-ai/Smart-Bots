@@ -20,9 +20,6 @@ for (const envPath of possiblePaths) {
   }
 }
 
-console.log('🔍 DB_HOST:', process.env.DB_HOST);
-console.log('🔍 DB_CONNECTION:', process.env.DB_CONNECTION);
-
 if (!envLoaded) {
   console.log('⚠️ No .env file found, using environment variables from Docker back');
 }
