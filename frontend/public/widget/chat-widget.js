@@ -112,6 +112,18 @@
     // Ensure floating icon is visible on initialization
     if (elements.widget) {
       elements.widget.classList.add('minimized');
+      
+      // Apply minimized position styles
+      const minimizedPositionStyles = getMinimizedPositionStyles();
+      elements.widget.style.cssText = elements.widget.style.cssText.replace(
+        /(bottom|top|left|right):\s*[^;]+;?/g, 
+        ''
+      ) + minimizedPositionStyles;
+      
+      // Set widget size for minimized state (purple button size)
+      elements.widget.style.width = '70px';
+      elements.widget.style.height = '70px';
+      
       elements.widget.style.display = 'block';
       elements.container.style.display = 'none';
       elements.minimized.style.display = 'flex';
@@ -175,13 +187,13 @@
             </div>
           </div>
           <div class="ai-chatbot-header-actions">
-            <button class="ai-chatbot-minimize-btn" title="Minimize">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 13H5v-2h14v2z"/>
+            <button class="ai-chatbot-refresh-btn" title="Refresh Chat">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
               </svg>
             </button>
             <button class="ai-chatbot-close-btn" title="Close">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
               </svg>
             </button>
@@ -209,7 +221,7 @@
                 <span class="ai-chatbot-checkbox-text">I agree to the privacy policy and terms of service</span>
               </label>
             </div>
-            <button type="submit" class="ai-chatbot-identity-submit">Start Chatting</button>
+            <button type="submit" class="ai-chatbot-identity-submit">Start Chatting 1111</button>
           </form>
         </div>
 
@@ -262,7 +274,7 @@
       identityFormElement: widget.querySelector('#ai-chatbot-identity-form-element'),
       input: widget.querySelector('#ai-chatbot-input'),
       sendBtn: widget.querySelector('#ai-chatbot-send-btn'),
-      minimizeBtn: widget.querySelector('.ai-chatbot-minimize-btn'),
+      refreshBtn: widget.querySelector('.ai-chatbot-refresh-btn'),
       closeBtn: widget.querySelector('.ai-chatbot-close-btn')
     };
     
@@ -293,10 +305,45 @@
       ${positions[position] || positions['bottom-right']}
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-      border-radius: 12px;
+      border-radius: 20px;
       overflow: hidden;
       display: none;
+      padding: 2px;
     `;
+  }
+
+  /**
+   * Get minimized widget position styles
+   */
+  function getMinimizedPositionStyles() {
+    const position = widgetState.config.position;
+    
+    const positions = {
+      'bottom-right': 'bottom: 20px; right: 20px;',
+      'bottom-left': 'bottom: 20px; left: 20px;',
+      'top-right': 'top: 20px; right: 20px;',
+      'top-left': 'top: 20px; left: 20px;',
+      'center': 'top: 50%; left: 50%; transform: translate(-50%, -50%);'
+    };
+    
+    return positions[position] || positions['bottom-right'];
+  }
+
+  /**
+   * Get open widget position styles (positioned above the floating icon)
+   */
+  function getOpenPositionStyles() {
+    const position = widgetState.config.position;
+    
+    const positions = {
+      'bottom-right': 'bottom: 100px; right: 20px;', // Above the 70px floating icon + 30px margin
+      'bottom-left': 'bottom: 100px; left: 20px;',   // Above the 70px floating icon + 30px margin
+      'top-right': 'top: 100px; right: 20px;',       // Below the 70px floating icon + 30px margin
+      'top-left': 'top: 100px; left: 20px;',         // Below the 70px floating icon + 30px margin
+      'center': 'top: 50%; left: 50%; transform: translate(-50%, -50%);'
+    };
+    
+    return positions[position] || positions['bottom-right'];
   }
 
   /**
@@ -356,18 +403,13 @@
       
       /* When minimized, widget should only show floating icon */
       .ai-chatbot-widget.minimized {
-        width: 70px !important;
-        height: 70px !important;
         position: fixed !important;
-        bottom: 20px !important;
-        right: 20px !important;
         z-index: 999999 !important;
       }
       
       /* When chat is open, position container above the floating icon */
       .ai-chatbot-widget:not(.minimized) {
-        bottom: 100px !important; /* Position above the 70px floating icon + 30px margin */
-        right: 20px !important;
+        /* Position will be set dynamically based on configuration */
       }
       
       .ai-chatbot-container {
@@ -375,7 +417,9 @@
         flex-direction: column;
         height: 100%;
         background: ${colors.background};
-        border: 1px solid ${colors.border};
+        border: 2px solid ${colors.primary};
+        border-radius: 12px;
+        box-sizing: border-box;
       }
       
       .ai-chatbot-header {
@@ -420,10 +464,10 @@
         gap: 8px;
       }
       
-      .ai-chatbot-minimize-btn,
+      .ai-chatbot-refresh-btn,
       .ai-chatbot-close-btn {
-        width: 24px;
-        height: 24px;
+        width: 30px;
+        height: 30px;
         border: none;
         background: none;
         color: ${colors.textSecondary};
@@ -435,7 +479,7 @@
         transition: all 0.2s;
       }
       
-      .ai-chatbot-minimize-btn:hover,
+      .ai-chatbot-refresh-btn:hover,
       .ai-chatbot-close-btn:hover {
         background: ${colors.border};
         color: ${colors.text};
@@ -700,10 +744,9 @@
         cursor: pointer;
         box-shadow: 0 4px 16px ${colors.shadow};
         transition: all 0.2s;
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
+        position: fixed !important;
         z-index: 1000000;
+        border: 3px solid ${colors.primary};
       }
       
       .ai-chatbot-minimized:hover {
@@ -813,8 +856,8 @@
       }
     });
     
-    // Minimize button
-    elements.minimizeBtn.addEventListener('click', minimizeWidget);
+    // Refresh button
+    elements.refreshBtn.addEventListener('click', refreshWidget);
     
     // Close button
     elements.closeBtn.addEventListener('click', closeWidget);
@@ -1116,6 +1159,24 @@
     // Remove minimized class to restore full size
     elements.widget.classList.remove('minimized');
     
+    // Apply open position styles to the main widget (chat container)
+    const openPositionStyles = getOpenPositionStyles();
+    elements.widget.style.cssText = elements.widget.style.cssText.replace(
+      /(bottom|top|left|right):\s*[^;]+;?/g, 
+      ''
+    ) + openPositionStyles;
+    
+    // Restore full widget size for open state
+    elements.widget.style.width = widgetState.config.size.width;
+    elements.widget.style.height = widgetState.config.size.height;
+    
+    // Ensure purple button stays in its fixed position
+    const minimizedPositionStyles = getMinimizedPositionStyles();
+    elements.minimized.style.cssText = elements.minimized.style.cssText.replace(
+      /(bottom|top|left|right):\s*[^;]+;?/g, 
+      ''
+    ) + minimizedPositionStyles + 'position: fixed !important;';
+    
     elements.widget.style.display = 'block';
     elements.container.style.display = 'flex';
     // Keep floating icon visible above the container
@@ -1133,6 +1194,49 @@
   }
 
   /**
+   * Refresh widget (reset to identity form)
+   */
+  function refreshWidget() {
+    if (!widgetState.isInitialized) return;
+    
+    // Reset widget state
+    widgetState.showIdentityForm = true;
+    widgetState.messages = [];
+    widgetState.currentSessionId = null;
+    widgetState.visitor = null;
+    widgetState.isLoading = false;
+    
+    // Clear messages
+    elements.messages.innerHTML = '';
+    
+    // Show identity form, hide messages and input
+    elements.identityForm.style.display = 'block';
+    elements.messages.style.display = 'none';
+    
+    // Hide chat input
+    const inputContainer = elements.widget.querySelector('.ai-chatbot-input-container');
+    if (inputContainer) {
+      inputContainer.style.display = 'none';
+    }
+    
+    // Reset form fields
+    const nameInput = elements.identityFormElement.querySelector('#ai-chatbot-name');
+    const emailInput = elements.identityFormElement.querySelector('#ai-chatbot-email');
+    const privacyCheckbox = elements.identityFormElement.querySelector('#ai-chatbot-privacy');
+    
+    if (nameInput) nameInput.value = '';
+    if (emailInput) emailInput.value = '';
+    if (privacyCheckbox) privacyCheckbox.checked = false;
+    
+    // Re-enable submit button
+    const submitBtn = elements.identityFormElement.querySelector('.ai-chatbot-identity-submit');
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Start Chatting';
+    }
+  }
+
+  /**
    * Minimize widget
    */
   function minimizeWidget() {
@@ -1140,6 +1244,17 @@
     
     // Add minimized class to widget
     elements.widget.classList.add('minimized');
+    
+    // Apply minimized position styles to the minimized element
+    const minimizedPositionStyles = getMinimizedPositionStyles();
+    elements.minimized.style.cssText = elements.minimized.style.cssText.replace(
+      /(bottom|top|left|right):\s*[^;]+;?/g, 
+      ''
+    ) + minimizedPositionStyles + 'position: fixed !important;';
+    
+    // Set widget size for minimized state (purple button size)
+    elements.widget.style.width = '70px';
+    elements.widget.style.height = '70px';
     
     elements.container.style.display = 'none';
     elements.minimized.style.display = 'flex';
@@ -1156,6 +1271,17 @@
     
     // Add minimized class to widget
     elements.widget.classList.add('minimized');
+    
+    // Apply minimized position styles to the minimized element
+    const minimizedPositionStyles = getMinimizedPositionStyles();
+    elements.minimized.style.cssText = elements.minimized.style.cssText.replace(
+      /(bottom|top|left|right):\s*[^;]+;?/g, 
+      ''
+    ) + minimizedPositionStyles + 'position: fixed !important;';
+    
+    // Set widget size for minimized state (purple button size)
+    elements.widget.style.width = '70px';
+    elements.widget.style.height = '70px';
     
     // Show floating icon, hide chat container
     elements.widget.style.display = 'block';
@@ -1204,6 +1330,17 @@
     // Add minimized class to widget
     elements.widget.classList.add('minimized');
     
+    // Apply minimized position styles to the minimized element
+    const minimizedPositionStyles = getMinimizedPositionStyles();
+    elements.minimized.style.cssText = elements.minimized.style.cssText.replace(
+      /(bottom|top|left|right):\s*[^;]+;?/g, 
+      ''
+    ) + minimizedPositionStyles + 'position: fixed !important;';
+    
+    // Set widget size for minimized state (purple button size)
+    elements.widget.style.width = '70px';
+    elements.widget.style.height = '70px';
+    
     elements.widget.style.display = 'block';
     elements.container.style.display = 'none';
     elements.minimized.style.display = 'flex';
@@ -1221,6 +1358,7 @@
     close: closeWidget,
     show: showWidget,
     minimize: minimizeWidget,
+    refresh: refreshWidget,
     sendMessage: (message) => {
       if (elements.input) {
         elements.input.value = message;
