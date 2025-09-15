@@ -8,7 +8,7 @@
 
   // Configuration
   const CONFIG = {
-    API_BASE_URL: 'https://dev.weam.ai/ai-chatbot-api',
+    API_BASE_URL: 'https://qa.weam.ai/ai-chatbot-api',
     WIDGET_VERSION: '1.0.0',
     DEFAULT_SETTINGS: {
       theme: 'light',
