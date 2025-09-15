@@ -22,8 +22,6 @@ const connectDB = async () => {
       serverSelectionTimeoutMS: MONGODB_SERVER_SELECTION_TIMEOUT, // Keep trying to send operations for 5 seconds
       socketTimeoutMS: MONGODB_SOCKET_TIMEOUT, // Close sockets after 45 seconds of inactivity
     });
-
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
     
     // Handle connection events
     mongoose.connection.on('error', (err) => {

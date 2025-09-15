@@ -31,8 +31,7 @@ const jwtAuthMiddleware = async (req, res, next) => {
       try {
         // Fallback to base64 decoding for testing
         const base64Decoded = Buffer.from(token, 'base64').toString('utf-8');
-        decoded = JSON.parse(base64Decoded);
-        console.log('🔍 Using base64 token for testing:', decoded);
+        decoded = JSON.parse(base64Decoded)
       } catch (base64Error) {
         throw new Error('Invalid token format');
       }
@@ -56,12 +55,6 @@ const jwtAuthMiddleware = async (req, res, next) => {
       companyId: decoded.companyId,
       roleCode: decoded.roleCode || 'user'
     };
-
-    console.log('🔐 User authenticated via JWT:', {
-      userId: req.user.userId,
-      userEmail: req.user.userEmail,
-      companyId: req.user.companyId
-    });
 
     next();
   } catch (error) {
