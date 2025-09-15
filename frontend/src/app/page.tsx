@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Plus, Bot, FileText, Users, Calendar, Play, Loader2, ArrowLeft } from 'lucide-react'
+import { Plus, Bot, FileText, Users, Calendar, Play, Loader2, ArrowLeft, Trash2, AlertTriangle } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
-import { useAgentOperations } from '@/hooks/useAgents'
+import { useAgentOperations, useDeleteAgent } from '@/hooks/useAgents'
 import CreateAgentModal from '@/components/CreateAgentModal'
 import type { Agent, CreateAgentPayload } from '@/types/agent'
 
@@ -12,6 +12,8 @@ export default function Home() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [agentToDelete, setAgentToDelete] = useState<Agent | null>(null)
   
   // Use real API hooks
   const {
@@ -22,6 +24,9 @@ export default function Home() {
     isCreating,
     refetch,
   } = useAgentOperations()
+
+  // Delete agent hook
+  const { deleteAgent, isLoading: isDeleting } = useDeleteAgent()
 
   // Ensure URL shows step=1 for main page
   useEffect(() => {
@@ -51,6 +56,28 @@ export default function Home() {
 
   const handleOpenAgent = (agentId: string) => {
     router.push(`/${agentId}?step=1`)
+  }
+
+  const handleDeleteClick = (e: React.MouseEvent, agent: Agent) => {
+    e.stopPropagation()
+    setAgentToDelete(agent)
+    setShowDeleteConfirm(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!agentToDelete) return
+    
+    const success = await deleteAgent(agentToDelete._id)
+    if (success) {
+      setShowDeleteConfirm(false)
+      setAgentToDelete(null)
+      refetch() // Refresh the agents list
+    }
+  }
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirm(false)
+    setAgentToDelete(null)
   }
 
   return (
@@ -215,6 +242,15 @@ export default function Home() {
                           </span>
                         </div>
                       </div>
+                      <div className="flex items-center gap-1 opacity-100 transition-opacity">
+                        <button 
+                          className="p-2 text-red-600 transition-colors"
+                          onClick={(e) => handleDeleteClick(e, agent)}
+                          title="Delete Agent"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
 
                     <p className="text-sm text-gray-600 mb-4">{agent.description || 'No description provided'}</p>
@@ -255,6 +291,17 @@ export default function Home() {
                         <Play className="h-4 w-4" />
                         {agent.status === 'ready' || agent.status === 'completed' ? 'Train the Chatbot' : `Train the Chatbot (${agent.status})`}
                       </button>
+
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          router.push(`/${agent._id}/deploy?step=4`)
+                        }}
+                        className="btn-secondary w-full font-medium rounded-lg text-sm"
+                      >
+                        See Chatbot Chat History
+                      </button>
                     </div>
                   </div>
                   ))}
@@ -274,6 +321,54 @@ export default function Home() {
         onSubmit={handleCreateSubmit}
         isLoading={isCreating}
       />
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && agentToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-10 w-10 bg-red-100 rounded-full flex items-center justify-center">
+                <AlertTriangle className="h-5 w-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Delete Agent</h3>
+                <p className="text-sm text-gray-600">This action cannot be undone</p>
+              </div>
+            </div>
+            
+            <div className="mb-6">
+              <p className="text-gray-700">
+                Are you sure you want to delete <strong>"{agentToDelete.name}"</strong>? 
+                This will permanently remove the agent and all its associated data.
+              </p>
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={handleDeleteCancel}
+                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50"
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Deleting...
+                  </div>
+                ) : (
+                  'Delete Agent'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

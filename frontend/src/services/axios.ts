@@ -168,11 +168,11 @@ const handleResponse = (response: AxiosResponse): AxiosResponse => {
   
   // Only show success toasts for specific operations to avoid spam
   if (method === 'POST' && url.includes('/agents')) {
-    toast.success('Agent created successfully!')
+    // toast.success('Agent created successfully!')
   } else if (method === 'PUT' && url.includes('/agents')) {
     toast.success('Agent updated successfully!')
   } else if (method === 'DELETE' && url.includes('/agents')) {
-    toast.success('Agent deleted successfully!')
+    // toast.success('Agent deleted successfully!')
   } else if (method === 'POST' && url.includes('/upload')) {
     toast.success('Files uploaded successfully!')
   }

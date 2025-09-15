@@ -20,6 +20,7 @@ import { InlineLoader } from '@/components/ui/Loader'
 import { AgentData, AgentFile } from '@/app/[agentId]/page'
 import { useChat } from '@/hooks/useChat'
 import toast from 'react-hot-toast'
+import AgentHeader from './AgentHeader'
 
 interface Message {
   id: string
@@ -95,49 +96,17 @@ export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: Ag
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={onBack}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </button>
-              <div>
-                <h1 className="text-xl font-semibold text-gray-900">Playground</h1>
-                <p className="text-sm text-gray-500">Step 3 of 4 • Agent: {localAgentData.name}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1">
-                  <div className="w-8 h-2 bg-green-500 rounded-full"></div>
-                  <div className="w-8 h-2 bg-green-500 rounded-full"></div>
-                  <div className="w-8 h-2 bg-primary-600 rounded-full"></div>
-                  <div className="w-8 h-2 bg-gray-200 rounded-full"></div>
-                </div>
-                <span className="text-sm text-gray-500 ml-2">Playground</span>
-              </div>
-              <button
-                onClick={handleDeploy}
-                className="btn-secondary inline-flex items-center gap-2"
-              >
-                <Globe className="h-4 w-4" />
-                Deploy
-              </button>
-              {/* <button
-                onClick={saveAgent}
-                className="btn-primary inline-flex items-center gap-2"
-              >
-                <Save className="h-4 w-4" />
-                Save to agent
-              </button> */}
-            </div>
-          </div>
-        </div>
-      </header>
+      <AgentHeader
+        title="Playground"
+        subtitle="Step 3 of 4"
+        currentStep={3}
+        totalSteps={4}
+        stepName="Playground"
+        onBack={onBack}
+        agentName={localAgentData.name}
+        showDeployButton={true}
+        onDeploy={handleDeploy}
+      />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 h-[calc(100vh-64px)]">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">

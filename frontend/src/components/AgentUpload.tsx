@@ -14,12 +14,15 @@ import {
   ArrowLeft,
   ArrowRight,
   Trash2,
+  Bot,
 } from "lucide-react";
 import { AgentData } from "@/app/[agentId]/page";
 import { useCompleteUpload } from "@/hooks/useUpload";
 import { useDeleteFile, useDeleteFileImmediate } from "@/hooks";
 import { InlineLoader } from "@/components/ui/Loader";
 import { axiosInstance } from "@/services/axios";
+import { useRouter } from "next/navigation";
+import AgentHeader from "./AgentHeader";
 
 interface AgentUploadProps {
   agentData: AgentData;
@@ -38,6 +41,7 @@ export default function AgentUpload({
   onStartTesting,
   hasNewUploads,
 }: AgentUploadProps) {
+  const router = useRouter();
   // Use real upload hooks
   const {
     uploadedFiles,
@@ -267,37 +271,15 @@ export default function AgentUpload({
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={onBack}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </button>
-              <div>
-                <h1 className="text-xl font-semibold text-gray-900">
-                  Upload Documents
-                </h1>
-                <p className="text-sm text-gray-500">
-                  Step 1 of 4 • Agent: {agentData.name}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1">
-                <div className="w-8 h-2 bg-primary-600 rounded-full"></div>
-                <div className="w-8 h-2 bg-gray-200 rounded-full"></div>
-                <div className="w-8 h-2 bg-gray-200 rounded-full"></div>
-                <div className="w-8 h-2 bg-gray-200 rounded-full"></div>
-              </div>
-              <span className="text-sm text-gray-500 ml-2">Upload</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <AgentHeader
+        title="Upload Documents"
+        subtitle="Step 1 of 4"
+        currentStep={1}
+        totalSteps={4}
+        stepName="Upload"
+        onBack={onBack}
+        agentName={agentData.name}
+      />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Instructions */}

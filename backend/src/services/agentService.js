@@ -257,6 +257,157 @@ const getPublicAgents = async () => {
   }
 };
 
+// Delete all deployments for an agent
+const deleteAgentDeployments = async (agentId) => {
+  try {
+    const { ScriptTag } = require('../models');
+    
+    console.log(`🗑️ Deleting all deployments for agent: ${agentId}`);
+    
+    const deletedDeployments = await ScriptTag.deleteMany({ agent: agentId });
+    
+    console.log(`✅ Deleted ${deletedDeployments.deletedCount} deployments for agent ${agentId}`);
+    
+    return {
+      success: true,
+      deletedCount: deletedDeployments.deletedCount,
+      agentId
+    };
+  } catch (error) {
+    console.error(`❌ Failed to delete deployments for agent ${agentId}:`, error);
+    throw new Error(`Failed to delete agent deployments: ${error.message}`);
+  }
+};
+
+// Delete all files for an agent (including S3 and Pinecone cleanup)
+const deleteAgentFiles = async (agentId) => {
+  try {
+    const { File } = require('../models');
+    const s3Service = require('./s3Service');
+    const pineconeService = require('./pineconeService');
+    const backgroundDeletionService = require('./backgroundDeletionService');
+    
+    console.log(`🗑️ Deleting all files for agent: ${agentId}`);
+    
+    // Get all files for the agent
+    const files = await File.find({ agent: agentId });
+    
+    if (files.length === 0) {
+      console.log(`ℹ️ No files found for agent ${agentId}`);
+      return {
+        success: true,
+        deletedCount: 0,
+        agentId
+      };
+    }
+    
+    console.log(`Found ${files.length} files to delete for agent ${agentId}`);
+    
+    // Queue file deletions in background (this handles S3, Pinecone, and database cleanup)
+    const fileIds = files.map(file => file._id.toString());
+    const companyId = files[0]?.companyId;
+    
+    if (companyId) {
+      // Queue batch deletion for all files
+      await backgroundDeletionService.queueBatchFileDeletion(agentId, fileIds, {
+        companyId,
+        reason: 'agent_deletion',
+        userId: files[0]?.createdBy
+      });
+      
+      console.log(`✅ Queued ${fileIds.length} files for background deletion`);
+    } else {
+      console.warn(`⚠️ No companyId found for agent ${agentId}, skipping Pinecone cleanup`);
+    }
+    
+    // Also delete from Pinecone directly for immediate cleanup
+    if (companyId) {
+      try {
+        await pineconeService.deleteAgentChunks(companyId, agentId);
+        console.log(`✅ Deleted Pinecone chunks for agent ${agentId}`);
+      } catch (pineconeError) {
+        console.warn(`⚠️ Pinecone cleanup failed for agent ${agentId}:`, pineconeError.message);
+        // Don't throw error, continue with other cleanup
+      }
+    }
+    
+    return {
+      success: true,
+      deletedCount: files.length,
+      agentId,
+      queuedForBackgroundDeletion: true
+    };
+  } catch (error) {
+    console.error(`❌ Failed to delete files for agent ${agentId}:`, error);
+    throw new Error(`Failed to delete agent files: ${error.message}`);
+  }
+};
+
+// Comprehensive agent cleanup (deployments, files, chat data)
+const deleteAgentCompletely = async (agentId, companyId) => {
+  try {
+    console.log(`🗑️ Starting comprehensive cleanup for agent: ${agentId}`);
+    
+    const results = {
+      agent: null,
+      deployments: { deletedCount: 0 },
+      files: { deletedCount: 0 },
+      chatSessions: { deletedCount: 0 },
+      chatMessages: { deletedCount: 0 }
+    };
+    
+    // 1. Delete agent first
+    const deletedAgent = await deleteAgentByIdAndCompany(agentId, companyId);
+    results.agent = deletedAgent;
+    
+    if (!deletedAgent) {
+      throw new Error('Agent not found or already deleted');
+    }
+    
+    // 2. Delete deployments
+    try {
+      const deploymentResult = await deleteAgentDeployments(agentId);
+      results.deployments = deploymentResult;
+    } catch (error) {
+      console.warn(`⚠️ Deployment cleanup failed:`, error.message);
+    }
+    
+    // 3. Delete files (with background processing)
+    try {
+      const fileResult = await deleteAgentFiles(agentId);
+      results.files = fileResult;
+    } catch (error) {
+      console.warn(`⚠️ File cleanup failed:`, error.message);
+    }
+    
+    // 4. Delete chat sessions and messages
+    try {
+      const { ChatSession, ChatMessage } = require('../models');
+      
+      const deletedSessions = await ChatSession.deleteMany({ agent: agentId });
+      results.chatSessions.deletedCount = deletedSessions.deletedCount;
+      
+      const deletedMessages = await ChatMessage.deleteMany({ agent: agentId });
+      results.chatMessages.deletedCount = deletedMessages.deletedCount;
+      
+      console.log(`✅ Deleted ${deletedSessions.deletedCount} chat sessions and ${deletedMessages.deletedCount} messages`);
+    } catch (error) {
+      console.warn(`⚠️ Chat data cleanup failed:`, error.message);
+    }
+    
+    console.log(`✅ Comprehensive cleanup completed for agent ${agentId}:`, results);
+    
+    return {
+      success: true,
+      agentId,
+      results
+    };
+  } catch (error) {
+    console.error(`❌ Comprehensive cleanup failed for agent ${agentId}:`, error);
+    throw new Error(`Failed to delete agent completely: ${error.message}`);
+  }
+};
+
 module.exports = {
   getAllAgents,
   getAgentsByCompany,
@@ -267,6 +418,9 @@ module.exports = {
   updateAgentByIdAndCompany,
   deleteAgent,
   deleteAgentByIdAndCompany,
+  deleteAgentDeployments,
+  deleteAgentFiles,
+  deleteAgentCompletely,
   updateAgentStatus,
   getAgentsByStatus,
   getPublicAgents
