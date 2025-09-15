@@ -3,26 +3,15 @@
  * Centralized configuration using dotenv
  */
 const dotenv = require('dotenv');
+const path = require('path');
 
-// Load environment variables from .env file
-// Try multiple possible paths for .env file
-const possiblePaths = [
-  '/app/.env',               // Docker container root (mounted .env file)
-];
+// Load dotenv only on server side
+if (typeof window === 'undefined') {
+  // Load from root  .env file (one level up from Nextjs directory)
+  console.log(`✅ .env file loaded from: ${path.join(process.cwd(), '..', '.env')}`);
+  dotenv.config({ path: path.join(process.cwd(), '..', '.env') });
+} 
 
-let envLoaded = false;
-for (const envPath of possiblePaths) {
-  const result = dotenv.config({ path: envPath });
-  if (!result.error) {
-    console.log(`✅ .env file loaded from: ${envPath}`);
-    envLoaded = true;
-    break;
-  }
-}
-
-if (!envLoaded) {
-  console.log('⚠️ No .env file found, using environment variables from Docker back');
-}
 // Environment Configuration Object
 const envConfig = {
   BACKEND_API_PREFIX: process.env.BACKEND_API_PREFIX,
