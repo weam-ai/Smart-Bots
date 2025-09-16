@@ -78,13 +78,27 @@ const deleteAgent = async (req, res) => {
     const { id } = req.params;
     const { companyId } = req.user;
     
-    const deletedAgent = await agentService.deleteAgentByIdAndCompany(id, companyId);
+    console.log(`🗑️ Deleting agent ${id} for company ${companyId}`);
     
-    if (!deletedAgent) {
+    // Use comprehensive cleanup method that handles all related data
+    const result = await agentService.deleteAgentCompletely(id, companyId);
+    
+    if (!result.success) {
       return res.status(404).json({ error: 'Agent not found' });
     }
     
-    res.json({ message: 'Agent deleted successfully', agent: deletedAgent });
+    console.log(`✅ Agent ${id} deleted successfully with cleanup results:`, result.results);
+    
+    res.json({ 
+      message: 'Agent deleted successfully', 
+      agent: result.results.agent,
+      cleanup: {
+        deployments: result.results.deployments.deletedCount,
+        files: result.results.files.deletedCount,
+        chatSessions: result.results.chatSessions.deletedCount,
+        chatMessages: result.results.chatMessages.deletedCount
+      }
+    });
   } catch (error) {
     console.error('Error deleting agent:', error);
     res.status(500).json({ error: 'Failed to delete agent' });

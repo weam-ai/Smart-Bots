@@ -23,6 +23,7 @@ import {
   Globe,
   BarChart3
 } from 'lucide-react';
+import AgentHeader from './AgentHeader';
 
 interface ChatSession {
   _id: string;
@@ -231,36 +232,23 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
     }
   }, [agentId, searchTerm, statusFilter, activeTab]);
 
+  // Auto-open chat history tab when component mounts
+  useEffect(() => {
+    setActiveTab('chat-history');
+  }, []);
+
   return (
     <div className="h-screen flex flex-col bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handleBackNavigation}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </button>
-              <div>
-                <h1 className="text-xl font-semibold text-gray-900">Deploy Agent</h1>
-                <p className="text-sm text-gray-500">Step 4 of 4 • Agent: {agentData?.name || 'Loading...'}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1">
-                <div className="w-8 h-2 bg-primary-600 rounded-full"></div>
-                <div className="w-8 h-2 bg-primary-600 rounded-full"></div>
-                <div className="w-8 h-2 bg-primary-600 rounded-full"></div>
-                <div className="w-8 h-2 bg-primary-600 rounded-full"></div>
-              </div>
-              <span className="text-sm text-gray-500 ml-2">Deploy</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <AgentHeader
+        title="Deploy Agent"
+        subtitle="Step 4 of 4"
+        currentStep={4}
+        totalSteps={4}
+        stepName="Deploy"
+        onBack={handleBackNavigation}
+        agentName={agentData?.name || 'Loading...'}
+      />
 
       {/* Tab Navigation */}
       <div className="bg-white border-b border-gray-200 px-6 flex justify-around">
