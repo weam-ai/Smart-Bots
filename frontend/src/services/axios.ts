@@ -5,19 +5,19 @@
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios'
 import toast from 'react-hot-toast'
-import { API_CONFIG, HTTP_STATUS, ERROR_MESSAGES, HEADERS, STORAGE_KEYS } from '@/utils/constants'
+import { HTTP_STATUS, ERROR_MESSAGES, HEADERS, STORAGE_KEYS } from '@/utils/constants'
 import { getAuthHeaders } from '@/utils/auth'
 import type { ApiResponse } from '@/types/api'
-import {  NEXT_PUBLIC_NODE_ENV } from '@/config/env'
+import {  NEXT_PUBLIC_API_TIMEOUT, NEXT_PUBLIC_BACKEND_API_URL, NEXT_PUBLIC_NODE_ENV } from '@/config/env'
 
 // Authentication state
 let authToken: string | null = null
 
 // Create axios instance
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: API_CONFIG.BASE_URL,
-  timeout: API_CONFIG.TIMEOUT,
-  withCredentials: API_CONFIG.WITH_CREDENTIALS,
+  baseURL: NEXT_PUBLIC_BACKEND_API_URL,
+  timeout: NEXT_PUBLIC_API_TIMEOUT,
+  withCredentials: true,
 })
 
 // ==================== UTILITY FUNCTIONS ====================
@@ -328,7 +328,7 @@ export const getAuthToken = (): string | null => {
  * Get base URL
  */
 export const getBaseURL = (): string => {
-  return API_CONFIG.BASE_URL
+  return NEXT_PUBLIC_BACKEND_API_URL
 }
 
 // ==================== HTTP METHODS ====================
