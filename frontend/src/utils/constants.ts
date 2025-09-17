@@ -11,6 +11,7 @@ export const API_CONFIG = {
   TIMEOUT: NEXT_PUBLIC_API_TIMEOUT,
   WITH_CREDENTIALS: true,
 } as const
+console.log("🚀 ~ API_CONFIG:", API_CONFIG)
 
 // API Endpoints
 export const API_ENDPOINTS = {

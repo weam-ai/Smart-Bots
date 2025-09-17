@@ -67,7 +67,7 @@ const envConfig = {
   API_RETRY_DELAY: parseInt(process.env.API_RETRY_DELAY || '1000', 10),
   
   // CORS Configuration
-  CORS_ORIGIN_DEV: process.env.CORS_ORIGIN_DEV || 'http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://127.0.0.1:3001,http://frontend:3000',
+  CORS_ORIGIN_DEV: process.env.CORS_ORIGIN_DEV || 'http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://127.0.0.1:3001,http://frontend:3000,http://localhost:8082',
   CORS_ORIGIN_PROD: process.env.CORS_ORIGIN_PROD || 'https://yourdomain.com',
   
   // Frontend Configuration
