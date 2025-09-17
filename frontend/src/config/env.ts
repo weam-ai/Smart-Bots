@@ -25,8 +25,14 @@ interface EnvConfig {
 
   NEXT_PUBLIC_BACKEND_API_URL: string;
   NEXT_PUBLIC_BACKEND_API_PREFIX: string;
+  NEXT_PUBLIC_BACKEND_API_URL_WITHOUT_PREFIX: string;
   NEXT_PUBLIC_NODE_ENV: string;
   NEXT_PUBLIC_API_PREFIX: string;
+
+  NEXT_PUBLIC_BASIC_AUTH_USERNAME: string;
+  NEXT_PUBLIC_BASIC_AUTH_PASSWORD: string;
+
+  NEXT_PUBLIC_SOLUTION_URL: string;
 }
 
 // Environment Configuration with defaults and validation
@@ -41,9 +47,15 @@ export const envConfig: EnvConfig = {
   NEXT_PUBLIC_API_RETRY_DELAY: process.env.NEXT_PUBLIC_API_RETRY_DELAY ? parseInt(process.env.NEXT_PUBLIC_API_RETRY_DELAY, 10) : parseInt(process.env.API_RETRY_DELAY || '5', 10),
   
   NEXT_PUBLIC_BACKEND_API_URL: process.env.NEXT_PUBLIC_BACKEND_API_URL || process.env.BACKEND_API_URL || 'https://app.weam.ai/ai-chatbot-api',
+  NEXT_PUBLIC_BACKEND_API_URL_WITHOUT_PREFIX: process.env.NEXT_PUBLIC_BACKEND_API_URL_WITHOUT_PREFIX || '',
   NEXT_PUBLIC_BACKEND_API_PREFIX: process.env.NEXT_PUBLIC_BACKEND_API_PREFIX || '/ai-chatbot-api',
-  NEXT_PUBLIC_NODE_ENV: process.env.NEXT_PUBLIC_NODE_ENV || process.env.NODE_ENV || 'production',
+  NEXT_PUBLIC_NODE_ENV: process.env.NEXT_PUBLIC_NODE_ENV || process.env.NODE_ENV || '',
   NEXT_PUBLIC_API_PREFIX: process.env.NEXT_PUBLIC_API_PREFIX || '/ai-chatbot',
+
+  NEXT_PUBLIC_BASIC_AUTH_USERNAME: process.env.NEXT_PUBLIC_BASIC_AUTH_USERNAME || '',
+  NEXT_PUBLIC_BASIC_AUTH_PASSWORD: process.env.NEXT_PUBLIC_BASIC_AUTH_PASSWORD || '',
+
+  NEXT_PUBLIC_SOLUTION_URL: process.env.NEXT_PUBLIC_SOLUTION_URL || '',
 };
 
 // Validation function
@@ -58,6 +70,10 @@ export const validateEnvConfig = (): void => {
     'NEXT_PUBLIC_BACKEND_API_PREFIX',
     'NEXT_PUBLIC_NODE_ENV',
     'NEXT_PUBLIC_API_PREFIX',
+    'NEXT_PUBLIC_BACKEND_API_URL_WITHOUT_PREFIX',
+    'NEXT_PUBLIC_BASIC_AUTH_USERNAME',
+    'NEXT_PUBLIC_BASIC_AUTH_PASSWORD',
+    'NEXT_PUBLIC_SOLUTION_URL',
   ];
 
   const missingFields = requiredFields.filter(field => !envConfig[field]);
@@ -76,6 +92,10 @@ export const {
   NEXT_PUBLIC_API_RETRY_DELAY,
   NEXT_PUBLIC_BACKEND_API_URL,
   NEXT_PUBLIC_BACKEND_API_PREFIX,
+  NEXT_PUBLIC_BACKEND_API_URL_WITHOUT_PREFIX,
   NEXT_PUBLIC_NODE_ENV,
   NEXT_PUBLIC_API_PREFIX,
+  NEXT_PUBLIC_BASIC_AUTH_USERNAME,
+  NEXT_PUBLIC_BASIC_AUTH_PASSWORD,
+  NEXT_PUBLIC_SOLUTION_URL,
 } = envConfig;
