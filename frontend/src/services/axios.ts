@@ -9,6 +9,7 @@ import { HTTP_STATUS, ERROR_MESSAGES, HEADERS, STORAGE_KEYS } from '@/utils/cons
 import { getAuthHeaders } from '@/utils/auth'
 import type { ApiResponse } from '@/types/api'
 import {  NEXT_PUBLIC_API_TIMEOUT, NEXT_PUBLIC_BACKEND_API_URL, NEXT_PUBLIC_NODE_ENV } from '@/config/env'
+console.log("🚀 ~ NEXT_PUBLIC_BACKEND_API_URL: in axios", NEXT_PUBLIC_BACKEND_API_URL)
 
 // Authentication state
 let authToken: string | null = null
