@@ -102,10 +102,10 @@ const agentSchemas = {
       }),
     
     model: Joi.string()
-      .valid('gpt-3.5-turbo', 'gpt-4', 'gpt-4-turbo', 'gpt-4o-mini')
-      .default('gpt-3.5-turbo')
+      .valid('gpt-5', 'gpt-5-mini', 'gpt-5-nano', 'gpt-4.1', 'gpt-4o', 'o3')
+      .default('gpt-4o')
       .messages({
-        'any.only': 'Model must be one of: gpt-3.5-turbo, gpt-4, gpt-4-turbo, gpt-4o-mini'
+        'any.only': 'Model must be one of: gpt-5, gpt-5-mini, gpt-5-nano, gpt-4.1, gpt-4o, o3'
       }),
     
     maxTokens: Joi.number()
@@ -167,7 +167,7 @@ const agentSchemas = {
       .optional(),
     
     model: Joi.string()
-      .valid('gpt-3.5-turbo', 'gpt-4', 'gpt-4-turbo', 'gpt-4o-mini')
+      .valid('gpt-5', 'gpt-5-mini', 'gpt-5-nano', 'gpt-4.1', 'gpt-4o', 'o3')
       .optional(),
     
     maxTokens: Joi.number()

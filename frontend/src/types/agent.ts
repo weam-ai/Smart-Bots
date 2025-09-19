@@ -7,7 +7,7 @@
 export type AgentStatus = 'creating' | 'ready' | 'training' | 'completed' | 'error'
 
 // Agent Model Options
-export type AgentModel = 'gpt-3.5-turbo' | 'gpt-4' | 'gpt-4-turbo'
+export type AgentModel = 'gpt-5' | 'gpt-5-mini' | 'gpt-5-nano' | 'gpt-4.1' | 'gpt-4o' | 'o3'
 
 // Base Agent Type
 export type Agent = {

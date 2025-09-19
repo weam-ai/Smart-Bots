@@ -81,7 +81,7 @@ const sendMessage = async (req, res) => {
       agentId,
       queryEmbedding,
       {
-        limit: 5,
+        limit: 18,
         threshold: 0.3
       }
     )
@@ -110,7 +110,7 @@ const sendMessage = async (req, res) => {
     console.log('🤖 Generating AI response...')
     
     // Use frontend parameters if provided, otherwise fall back to agent defaults
-    const finalModel = model || agent.model || 'gpt-3.5-turbo'
+    const finalModel = model || agent.model || 'gpt-4o'
     const finalTemperature = temperature !== undefined ? temperature : (agent.temperature || 0.7)
     const finalInstructions = instructions || agent.systemPrompt || 'You are a helpful AI assistant. Answer questions based on the provided context.'
     

@@ -37,10 +37,12 @@ interface AgentPlaygroundProps {
 }
 
 const models = [
-  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', description: 'Fast and cost-effective' },
-  { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', description: 'Fast and reliable' },
-  { id: 'gpt-4', name: 'GPT-4', description: 'More capable and accurate' },
-  { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', description: 'Latest model' }
+  { id: 'gpt-5', name: 'GPT-5', description: 'Most advanced model with latest capabilities (fixed temperature)' },
+  { id: 'gpt-5-mini', name: 'GPT-5 Mini', description: 'Cost-effective GPT-5 model (fixed temperature)' },
+  { id: 'gpt-5-nano', name: 'GPT-5 Nano', description: 'Compact GPT-5 model (fixed temperature)' },
+  { id: 'gpt-4.1', name: 'GPT-4.1', description: 'Enhanced GPT-4 with improved performance' },
+  { id: 'gpt-4o', name: 'GPT-4o', description: 'Latest GPT-4 model with multimodal capabilities' },
+  { id: 'o3', name: 'O3', description: 'OpenAI\'s most advanced reasoning model (fixed temperature)' }
 ]
 
 export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: AgentPlaygroundProps) {

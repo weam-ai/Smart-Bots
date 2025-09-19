@@ -53,7 +53,7 @@ CREATE TABLE agents (
     avatar VARCHAR(255) DEFAULT '🤖',
     system_prompt TEXT NOT NULL,
     temperature DECIMAL(3,2) DEFAULT 0.7 CHECK (temperature >= 0.0 AND temperature <= 2.0),
-    model VARCHAR(100) DEFAULT 'gpt-3.5-turbo',
+    model VARCHAR(100) DEFAULT 'gpt-4o',
     max_tokens INTEGER DEFAULT 1000,
     top_p DECIMAL(3,2) DEFAULT 1.0,
     frequency_penalty DECIMAL(3,2) DEFAULT 0.0,
