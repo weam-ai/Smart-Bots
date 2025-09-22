@@ -63,7 +63,7 @@ export default function AgentPage() {
           break
         case 4:
           // Navigate to deploy page for step 4
-          router.push(`/${agentId}/deploy?step=4`)
+          router.push(`/${agentId}/deploy?step=4&tab=deploy`)
           break
         default:
           setCurrentStep('upload')

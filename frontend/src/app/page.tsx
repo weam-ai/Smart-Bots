@@ -296,7 +296,7 @@ export default function Home() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
-                          router.push(`/${agent._id}/deploy?step=4`)
+                          router.push(`/${agent._id}/deploy?step=4&tab=chat-history`)
                         }}
                         className="btn-secondary w-full font-medium rounded-lg text-sm"
                       >

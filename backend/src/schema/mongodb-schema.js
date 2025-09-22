@@ -540,7 +540,27 @@ const scriptTagSchema = new mongoose.Schema({
       }
     },
     customCSS: String,
-    customJS: String
+    customJS: String,
+    welcomeMessage: {
+      type: String,
+      default: 'Hi! How can I help you today?'
+    },
+    autoOpen: {
+      type: Boolean,
+      default: false
+    },
+    logo: {
+      type: String,
+      default: ''
+    },
+    primaryColor: {
+      type: String,
+      default: '#3B82F6'
+    },
+    secondaryColor: {
+      type: String,
+      default: '#1E40AF'
+    }
   },
   analytics: {
     views: {

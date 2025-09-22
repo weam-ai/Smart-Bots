@@ -61,7 +61,9 @@ interface DeployWithChatHistoryProps {
 const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState<'deploy' | 'chat-history'>('deploy');
+  
+  // Get active tab from URL, default to 'deploy'
+  const activeTab = (searchParams.get('tab') as 'deploy' | 'chat-history') || 'deploy';
   
   // Agent Data State
   const [agentData, setAgentData] = useState<{ name: string } | null>(null);
@@ -87,7 +89,7 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
     1: `/${agentId}?step=1`, // Main agent page
     2: `/${agentId}?step=2`, // Agent detail page
     3: `/${agentId}/playground?step=3`, // Playground page
-    4: `/${agentId}/deploy?step=4`, // Deploy page with chat history
+    4: `/${agentId}/deploy?step=4&tab=deploy`, // Deploy page with chat history
   };
 
   // Handle back navigation
@@ -232,10 +234,12 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
     }
   }, [agentId, searchTerm, statusFilter, activeTab]);
 
-  // Auto-open chat history tab when component mounts
-  useEffect(() => {
-    setActiveTab('chat-history');
-  }, []);
+  // Function to handle tab changes and update URL
+  const handleTabChange = (tab: 'deploy' | 'chat-history') => {
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set('tab', tab);
+    router.push(`?${newSearchParams.toString()}`, { scroll: false });
+  };
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
@@ -254,7 +258,7 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
       <div className="border-b border-gray-200 px-6 flex justify-around">
         <div className="flex space-around space-x-8">
           <button
-            onClick={() => setActiveTab('deploy')}
+            onClick={() => handleTabChange('deploy')}
             className={`py-4 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'deploy'
                 ? 'border-primary-500 text-primary-600'
@@ -267,7 +271,7 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
             </div>
           </button>
           <button
-            onClick={() => setActiveTab('chat-history')}
+            onClick={() => handleTabChange('chat-history')}
             className={`py-4 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'chat-history'
                 ? 'border-primary-500 text-primary-600'
@@ -291,7 +295,7 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
               agentId={agentId}
               agentName={agentData?.name || 'Loading...'}
               onBack={handleBackNavigation}
-              onViewHistory={() => setActiveTab('chat-history')}
+              onViewHistory={() => handleTabChange('chat-history')}
             />
           </div>
         ) : (

@@ -84,7 +84,7 @@ export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: Ag
   const handleDeploy = () => {
     // Save agent first, then navigate to deploy page
     onAgentUpdate(localAgentData)
-    router.push(`/${agentData.id}/deploy?step=4`)
+    router.push(`/${agentData.id}/deploy?step=4&tab=deploy`)
   }
 
   const formatFileSize = (bytes: number) => {
