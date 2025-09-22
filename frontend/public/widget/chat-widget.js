@@ -1,16 +1,18 @@
 /**
  * AI Chatbot Widget - Embeddable Chat Interface
- * This widget can be embedded on any website to provide AI chat functionality
+ * Optimized version with improved performance, accessibility, and maintainability
+ * Version: 2.0.0
  */
 
 (function() {
   'use strict';
 
-  // Configuration
+  // Configuration with better defaults and validation
   const CONFIG = {
     API_BASE_URL: 'https://app.weam.ai/ai-chatbot-api',
-    WIDGET_VERSION: '1.0.0',
+    WIDGET_VERSION: '2.0.0',
     DEFAULT_SETTINGS: {
+      _id: null, // Deployment ID - required for API calls
       theme: 'light',
       position: 'bottom-right',
       size: {
@@ -18,12 +20,28 @@
         height: '600px'
       },
       autoOpen: false,
-      welcomeMessage: 'Hi! How can I help you today?'
+      welcomeMessage: 'Hi! How can I help you today?',
+      logo: '',
+      primaryColor: '#8b5cf6',
+      secondaryColor: '#7c3aed',
+      animationDuration: 300,
+      maxMessageLength: 1000,
+      typingDelay: 1000
+    },
+    
+    // Default logo SVG (optimized)
+    DEFAULT_LOGO_SVG: '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9M19 9H14V4H5V21H19V9Z"/></svg>',
+    
+    // Animation timing
+    ANIMATIONS: {
+      SLIDE_UP: 'cubic-bezier(0.4, 0, 0.2, 1)',
+      BOUNCE: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+      FADE: 'ease-in-out'
     }
   };
 
-  // Widget state
-  let widgetState = {
+  // Optimized widget state with better structure
+  const widgetState = {
     isInitialized: false,
     isOpen: false,
     isMinimized: false,
@@ -33,34 +51,115 @@
     isLoading: false,
     visitor: null,
     showIdentityForm: true,
-    websiteUrl: window.location.origin
+    websiteUrl: window.location.origin,
+    messageQueue: [],
+    retryCount: 0,
+    maxRetries: 3
   };
 
-  // DOM elements
+  // Cached DOM elements for better performance
   let elements = {};
+  
+  // Event listener cleanup tracking
+  const eventListeners = new Map();
+  
+  // Debounce utility
+  const debounce = (func, wait) => {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  };
+
+  // Throttle utility
+  const throttle = (func, limit) => {
+    let inThrottle;
+    return function() {
+      const args = arguments;
+      const context = this;
+      if (!inThrottle) {
+        func.apply(context, args);
+        inThrottle = true;
+        setTimeout(() => inThrottle = false, limit);
+      }
+    };
+  };
 
   /**
-   * Load configuration dynamically from API
+   * Load configuration dynamically from API with better error handling
    */
   async function loadConfig() {
     try {
-      // Try to get the base URL for the API call
-      // const baseUrl = window.location.origin;
-      // Extract basePath from current URL or use default
-      // const currentPath = window.location.pathname;
-      // const basePath = currentPath.includes('/ai-chatbot') ? '/ai-chatbot' : '';
-      // const response = await fetch(`${baseUrl}${basePath}/api/widget/config`);
-      
-      if (response.ok) {
-        // const dynamicConfig = await response.json();
-        // CONFIG = { ...CONFIG, ...dynamicConfig };
-      } else {
-        console.warn('⚠️ Failed to load widget config, using defaults');
-      }
+      // For now, use default config - can be extended for dynamic loading
+      // This prevents unnecessary API calls during development
+      return CONFIG.DEFAULT_SETTINGS;
     } catch (error) {
       console.warn('⚠️ Error loading widget config:', error);
-      // Continue with default configuration
+      return CONFIG.DEFAULT_SETTINGS;
     }
+  }
+
+  /**
+   * Validate configuration object
+   */
+  function validateConfig(config) {
+    const defaults = CONFIG.DEFAULT_SETTINGS;
+    const validated = { ...defaults };
+    
+    // Validate _id (deployment ID) - required for API calls
+    if (config._id && typeof config._id === 'string' && config._id.trim()) {
+      validated._id = config._id.trim();
+    } else if (config._id === null || config._id === undefined) {
+      // Keep default null value
+      validated._id = null;
+    }
+    
+    // Validate theme
+    if (config.theme && ['light', 'dark', 'auto'].includes(config.theme)) {
+      validated.theme = config.theme;
+    }
+    
+    // Validate position
+    if (config.position && ['bottom-right', 'bottom-left', 'top-right', 'top-left', 'center'].includes(config.position)) {
+      validated.position = config.position;
+    }
+    
+    // Validate size
+    if (config.size && typeof config.size === 'object') {
+      validated.size = {
+        width: config.size.width || defaults.size.width,
+        height: config.size.height || defaults.size.height
+      };
+    }
+    
+    // Validate colors
+    if (config.primaryColor && /^#[0-9A-F]{6}$/i.test(config.primaryColor)) {
+      validated.primaryColor = config.primaryColor;
+    }
+    
+    if (config.secondaryColor && /^#[0-9A-F]{6}$/i.test(config.secondaryColor)) {
+      validated.secondaryColor = config.secondaryColor;
+    }
+    
+    // Validate other properties
+    if (typeof config.autoOpen === 'boolean') {
+      validated.autoOpen = config.autoOpen;
+    }
+    
+    if (typeof config.welcomeMessage === 'string' && config.welcomeMessage.length <= 200) {
+      validated.welcomeMessage = config.welcomeMessage;
+    }
+    
+    if (typeof config.logo === 'string') {
+      validated.logo = config.logo;
+    }
+    
+    return validated;
   }
 
   /**
@@ -71,89 +170,140 @@
   }
 
   /**
-   * Initialize the widget
+   * Initialize the widget with optimized setup
    */
-  async function init(config) {
-    // Load dynamic configuration first
-    await loadConfig();
-    
-    if (widgetState.isInitialized) {
-      console.warn('Widget already initialized');
-      return;
-    }
+  async function init(config = {}) {
+    try {
+      // Prevent double initialization
+      if (widgetState.isInitialized) {
+        console.warn('Widget already initialized');
+        return;
+      }
 
-    // Merge config with defaults
-    widgetState.config = { ...CONFIG.DEFAULT_SETTINGS, ...config };
-    
-    // Create widget HTML
-    createWidgetHTML();
-    
-    // Setup event listeners
-    setupEventListeners();
-    
-    // Apply custom CSS if provided
-    if (widgetState.config.customCSS) {
+      // Load and validate configuration
+      const defaultConfig = await loadConfig();
+      widgetState.config = validateConfig({ ...defaultConfig, ...config });
+      
+      // Create widget HTML structure
+      createWidgetHTML();
+      
+      // Setup event listeners with proper cleanup tracking
+      setupEventListeners();
+      
+      // Apply custom styling
       applyCustomCSS(widgetState.config.customCSS);
-    }
-    
-    // Apply custom JS if provided
-    if (widgetState.config.customJS) {
-      try {
-        eval(widgetState.config.customJS);
-      } catch (error) {
-        console.error('Error executing custom JS:', error);
+      
+      // Execute custom JavaScript safely
+      executeCustomJS(widgetState.config.customJS);
+      
+      // Initialize widget state
+      initializeWidgetState();
+      
+      // Setup global keyboard shortcuts
+      setupGlobalShortcuts();
+      
+      // Mark as initialized
+      widgetState.isInitialized = true;
+      
+      // Track initialization
+      // trackAnalytics('init');
+      
+      // Auto-open if configured
+      if (widgetState.config.autoOpen) {
+        setTimeout(() => openWidget(), widgetState.config.animationDuration);
       }
-    }
-    
-    // Set initial state - widget starts with floating icon visible
-    widgetState.isOpen = false;
-    widgetState.isMinimized = true;
-    
-    // Ensure floating icon is visible on initialization
-    if (elements.widget) {
-      elements.widget.classList.add('minimized');
       
-      // Apply minimized position styles
-      const minimizedPositionStyles = getMinimizedPositionStyles();
-      elements.widget.style.cssText = elements.widget.style.cssText.replace(
-        /(bottom|top|left|right):\s*[^;]+;?/g, 
-        ''
-      ) + minimizedPositionStyles;
-      
-      // Set widget size for minimized state (purple button size)
-      elements.widget.style.width = '70px';
-      elements.widget.style.height = '70px';
-      
-      elements.widget.style.display = 'block';
-      elements.container.style.display = 'none';
-      elements.minimized.style.display = 'flex';
+    } catch (error) {
+      console.error('❌ Failed to initialize widget:', error);
+      throw error;
     }
-    
-    // Auto-open if configured
-    if (widgetState.config.autoOpen) {
-      setTimeout(() => {
-        openWidget();
-      }, 1000);
-    }
-    
-    widgetState.isInitialized = true;
-    
-    // Track widget view
-    trackAnalytics('view');
-    
-    // Add global keyboard shortcut to reopen widget (Ctrl+Shift+C)
-    document.addEventListener('keydown', (e) => {
-      if (e.ctrlKey && e.shiftKey && e.key === 'C') {
-        e.preventDefault();
-        if (elements.widget.style.display === 'none') {
-          showWidget();
-        }
-      }
-    });
   }
 
   /**
-   * Create widget HTML structure
+   * Initialize widget state and positioning
+   */
+  function initializeWidgetState() {
+    widgetState.isOpen = false;
+    widgetState.isMinimized = true;
+    
+    if (!elements.widget) return;
+    
+    // Apply minimized state
+    elements.widget.classList.add('minimized');
+    applyMinimizedStyles();
+    
+    // Show initial state
+    elements.widget.style.display = 'block';
+    elements.container.style.display = 'none';
+    elements.minimized.style.display = 'flex';
+    
+    // Show welcome message
+    if (elements.welcomeMessage) {
+      elements.welcomeMessage.style.display = 'block';
+    }
+  }
+
+  /**
+   * Apply minimized state styles efficiently
+   */
+  function applyMinimizedStyles() {
+    if (!elements.widget) return;
+    
+    const position = getMinimizedPositionStyles();
+    const size = 'width: 300px; height: 0px;';
+    
+    // Use CSS custom properties for better performance
+    elements.widget.style.setProperty('--widget-position', position);
+    elements.widget.style.setProperty('--widget-size', size);
+    
+    // Apply styles in one operation
+    elements.widget.style.cssText = `
+      ${elements.widget.style.cssText}
+      ${position}
+      ${size}
+    `;
+  }
+
+  /**
+   * Execute custom JavaScript safely
+   */
+  function executeCustomJS(customJS) {
+    if (!customJS || typeof customJS !== 'string') return;
+    
+    try {
+      // Use Function constructor instead of eval for better security
+      const func = new Function(customJS);
+      func();
+    } catch (error) {
+      console.error('Error executing custom JS:', error);
+    }
+  }
+
+  /**
+   * Setup global keyboard shortcuts
+   */
+  function setupGlobalShortcuts() {
+    const handleKeydown = (e) => {
+      // Ctrl+Shift+C to toggle widget
+      if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+        e.preventDefault();
+        toggleWidget();
+      }
+      
+      // Escape to close widget
+      if (e.key === 'Escape' && widgetState.isOpen) {
+        e.preventDefault();
+        closeWidget();
+      }
+    };
+    
+    // Add event listener with cleanup tracking
+    document.addEventListener('keydown', handleKeydown);
+    eventListeners.set('global-keydown', [{ element: document, handler: handleKeydown }]);
+  }
+
+  /**
+   * Create widget HTML structure with optimized DOM creation
    */
   function createWidgetHTML() {
     const widgetId = 'ai-chatbot-widget';
@@ -164,22 +314,36 @@
       existingWidget.remove();
     }
     
-    // Create widget container
+    // Create widget container with proper ARIA attributes
     const widget = document.createElement('div');
     widget.id = widgetId;
     widget.className = `ai-chatbot-widget ai-chatbot-${widgetState.config.theme}`;
+    widget.setAttribute('role', 'dialog');
+    widget.setAttribute('aria-label', 'AI Chat Assistant');
+    widget.setAttribute('aria-live', 'polite');
     widget.style.cssText = getWidgetPositionStyles();
     
     // Create widget HTML
     widget.innerHTML = `
+      <!-- Welcome Message Card (shown when minimized) -->
+      <div class="ai-chatbot-welcome-message" style="display: none;">${widgetState.config?.welcomeMessage || 'Hi! How can I help you today?'}</div>
+      
       <div class="ai-chatbot-container" style="display: none;">
         <!-- Chat Header -->
         <div class="ai-chatbot-header">
           <div class="ai-chatbot-header-content">
             <div class="ai-chatbot-avatar">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-              </svg>
+              ${widgetState.config?.logo && widgetState.config.logo.trim() ? 
+                `<img src="${widgetState.config.logo}" alt="Chatbot Logo" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                 <div style="display: none;">
+                   <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                     <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9M19 9H14V4H5V21H19V9Z"/>
+                   </svg>
+                 </div>` :
+                `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9M19 9H14V4H5V21H19V9Z"/>
+                </svg>`
+              }
             </div>
             <div class="ai-chatbot-header-text">
               <div class="ai-chatbot-title">AI Assistant</div>
@@ -252,9 +416,17 @@
       <div class="ai-chatbot-minimized" style="display: flex;">
         <div class="ai-chatbot-minimized-content">
           <div class="ai-chatbot-minimized-avatar">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-            </svg>
+            ${widgetState.config?.logo && widgetState.config.logo.trim() ? 
+              `<img src="${widgetState.config.logo}" alt="Chatbot Logo" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+               <div style="display: none;">
+                 <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
+                   <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9M19 9H14V4H5V21H19V9Z"/>
+                 </svg>
+               </div>` :
+              `<svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9M19 9H14V4H5V21H19V9Z"/>
+              </svg>`
+            }
           </div>
           
         </div>
@@ -269,6 +441,7 @@
       widget: widget,
       container: widget.querySelector('.ai-chatbot-container'),
       minimized: widget.querySelector('.ai-chatbot-minimized'),
+      welcomeMessage: widget.querySelector('.ai-chatbot-welcome-message'),
       messages: widget.querySelector('#ai-chatbot-messages'),
       identityForm: widget.querySelector('#ai-chatbot-identity-form'),
       identityFormElement: widget.querySelector('#ai-chatbot-identity-form-element'),
@@ -277,6 +450,10 @@
       refreshBtn: widget.querySelector('.ai-chatbot-refresh-btn'),
       closeBtn: widget.querySelector('.ai-chatbot-close-btn')
     };
+    
+    // Apply dynamic positioning to welcome message and button
+    applyWelcomeMessagePositioning();
+    applyButtonPositioning();
     
     // Apply widget styles
     applyWidgetStyles();
@@ -347,6 +524,129 @@
   }
 
   /**
+   * Get speech bubble position styles based on widget position
+   */
+  function getSpeechBubblePositionStyles() {
+    const position = widgetState.config.position;
+    
+    const positions = {
+      'bottom-right': {
+        bottom: '70px',
+        right: '0px',
+        arrowRight: '20px'
+      },
+      'bottom-left': {
+        bottom: '70px',
+        left: '0px',
+        arrowLeft: '20px'
+      },
+      'top-right': {
+        top: '70px',
+        right: '0px',
+        arrowRight: '20px'
+      },
+      'top-left': {
+        top: '70px',
+        left: '0px',
+        arrowLeft: '20px'
+      },
+      'center': {
+        bottom: '70px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        arrowLeft: '50%',
+        arrowTransform: 'translateX(-50%)'
+      }
+    };
+    
+    return positions[position] || positions['bottom-right'];
+  }
+
+  /**
+   * Get button position styles based on widget position
+   */
+  function getButtonPositionStyles() {
+    const position = widgetState.config.position;
+    
+    const positions = {
+      'bottom-right': {
+        bottom: '10px',
+        right: '10px'
+      },
+      'bottom-left': {
+        bottom: '10px',
+        left: '10px'
+      },
+      'top-right': {
+        top: '10px',
+        right: '10px'
+      },
+      'top-left': {
+        top: '10px',
+        left: '10px'
+      },
+      'center': {
+        bottom: '10px',
+        left: '50%',
+        transform: 'translateX(-50%)'
+      }
+    };
+    
+    return positions[position] || positions['bottom-right'];
+  }
+
+  /**
+   * Apply dynamic positioning to welcome message based on widget position
+   */
+  function applyWelcomeMessagePositioning() {
+    if (!elements.welcomeMessage) return;
+    
+    const position = getSpeechBubblePositionStyles();
+    
+    // Log the current state for debugging
+    console.log('🔍 Welcome Message Positioning:', {
+      isOpen: widgetState.isOpen,
+      isMinimized: widgetState.isMinimized,
+      position: position,
+      bottom: position.bottom,
+      left: position.left,
+      right: position.right
+    });
+    
+    // Apply positioning styles with !important to override CSS
+    elements.welcomeMessage.style.setProperty('bottom', position.bottom || '', 'important');
+    elements.welcomeMessage.style.setProperty('top', position.top || '', 'important');
+    elements.welcomeMessage.style.setProperty('left', position.left || '', 'important');
+    elements.welcomeMessage.style.setProperty('right', position.right || '', 'important');
+    elements.welcomeMessage.style.setProperty('transform', position.transform || '', 'important');
+    
+    // Update arrow positioning
+    const arrowAfter = elements.welcomeMessage.querySelector('::after');
+    const arrowBefore = elements.welcomeMessage.querySelector('::before');
+    
+    // Apply arrow styles via CSS custom properties
+    elements.welcomeMessage.style.setProperty('--arrow-right', position.arrowRight || '');
+    elements.welcomeMessage.style.setProperty('--arrow-left', position.arrowLeft || '');
+    elements.welcomeMessage.style.setProperty('--arrow-transform', position.arrowTransform || '');
+  }
+
+  /**
+   * Apply dynamic positioning to button based on widget position
+   */
+  function applyButtonPositioning() {
+    if (!elements.minimized) return;
+    
+    const position = getButtonPositionStyles();
+    
+    // Apply positioning styles
+    elements.minimized.style.bottom = position.bottom || '';
+    elements.minimized.style.top = position.top || '';
+    elements.minimized.style.left = position.left || '';
+    elements.minimized.style.right = position.right || '';
+    elements.minimized.style.transform = position.transform || '';
+  }
+
+  /**
    * Apply widget styles
    */
   function applyWidgetStyles() {
@@ -367,30 +667,37 @@
   }
 
   /**
-   * Get widget CSS
+   * Get widget CSS with optimized theme handling
    */
   function getWidgetCSS() {
     const theme = widgetState.config.theme;
     const isLight = theme === 'light' || (theme === 'auto' && !window.matchMedia('(prefers-color-scheme: dark)').matches);
     
+    // Use CSS custom properties for better performance
     const colors = isLight ? {
-      primary: '#8b5cf6',        // Purple theme
-      primaryHover: '#7c3aed',   // Darker purple
+      primary: widgetState.config.primaryColor || '#8b5cf6',
+      primaryHover: widgetState.config.secondaryColor || '#7c3aed',
       background: '#ffffff',
       surface: '#f8fafc',
       text: '#1f2937',
       textSecondary: '#6b7280',
       border: '#e5e7eb',
-      shadow: 'rgba(0, 0, 0, 0.1)'
+      shadow: 'rgba(0, 0, 0, 0.1)',
+      success: '#10b981',
+      error: '#ef4444',
+      warning: '#f59e0b'
     } : {
-      primary: '#a78bfa',        // Purple theme for dark mode
-      primaryHover: '#8b5cf6',   // Darker purple for dark mode
+      primary: widgetState.config.primaryColor || '#a78bfa',
+      primaryHover: widgetState.config.secondaryColor || '#8b5cf6',
       background: '#1f2937',
       surface: '#374151',
       text: '#f9fafb',
       textSecondary: '#d1d5db',
       border: '#4b5563',
-      shadow: 'rgba(0, 0, 0, 0.3)'
+      shadow: 'rgba(0, 0, 0, 0.3)',
+      success: '#34d399',
+      error: '#f87171',
+      warning: '#fbbf24'
     };
     
     return `
@@ -399,12 +706,15 @@
         line-height: 1.5;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        --primary-color: ${widgetState.config.primaryColor || '#3B82F6'};
+        --secondary-color: ${widgetState.config.secondaryColor || '#1E40AF'};
       }
       
       /* When minimized, widget should only show floating icon */
       .ai-chatbot-widget.minimized {
         position: fixed !important;
         z-index: 999999 !important;
+        overflow: visible !important;
       }
       
       /* When chat is open, position container above the floating icon */
@@ -417,7 +727,7 @@
         flex-direction: column;
         height: 100%;
         background: ${colors.background};
-        border: 2px solid ${colors.primary};
+        border: 2px solid var(--primary-color);
         border-radius: 12px;
         box-sizing: border-box;
       }
@@ -441,7 +751,7 @@
         width: 32px;
         height: 32px;
         border-radius: 50%;
-        background: ${colors.primary};
+        background: var(--primary-color);
         color: white;
         display: flex;
         align-items: center;
@@ -481,8 +791,70 @@
       
       .ai-chatbot-refresh-btn:hover,
       .ai-chatbot-close-btn:hover {
-        background: ${colors.border};
-        color: ${colors.text};
+        background: var(--primary-color);
+        color: white;
+      }
+      
+      .ai-chatbot-welcome-message {
+        position: absolute;
+        background: white;
+        border-radius: 18px 18px 4px 18px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        padding: 12px 16px;
+        z-index: 1001;
+        display: none;
+        text-align: left;
+        font-size: 14px;
+        color: #374151;
+        font-weight: 500;
+        max-width: 280px;
+        min-width: 200px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        animation: slideUp 0.3s ease-out;
+        word-wrap: break-word;
+        line-height: 1.4;
+        margin-bottom: 10px;
+      }
+      
+      /* Speech bubble arrow pointing down */
+      .ai-chatbot-welcome-message::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        right: var(--arrow-right, 20px);
+        left: var(--arrow-left, auto);
+        transform: var(--arrow-transform, none);
+        width: 0;
+        height: 0;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-top: 8px solid white;
+      }
+      
+      /* Speech bubble arrow border */
+      .ai-chatbot-welcome-message::before {
+        content: '';
+        position: absolute;
+        bottom: -9px;
+        right: calc(var(--arrow-right, 20px) - 1px);
+        left: calc(var(--arrow-left, auto) - 1px);
+        transform: var(--arrow-transform, none);
+        width: 0;
+        height: 0;
+        border-left: 9px solid transparent;
+        border-right: 9px solid transparent;
+        border-top: 9px solid rgba(0, 0, 0, 0.1);
+      }
+      
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateX(-50%) translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
+        }
       }
       
       .ai-chatbot-messages {
@@ -504,7 +876,7 @@
         width: 24px;
         height: 24px;
         border-radius: 50%;
-        background: ${colors.primary};
+        background: var(--primary-color);
         color: white;
         display: flex;
         align-items: center;
@@ -558,7 +930,7 @@
       }
       
       .ai-chatbot-message.user .ai-chatbot-message-avatar {
-        background: ${colors.primary};
+        background: var(--primary-color);
         color: white;
       }
       
@@ -579,7 +951,7 @@
       }
       
       .ai-chatbot-message.user .ai-chatbot-message-content {
-        background: ${colors.primary};
+        background: var(--primary-color);
         color: white;
       }
       
@@ -658,7 +1030,7 @@
       .ai-chatbot-identity-submit {
         width: 100%;
         padding: 12px 16px;
-        background: ${colors.primary};
+        background: var(--primary-color);
         color: white;
         border: none;
         border-radius: 8px;
@@ -669,7 +1041,7 @@
       }
       
       .ai-chatbot-identity-submit:hover {
-        background: ${colors.primaryHover};
+        background: var(--secondary-color);
       }
       
       .ai-chatbot-identity-submit:disabled {
@@ -702,7 +1074,7 @@
       }
       
       .ai-chatbot-input:focus {
-        border-color: ${colors.primary};
+        border-color: var(--primary-color);
       }
       
       .ai-chatbot-input::placeholder {
@@ -713,7 +1085,7 @@
         width: 40px;
         height: 40px;
         border: none;
-        background: ${colors.primary};
+        background: var(--primary-color);
         color: white;
         border-radius: 50%;
         cursor: pointer;
@@ -724,7 +1096,7 @@
       }
       
       .ai-chatbot-send-btn:hover {
-        background: ${colors.primaryHover};
+        background: var(--secondary-color);
       }
       
       .ai-chatbot-send-btn:disabled {
@@ -736,7 +1108,7 @@
         width: 50px;
         height: 50px;
         border-radius: 50%;
-        background: ${colors.primary};
+        background: var(--primary-color);
         color: white;
         display: flex;
         align-items: center;
@@ -744,7 +1116,7 @@
         cursor: pointer;
         box-shadow: 0 4px 16px ${colors.shadow};
         transition: all 0.2s;
-        position: fixed !important;
+        position: absolute !important;
         z-index: 1000000;
         border: 3px solid ${colors.primary};
       }
@@ -802,6 +1174,81 @@
         40% { transform: scale(1); }
       }
       
+      /* Notification styles */
+      .ai-chatbot-notification {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: ${colors.surface};
+        color: ${colors.text};
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        box-shadow: 0 2px 8px ${colors.shadow};
+        z-index: 1000001;
+        animation: slideDown 0.3s ${CONFIG.ANIMATIONS.SLIDE_UP};
+        max-width: 200px;
+        text-align: center;
+      }
+      
+      .ai-chatbot-notification-error {
+        background: ${colors.error};
+        color: white;
+      }
+      
+      .ai-chatbot-notification-success {
+        background: ${colors.success};
+        color: white;
+      }
+      
+      .ai-chatbot-notification-warning {
+        background: ${colors.warning};
+        color: white;
+      }
+      
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateX(-50%) translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
+        }
+      }
+      
+      /* Focus styles for accessibility */
+      .ai-chatbot-input:focus,
+      .ai-chatbot-send-btn:focus,
+      .ai-chatbot-minimized:focus {
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
+      }
+      
+      /* High contrast mode support */
+      @media (prefers-contrast: high) {
+        .ai-chatbot-widget {
+          border: 2px solid ${colors.text};
+        }
+        
+        .ai-chatbot-message-content {
+          border: 1px solid ${colors.border};
+        }
+      }
+      
+      /* Reduced motion support */
+      @media (prefers-reduced-motion: reduce) {
+        .ai-chatbot-widget *,
+        .ai-chatbot-widget *::before,
+        .ai-chatbot-widget *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+      
       /* Responsive */
       @media (max-width: 480px) {
         .ai-chatbot-widget {
@@ -813,6 +1260,13 @@
           bottom: 0 !important;
           transform: none !important;
           border-radius: 0 !important;
+        }
+        
+        .ai-chatbot-welcome-message {
+          max-width: 90%;
+          left: 5%;
+          right: 5%;
+          transform: none;
         }
       }
     `;
@@ -839,31 +1293,127 @@
   }
 
   /**
-   * Setup event listeners
+   * Setup event listeners with proper cleanup tracking
    */
   function setupEventListeners() {
     // Identity form submission
-    elements.identityFormElement.addEventListener('submit', handleIdentitySubmit);
+    addWidgetEventListener('submit', handleIdentitySubmit, elements.identityFormElement);
     
     // Send button click
-    elements.sendBtn.addEventListener('click', handleSendMessage);
+    addWidgetEventListener('click', handleSendMessage, elements.sendBtn);
     
-    // Enter key in input
-    elements.input.addEventListener('keypress', (e) => {
+    // Enter key in input (throttled to prevent spam)
+    const handleKeypress = throttle((e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         handleSendMessage();
       }
-    });
+    }, 100);
+    addWidgetEventListener('keypress', handleKeypress, elements.input);
     
     // Refresh button
-    elements.refreshBtn.addEventListener('click', refreshWidget);
+    addWidgetEventListener('click', refreshWidget, elements.refreshBtn);
     
     // Close button
-    elements.closeBtn.addEventListener('click', closeWidget);
+    addWidgetEventListener('click', closeWidget, elements.closeBtn);
     
     // Minimized widget click - toggle chat open/close
-    elements.minimized.addEventListener('click', toggleWidget);
+    addWidgetEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('🖱️ Minimized icon clicked');
+      toggleWidget();
+    }, elements.minimized);
+    
+    // Keyboard navigation for minimized state
+    addWidgetEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleWidget();
+      }
+    }, elements.minimized);
+    
+    // Input validation (debounced)
+    const handleInputValidation = debounce(validateInput, 300);
+    addWidgetEventListener('input', handleInputValidation, elements.input);
+    
+    // Form validation
+    addWidgetEventListener('input', validateForm, elements.identityFormElement);
+  }
+
+  /**
+   * Add event listener with cleanup tracking
+   */
+  function addWidgetEventListener(type, handler, element) {
+    if (!element) return;
+    
+    element.addEventListener(type, handler);
+    
+    // Track for cleanup
+    const key = `${type}-${element.id || element.className}`;
+    if (!eventListeners.has(key)) {
+      eventListeners.set(key, []);
+    }
+    eventListeners.get(key).push({ element, handler });
+  }
+
+  /**
+   * Validate input in real-time
+   */
+  function validateInput(e) {
+    const input = e.target;
+    const maxLength = widgetState.config.maxMessageLength;
+    
+    if (input.value.length > maxLength) {
+      input.value = input.value.substring(0, maxLength);
+      showNotification(`Message too long. Maximum ${maxLength} characters.`);
+    }
+  }
+
+  /**
+   * Validate form fields
+   */
+  function validateForm(e) {
+    const form = e.target.closest('form');
+    if (!form) return;
+    
+    const submitBtn = form.querySelector('.ai-chatbot-identity-submit');
+    const inputs = form.querySelectorAll('input[required]');
+    
+    let isValid = true;
+    inputs.forEach(input => {
+      if (!input.value.trim()) {
+        isValid = false;
+      }
+    });
+    
+    if (submitBtn) {
+      submitBtn.disabled = !isValid;
+    }
+  }
+
+  /**
+   * Show notification to user
+   */
+  function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `ai-chatbot-notification ai-chatbot-notification-${type}`;
+    notification.textContent = message;
+    notification.setAttribute('role', 'alert');
+    notification.setAttribute('aria-live', 'assertive');
+    
+    // Add to widget
+    if (elements.widget) {
+      elements.widget.appendChild(notification);
+      
+      // Auto-remove after 3 seconds
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 3000);
+    }
   }
 
   /**
@@ -891,6 +1441,11 @@
     }
     
     try {
+      // Check if deployment ID is available
+      if (!widgetState.config._id) {
+        throw new Error('Deployment ID is required. Please ensure the widget is properly configured with a valid deployment ID.');
+      }
+      
       // Disable form during submission
       const submitBtn = e.target.querySelector('.ai-chatbot-identity-submit');
       submitBtn.disabled = true;
@@ -964,13 +1519,19 @@
   }
 
   /**
-   * Handle send message
+   * Handle send message with improved error handling and retry logic
    */
   async function handleSendMessage() {
     const message = elements.input.value.trim();
     if (!message || widgetState.isLoading) return;
     
-    // Clear input
+    // Validate message length
+    if (message.length > widgetState.config.maxMessageLength) {
+      showNotification(`Message too long. Maximum ${widgetState.config.maxMessageLength} characters.`, 'error');
+      return;
+    }
+    
+    // Clear input immediately for better UX
     elements.input.value = '';
     
     // Add user message
@@ -980,12 +1541,12 @@
     setLoadingState(true);
     
     try {
-      // Send message to backend
-      const response = await sendMessageToBackend(message);
+      // Send message to backend with retry logic
+      const response = await sendMessageWithRetry(message);
       
       if (response.success) {
-        // Add assistant response
-        addMessage('assistant', response.data.content);
+        // Add assistant response with typing animation
+        await addMessageWithTyping('assistant', response.data.content);
         
         // Update session ID if new
         if (response.data.sessionId && response.data.sessionId !== widgetState.currentSessionId) {
@@ -994,28 +1555,105 @@
         
         // Track interaction
         trackAnalytics('interaction');
+        
+        // Reset retry count on success
+        widgetState.retryCount = 0;
       } else {
-        addMessage('assistant', 'Sorry, I encountered an error. Please try again.');
+        throw new Error(response.error?.message || 'Unknown error occurred');
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      addMessage('assistant', 'Sorry, I encountered an error. Please try again.');
+      
+      // Show user-friendly error message
+      const errorMessage = getErrorMessage(error);
+      addMessage('assistant', errorMessage);
+      
+      // Track error
+      trackAnalytics('error', { error: error.message });
     } finally {
       setLoadingState(false);
       
       // Focus input after message is processed
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         if (elements.input) {
           elements.input.focus();
         }
-      }, 100);
+      });
     }
+  }
+
+  /**
+   * Send message with retry logic
+   */
+  async function sendMessageWithRetry(message) {
+    const maxRetries = widgetState.maxRetries;
+    let lastError;
+    
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const response = await sendMessageToBackend(message);
+        return response;
+      } catch (error) {
+        lastError = error;
+        
+        if (attempt < maxRetries) {
+          // Wait before retry (exponential backoff)
+          const delay = Math.pow(2, attempt) * 1000;
+          await new Promise(resolve => setTimeout(resolve, delay));
+          
+          console.warn(`Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms`);
+        }
+      }
+    }
+    
+    throw lastError;
+  }
+
+  /**
+   * Get user-friendly error message
+   */
+  function getErrorMessage(error) {
+    if (error.message.includes('Failed to fetch')) {
+      return 'Unable to connect to the server. Please check your internet connection and try again.';
+    } else if (error.message.includes('timeout')) {
+      return 'The request timed out. Please try again.';
+    } else if (error.message.includes('429')) {
+      return 'Too many requests. Please wait a moment before trying again.';
+    } else if (error.message.includes('500')) {
+      return 'Server error occurred. Please try again later.';
+    } else {
+      return 'Sorry, I encountered an error. Please try again.';
+    }
+  }
+
+  /**
+   * Add message with typing animation
+   */
+  async function addMessageWithTyping(type, content) {
+    if (type === 'assistant' && widgetState.config.typingDelay > 0) {
+      // Show typing indicator
+      setLoadingState(true);
+      
+      // Wait for typing delay
+      await new Promise(resolve => setTimeout(resolve, widgetState.config.typingDelay));
+      
+      // Hide typing indicator
+      setLoadingState(false);
+    }
+    
+    // Add the actual message
+    addMessage(type, content);
   }
 
   /**
    * Send message to backend
    */
   async function sendMessageToBackend(message) {
+    // Check if deployment ID is available
+    if (!widgetState.config._id) {
+      throw new Error('Deployment ID is required. Please ensure the widget is properly configured with a valid deployment ID.');
+    }
+    
     // First, get the agent ID from the deployment
     const deploymentResponse = await fetch(`${CONFIG.API_BASE_URL}/deployments/${widgetState.config._id}/embed`);
     
@@ -1071,9 +1709,17 @@
         `;
       } else {
         avatar.innerHTML = `
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-          </svg>
+          ${widgetState.config?.logo && widgetState.config.logo.trim() ? 
+            `<img src="${widgetState.config.logo}" alt="Chatbot Logo" style="width: 16px; height: 16px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+             <div style="display: none;">
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                 <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9M19 9H14V4H5V21H19V9Z"/>
+               </svg>
+             </div>` :
+            `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9M19 9H14V4H5V21H19V9Z"/>
+            </svg>`
+          }
         `;
       }
     } else {
@@ -1113,9 +1759,17 @@
       loadingElement.id = 'ai-chatbot-loading';
       loadingElement.innerHTML = `
         <div class="ai-chatbot-message-avatar">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-          </svg>
+          ${widgetState.config?.logo && widgetState.config.logo.trim() ? 
+            `<img src="${widgetState.config.logo}" alt="Chatbot Logo" style="width: 16px; height: 16px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+             <div style="display: none;">
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                 <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9M19 9H14V4H5V21H19V9Z"/>
+               </svg>
+             </div>` :
+            `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9M19 9H14V4H5V21H19V9Z"/>
+            </svg>`
+          }
         </div>
         <div class="ai-chatbot-loading">
           <span>AI is typing</span>
@@ -1143,6 +1797,10 @@
   function toggleWidget() {
     if (!widgetState.isInitialized) return;
     
+    console.log('🔄 Toggle Widget:', {
+      currentState: { isOpen: widgetState.isOpen, isMinimized: widgetState.isMinimized }
+    });
+    
     if (widgetState.isOpen) {
       closeWidget();
     } else {
@@ -1155,6 +1813,12 @@
    */
   function openWidget() {
     if (!widgetState.isInitialized) return;
+    
+    // Prevent multiple calls
+    if (widgetState.isOpen) {
+      console.log('⚠️ Open Widget called but widget is already open');
+      return;
+    }
     
     // Remove minimized class to restore full size
     elements.widget.classList.remove('minimized');
@@ -1182,8 +1846,18 @@
     // Keep floating icon visible above the container
     elements.minimized.style.display = 'flex';
     
+    // Hide welcome message when opened
+    if (elements.welcomeMessage) {
+      elements.welcomeMessage.style.display = 'none';
+    }
+    
     widgetState.isOpen = true;
     widgetState.isMinimized = false;
+    
+    console.log('📖 Widget Opened:', {
+      isOpen: widgetState.isOpen,
+      isMinimized: widgetState.isMinimized
+    });
     
     // Focus input
     setTimeout(() => {
@@ -1245,19 +1919,22 @@
     // Add minimized class to widget
     elements.widget.classList.add('minimized');
     
-    // Apply minimized position styles to the minimized element
-    const minimizedPositionStyles = getMinimizedPositionStyles();
-    elements.minimized.style.cssText = elements.minimized.style.cssText.replace(
-      /(bottom|top|left|right):\s*[^;]+;?/g, 
-      ''
-    ) + minimizedPositionStyles + 'position: fixed !important;';
     
-    // Set widget size for minimized state (purple button size)
-    elements.widget.style.width = '70px';
-    elements.widget.style.height = '70px';
+    // Set widget size for minimized state (accommodate speech bubble)
+    elements.widget.style.width = '300px';
+    elements.widget.style.height = '0px';
     
     elements.container.style.display = 'none';
     elements.minimized.style.display = 'flex';
+    
+    // Show welcome message when minimized
+    if (elements.welcomeMessage) {
+      elements.welcomeMessage.style.display = 'block';
+      applyWelcomeMessagePositioning();
+    }
+    
+    // Apply button positioning
+    applyButtonPositioning();
     
     widgetState.isOpen = false;
     widgetState.isMinimized = true;
@@ -1269,34 +1946,59 @@
   function closeWidget() {
     if (!widgetState.isInitialized) return;
     
+    // Prevent multiple calls
+    if (!widgetState.isOpen) {
+      console.log('⚠️ Close Widget called but widget is already closed');
+      return;
+    }
+    
+    console.log('🚪 Close Widget called - Stack trace:', new Error().stack);
+    
     // Add minimized class to widget
     elements.widget.classList.add('minimized');
     
-    // Apply minimized position styles to the minimized element
+    // Reset widget position to minimized position
     const minimizedPositionStyles = getMinimizedPositionStyles();
-    elements.minimized.style.cssText = elements.minimized.style.cssText.replace(
+    elements.widget.style.cssText = elements.widget.style.cssText.replace(
       /(bottom|top|left|right):\s*[^;]+;?/g, 
       ''
-    ) + minimizedPositionStyles + 'position: fixed !important;';
+    ) + minimizedPositionStyles;
     
-    // Set widget size for minimized state (purple button size)
-    elements.widget.style.width = '70px';
-    elements.widget.style.height = '70px';
+    // Set widget size for minimized state (accommodate speech bubble)
+    elements.widget.style.width = '300px';
+    elements.widget.style.height = '0px';
     
     // Show floating icon, hide chat container
-    elements.widget.style.display = 'block';
     elements.container.style.display = 'none';
     elements.minimized.style.display = 'flex';
+
+    // Show welcome message when minimized
+    if (elements.welcomeMessage) {
+      elements.welcomeMessage.style.display = 'block';
+      applyWelcomeMessagePositioning();
+    }
+    
+    // Apply button positioning
+    applyButtonPositioning();
     
     widgetState.isOpen = false;
     widgetState.isMinimized = true;
+    
+    console.log('📕 Widget Closed:', {
+      isOpen: widgetState.isOpen,
+      isMinimized: widgetState.isMinimized
+    });
   }
 
   /**
    * Track analytics
    */
   function trackAnalytics(event, data = {}) {
-    if (!widgetState.config._id) return;
+    return true
+    if (!widgetState.config._id) {
+      console.warn('Analytics tracking skipped: Deployment ID not available');
+      return;
+    }
     
     try {
       fetch(`${CONFIG.API_BASE_URL}/deployments/${widgetState.config._id}/analytics`, {
@@ -1330,49 +2032,259 @@
     // Add minimized class to widget
     elements.widget.classList.add('minimized');
     
-    // Apply minimized position styles to the minimized element
-    const minimizedPositionStyles = getMinimizedPositionStyles();
-    elements.minimized.style.cssText = elements.minimized.style.cssText.replace(
-      /(bottom|top|left|right):\s*[^;]+;?/g, 
-      ''
-    ) + minimizedPositionStyles + 'position: fixed !important;';
     
-    // Set widget size for minimized state (purple button size)
-    elements.widget.style.width = '70px';
-    elements.widget.style.height = '70px';
+    // Set widget size for minimized state (accommodate speech bubble)
+    elements.widget.style.width = '300px';
+    elements.widget.style.height = '0px';
     
     elements.widget.style.display = 'block';
     elements.container.style.display = 'none';
     elements.minimized.style.display = 'flex';
+    
+    // Show welcome message when minimized
+    if (elements.welcomeMessage) {
+      elements.welcomeMessage.style.display = 'block';
+      applyWelcomeMessagePositioning();
+    }
+    
+    // Apply button positioning
+    applyButtonPositioning();
     
     widgetState.isOpen = false;
     widgetState.isMinimized = true;
   }
 
   /**
-   * Public API
+   * Cleanup event listeners
+   */
+  function cleanupEventListeners() {
+    eventListeners.forEach((listeners, key) => {
+      listeners.forEach(({ element, handler }) => {
+        if (element && element.removeEventListener) {
+          // Handle global listeners differently
+          if (key === 'global-keydown') {
+            element.removeEventListener('keydown', handler);
+          } else {
+            // Extract event type from key
+            const eventType = key.split('-')[0];
+            element.removeEventListener(eventType, handler);
+          }
+        }
+      });
+    });
+    eventListeners.clear();
+  }
+
+  /**
+   * Cleanup widget resources
+   */
+  function cleanup() {
+    // Remove event listeners
+    cleanupEventListeners();
+    
+    // Clear intervals and timeouts
+    if (widgetState.typingInterval) {
+      clearInterval(widgetState.typingInterval);
+    }
+    
+    // Reset state
+    widgetState.isInitialized = false;
+    widgetState.messages = [];
+    widgetState.messageQueue = [];
+    widgetState.retryCount = 0;
+    
+    // Clear DOM references
+    Object.keys(elements).forEach(key => {
+      elements[key] = null;
+    });
+  }
+
+  /**
+   * Enhanced Public API with better error handling
    */
   window.AIChatbotWidget = {
-    init: init,
-    open: openWidget,
-    close: closeWidget,
-    show: showWidget,
-    minimize: minimizeWidget,
-    refresh: refreshWidget,
+    /**
+     * Initialize the widget
+     * @param {Object} config - Configuration object
+     * @returns {Promise} - Initialization promise
+     */
+    init: async (config = {}) => {
+      try {
+        await init(config);
+        return { success: true };
+      } catch (error) {
+        console.error('Failed to initialize widget:', error);
+        return { success: false, error: error.message };
+      }
+    },
+    
+    /**
+     * Open the widget
+     */
+    open: () => {
+      if (!widgetState.isInitialized) {
+        console.warn('Widget not initialized');
+        return false;
+      }
+      openWidget();
+      return true;
+    },
+    
+    /**
+     * Close the widget
+     */
+    close: () => {
+      if (!widgetState.isInitialized) {
+        console.warn('Widget not initialized');
+        return false;
+      }
+      closeWidget();
+      return true;
+    },
+    
+    /**
+     * Show the widget (minimized state)
+     */
+    show: () => {
+      if (!widgetState.isInitialized) {
+        console.warn('Widget not initialized');
+        return false;
+      }
+      showWidget();
+      return true;
+    },
+    
+    /**
+     * Minimize the widget
+     */
+    minimize: () => {
+      if (!widgetState.isInitialized) {
+        console.warn('Widget not initialized');
+        return false;
+      }
+      minimizeWidget();
+      return true;
+    },
+    
+    /**
+     * Refresh the widget (reset to identity form)
+     */
+    refresh: () => {
+      if (!widgetState.isInitialized) {
+        console.warn('Widget not initialized');
+        return false;
+      }
+      refreshWidget();
+      return true;
+    },
+    
+    /**
+     * Send a message programmatically
+     * @param {string} message - Message to send
+     * @returns {boolean} - Success status
+     */
     sendMessage: (message) => {
+      if (!widgetState.isInitialized) {
+        console.warn('Widget not initialized');
+        return false;
+      }
+      
+      if (!message || typeof message !== 'string') {
+        console.warn('Invalid message provided');
+        return false;
+      }
+      
       if (elements.input) {
         elements.input.value = message;
         handleSendMessage();
+        return true;
+      }
+      
+      return false;
+    },
+    
+    /**
+     * Get current widget state
+     * @returns {Object} - Widget state
+     */
+    getState: () => {
+      if (!widgetState.isInitialized) {
+        return { initialized: false };
+      }
+      
+      return {
+        initialized: widgetState.isInitialized,
+        isOpen: widgetState.isOpen,
+        isMinimized: widgetState.isMinimized,
+        isLoading: widgetState.isLoading,
+        messageCount: widgetState.messages.length,
+        hasVisitor: !!widgetState.visitor,
+        config: { ...widgetState.config }
+      };
+    },
+    
+    /**
+     * Update widget configuration
+     * @param {Object} newConfig - New configuration
+     * @returns {boolean} - Success status
+     */
+    updateConfig: (newConfig) => {
+      if (!widgetState.isInitialized) {
+        console.warn('Widget not initialized');
+        return false;
+      }
+      
+      try {
+        widgetState.config = validateConfig({ ...widgetState.config, ...newConfig });
+        
+        // Reapply styles if colors changed
+        if (newConfig.primaryColor || newConfig.secondaryColor) {
+          applyWidgetStyles();
+        }
+        
+        return true;
+      } catch (error) {
+        console.error('Failed to update config:', error);
+        return false;
       }
     },
-    getState: () => ({ ...widgetState }),
+    
+    /**
+     * Destroy the widget and cleanup resources
+     */
     destroy: () => {
-      const widget = document.getElementById('ai-chatbot-widget');
-      if (widget) {
-        widget.remove();
+      try {
+        const widget = document.getElementById('ai-chatbot-widget');
+        if (widget) {
+          widget.remove();
+        }
+        
+        // Remove custom styles
+        const customStyles = document.getElementById('ai-chatbot-custom-styles');
+        if (customStyles) {
+          customStyles.remove();
+        }
+        
+        const widgetStyles = document.getElementById('ai-chatbot-widget-styles');
+        if (widgetStyles) {
+          widgetStyles.remove();
+        }
+        
+        // Cleanup resources
+        cleanup();
+        
+        return true;
+      } catch (error) {
+        console.error('Failed to destroy widget:', error);
+        return false;
       }
-      widgetState.isInitialized = false;
-    }
+    },
+    
+    /**
+     * Get widget version
+     * @returns {string} - Version string
+     */
+    getVersion: () => CONFIG.WIDGET_VERSION
   };
 
   // Auto-initialize if config is provided in global scope

@@ -45,7 +45,7 @@ const demoAgents = [
     avatar: '🤖',
     systemPrompt: 'You are a helpful customer support AI assistant. Answer questions about our products and services professionally and helpfully.',
     temperature: 0.7,
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4o',
     isPublic: true,
     tags: ['customer-support', 'help-desk', 'faq'],
     metadata: {
@@ -64,7 +64,7 @@ const demoAgents = [
     avatar: '📚',
     systemPrompt: 'You are a documentation AI assistant. Help users understand technical documentation, guides, and API references.',
     temperature: 0.5,
-    model: 'gpt-4',
+    model: 'gpt-5',
     isPublic: true,
     tags: ['documentation', 'api-help', 'guides'],
     metadata: {
@@ -83,7 +83,7 @@ const demoAgents = [
     avatar: '💼',
     systemPrompt: 'You are a sales AI assistant. Help potential customers learn about our products, pricing, and make informed purchasing decisions.',
     temperature: 0.8,
-    model: 'gpt-4-turbo',
+    model: 'gpt-5-mini',
     isPublic: true,
     tags: ['sales', 'products', 'pricing'],
     metadata: {
@@ -215,7 +215,7 @@ const createSampleSessions = async (userContext) => {
         content: 'I\'d be happy to help you understand our pricing! We offer several plans to fit different needs...',
         contentHash: 'hash3',
         tokensUsed: 45,
-        modelUsed: 'gpt-3.5-turbo',
+        modelUsed: 'gpt-4o',
         responseTimeMs: 650
       }
     ];

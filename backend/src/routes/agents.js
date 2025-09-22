@@ -10,6 +10,7 @@ const {
   validateAgentId,
   validateCreateDeployment,
   validateUpdateDeployment,
+  validateDeleteDeployment,
   validatePagination,
   agentCreationLimiter,
   generalLimiter
@@ -81,7 +82,7 @@ router.get('/:agentId/deployments/:_id',
 
 // PUT /api/agents/:agentId/deployments/:_id - Update deployment
 router.put('/:agentId/deployments/:_id',
-  validateAgentId,
+  // validateAgentId,
   validateUpdateDeployment,
   jwtAuthMiddleware,
   deploymentController.updateDeployment
@@ -89,7 +90,7 @@ router.put('/:agentId/deployments/:_id',
 
 // DELETE /api/agents/:agentId/deployments/:_id - Delete deployment
 router.delete('/:agentId/deployments/:_id',
-  validateAgentId,
+  validateDeleteDeployment,
   jwtAuthMiddleware,
   deploymentController.deleteDeployment
 );

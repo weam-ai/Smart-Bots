@@ -12,7 +12,7 @@ let agents = [
     avatar: '🤖',
     systemPrompt: 'You are a helpful customer support assistant.',
     temperature: 0.7,
-    model: 'gpt-3.5-turbo'
+    model: 'gpt-4o'
   },
   {
     id: 'demo-agent-2',
@@ -26,7 +26,7 @@ let agents = [
     avatar: '📚',
     systemPrompt: 'You are a helpful documentation assistant.',
     temperature: 0.7,
-    model: 'gpt-3.5-turbo'
+    model: 'gpt-4o'
   },
   {
     id: 'demo-agent-3',
@@ -40,7 +40,7 @@ let agents = [
     avatar: '💼',
     systemPrompt: 'You are a helpful sales assistant.',
     temperature: 0.7,
-    model: 'gpt-3.5-turbo'
+    model: 'gpt-4o'
   }
 ];
 

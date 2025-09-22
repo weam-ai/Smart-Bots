@@ -15,7 +15,7 @@ app.set('trust proxy', true);
 // Middleware
 app.use(helmet());
 // app.use(compression()); // Temporarily disabled
-// CORS configuration
+
 const corsOptions = {
   origin: CORS_ORIGIN_DEV ? CORS_ORIGIN_DEV.split(',') : [/weam\.ai$/],
   credentials: true,

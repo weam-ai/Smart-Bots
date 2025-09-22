@@ -128,16 +128,19 @@ export const CHAT = {
 
 // AI Model Configuration
 export const AI_MODEL = {
-  DEFAULT_MODEL: 'gpt-3.5-turbo',
+  DEFAULT_MODEL: 'gpt-4o',
   DEFAULT_MAX_TOKENS: 1000,
 } as const
 
 // Agent Constants
 export const AGENT = {
   MODELS: [
-    { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', description: 'Fast and cost-effective' },
-    { id: 'gpt-4', name: 'GPT-4', description: 'More capable and accurate' },
-    { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', description: 'Latest model with improved performance' },
+    { id: 'gpt-5', name: 'GPT-5', description: 'Most advanced model with latest capabilities (fixed temperature)' },
+    { id: 'gpt-5-mini', name: 'GPT-5 Mini', description: 'Cost-effective GPT-5 model (fixed temperature)' },
+    { id: 'gpt-5-nano', name: 'GPT-5 Nano', description: 'Compact GPT-5 model (fixed temperature)' },
+    { id: 'gpt-4.1', name: 'GPT-4.1', description: 'Enhanced GPT-4 with improved performance' },
+    { id: 'gpt-4o', name: 'GPT-4o', description: 'Latest GPT-4 model with multimodal capabilities' },
+    { id: 'o3', name: 'O3', description: 'OpenAI\'s most advanced reasoning model (fixed temperature)' },
   ],
   TEMPERATURE: {
     MIN: 0.1,
@@ -157,7 +160,7 @@ export const AGENT = {
 export const FILE_PROCESSING = {
   DELAY: 5000, // 5 seconds
   BATCH_JOB_DELAY: 5000, // 5 seconds
-  DEFAULT_CHUNK_SIZE: 1000,
+  DEFAULT_CHUNK_SIZE: 3000,
   DEFAULT_CHUNK_OVERLAP: 200,
 } as const
 

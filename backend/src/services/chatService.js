@@ -140,7 +140,7 @@ const processMessage = async (agentId, message, sessionId) => {
         
         console.log(`🧠 Generating RAG response with ${searchResult.results.length} context chunks`);
         const ragResponse = await openaiService.generateChatCompletion(message, searchResult.results, {
-          model: agent.model || 'gpt-4',
+          model: agent.model || 'gpt-4o',
           maxTokens: 2000,
           temperature: 0.7
         });
@@ -169,7 +169,7 @@ const processMessage = async (agentId, message, sessionId) => {
           message, 
           [], // Empty context
           {
-            model: agent.model || 'gpt-4',
+            model: agent.model || 'gpt-4o',
             maxTokens: 1000,
             temperature: 0.8
           }
@@ -202,7 +202,7 @@ const processMessage = async (agentId, message, sessionId) => {
       messageType: 'assistant',
       content: assistantContent,
       contentHash: require('crypto').createHash('md5').update(assistantContent).digest('hex'),
-      modelUsed: agent.model || 'gpt-4',
+      modelUsed: agent.model || 'gpt-4o',
       tokensUsed: tokensUsed,
       responseTimeMs: responseTimeMs,
       

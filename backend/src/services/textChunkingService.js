@@ -30,7 +30,7 @@ const LANGCHAIN_STRATEGIES = {
  * Default chunking parameters
  */
 const CHUNKING_DEFAULTS = {
-  CHUNK_SIZE: 500,
+  CHUNK_SIZE: 3000,
   CHUNK_OVERLAP: 50,
   MIN_CHUNK_SIZE: 20,     // Reduced from 100 to allow small documents
   MAX_CHUNK_SIZE: 4000
