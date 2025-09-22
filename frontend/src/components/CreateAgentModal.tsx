@@ -59,7 +59,7 @@ export default function CreateAgentModal({ isOpen, onClose, onSubmit, isLoading 
       name: '',
       systemPrompt: 'You are a helpful AI assistant. Answer questions based on the provided documents.',
       temperature: 0.7,
-      model: 'gpt-3.5-turbo'
+      model: 'gpt-5'
     })
     setErrors({})
     onClose()
