@@ -17,7 +17,7 @@
    */
   const OPENAI_CONFIG = {
     EMBEDDING_MODEL: 'text-embedding-3-small', // Latest embedding model (1536 dimensions)
-    CHAT_MODEL: 'gpt-4o-mini', // Cost-effective GPT-4 model
+    CHAT_MODEL: 'gpt-4o', // Latest GPT-4 model with multimodal capabilities
     MAX_TOKENS: 4096,
     TEMPERATURE: 0.1, // Low temperature for consistent responses
     MAX_BATCH_SIZE: 100, // Maximum chunks to process in one batch
@@ -192,15 +192,29 @@
         { role: 'user', content: userMessage }
       ];
       
-      console.log(`🤖 Sending request to ${options.model || OPENAI_CONFIG.CHAT_MODEL}`);
+      const model = options.model || OPENAI_CONFIG.CHAT_MODEL;
+      console.log(`🤖 Sending request to ${model}`);
       
-      const response = await openai.chat.completions.create({
-        model: options.model || OPENAI_CONFIG.CHAT_MODEL,
+      // Models that don't support custom temperature (only support default value of 1)
+      const modelsWithoutCustomTemperature = ['o3', 'gpt-5', 'gpt-5-mini', 'gpt-5-nano'];
+      const supportsCustomTemperature = !modelsWithoutCustomTemperature.includes(model);
+      
+      // Build request parameters based on model capabilities
+      const requestParams = {
+        model,
         messages,
-        max_tokens: options.maxTokens || OPENAI_CONFIG.MAX_TOKENS,
-        temperature: options.temperature || OPENAI_CONFIG.TEMPERATURE,
+        max_completion_tokens: options.maxTokens || OPENAI_CONFIG.MAX_TOKENS,
         stream: false
-      });
+      };
+      
+      // Only add temperature if the model supports custom values
+      if (supportsCustomTemperature) {
+        requestParams.temperature = options.temperature || OPENAI_CONFIG.TEMPERATURE;
+      }
+      
+      console.log(`🔧 Model ${model} supports custom temperature: ${supportsCustomTemperature}`);
+      
+      const response = await openai.chat.completions.create(requestParams);
       
       const completion = response.choices[0]?.message?.content;
       
@@ -236,6 +250,8 @@
    * Get OpenAI model information
    */
   const getModelInfo = () => {
+    const modelsWithoutCustomTemperature = ['o3', 'gpt-5', 'gpt-5-mini', 'gpt-5-nano'];
+    
     return {
       embedding: {
         model: OPENAI_CONFIG.EMBEDDING_MODEL,
@@ -245,7 +261,12 @@
       chat: {
         model: OPENAI_CONFIG.CHAT_MODEL,
         maxTokens: OPENAI_CONFIG.MAX_TOKENS,
-        temperature: OPENAI_CONFIG.TEMPERATURE
+        temperature: OPENAI_CONFIG.TEMPERATURE,
+        supportsCustomTemperature: !modelsWithoutCustomTemperature.includes(OPENAI_CONFIG.CHAT_MODEL)
+      },
+      modelCapabilities: {
+        modelsWithoutCustomTemperature,
+        modelsWithCustomTemperature: ['gpt-4o', 'gpt-4.1', 'gpt-4']
       },
       config: OPENAI_CONFIG
     };

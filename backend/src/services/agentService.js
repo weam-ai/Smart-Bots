@@ -157,7 +157,7 @@ const createAgent = async (agentData) => {
       avatar: agentData.avatar || '🤖',
       systemPrompt: agentData.systemPrompt || 'You are a helpful AI assistant.',
       temperature: agentData.temperature || 0.7,
-      model: agentData.model || 'gpt-3.5-turbo',
+      model: agentData.model || 'gpt-4o',
       maxTokens: agentData.maxTokens || 1000,
       topP: agentData.topP || 1.0,
       frequencyPenalty: agentData.frequencyPenalty || 0.0,

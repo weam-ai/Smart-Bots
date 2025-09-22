@@ -102,10 +102,10 @@ const agentSchemas = {
       }),
     
     model: Joi.string()
-      .valid('gpt-3.5-turbo', 'gpt-4', 'gpt-4-turbo', 'gpt-4o-mini')
-      .default('gpt-3.5-turbo')
+      .valid('gpt-5', 'gpt-5-mini', 'gpt-5-nano', 'gpt-4.1', 'gpt-4o', 'o3')
+      .default('gpt-4o')
       .messages({
-        'any.only': 'Model must be one of: gpt-3.5-turbo, gpt-4, gpt-4-turbo, gpt-4o-mini'
+        'any.only': 'Model must be one of: gpt-5, gpt-5-mini, gpt-5-nano, gpt-4.1, gpt-4o, o3'
       }),
     
     maxTokens: Joi.number()
@@ -167,7 +167,7 @@ const agentSchemas = {
       .optional(),
     
     model: Joi.string()
-      .valid('gpt-3.5-turbo', 'gpt-4', 'gpt-4-turbo', 'gpt-4o-mini')
+      .valid('gpt-5', 'gpt-5-mini', 'gpt-5-nano', 'gpt-4.1', 'gpt-4o', 'o3')
       .optional(),
     
     maxTokens: Joi.number()
@@ -319,7 +319,20 @@ const deploymentSchemas = {
       welcomeMessage: Joi.string()
         .max(200)
         .trim()
-        .default('Hi! How can I help you today?')
+        .default('Hi! How can I help you today?'),
+      
+      logo: Joi.string()
+        .uri()
+        .allow('')
+        .optional(),
+      
+      primaryColor: Joi.string()
+        .pattern(/^#[0-9A-Fa-f]{6}$/)
+        .default('#3B82F6'),
+      
+      secondaryColor: Joi.string()
+        .pattern(/^#[0-9A-Fa-f]{6}$/)
+        .default('#1E40AF')
     }).optional()
   }),
 
@@ -366,12 +379,38 @@ const deploymentSchemas = {
       welcomeMessage: Joi.string()
         .max(200)
         .trim()
+        .optional(),
+
+      logo: Joi.string()
+        .uri()
+        .allow('')
+        .optional(),
+
+      primaryColor: Joi.string()
+        .pattern(/^#[0-9A-Fa-f]{6}$/)
+        .optional(),
+
+      secondaryColor: Joi.string()
+        .pattern(/^#[0-9A-Fa-f]{6}$/)
+        .optional() 
     }).optional(),
     
     isActive: Joi.boolean()
       .optional()
   }).min(1), // At least one field must be provided for update
 
+  deleteDeployment: Joi.object({
+    _id: customValidators.objectId.required()
+      .messages({
+        'any.required': 'Deployment ID parameter is required',
+        'any.invalid': 'Invalid deployment ID format'
+      }),
+    agentId: customValidators.objectId.required()
+      .messages({
+        'any.required': 'Agent ID parameter is required',
+        'any.invalid': 'Invalid agent ID format'
+      })
+  }),
   trackAnalytics: Joi.object({
     event: Joi.string()
       .valid('view', 'interaction', 'chat_start', 'chat_end')
@@ -478,6 +517,7 @@ const validateCreateSession = validate(chatSchemas.createSession, 'body');
 
 const validateCreateDeployment = validate(deploymentSchemas.createDeployment, 'body');
 const validateUpdateDeployment = validate(deploymentSchemas.updateDeployment, 'body');
+const validateDeleteDeployment = validate(deploymentSchemas.deleteDeployment, 'params');
 const validateTrackAnalytics = validate(deploymentSchemas.trackAnalytics, 'body');
 
 const validateObjectId = validate(paramSchemas.objectId, 'params');
@@ -510,6 +550,7 @@ module.exports = {
   // Deployment validation
   validateCreateDeployment,
   validateUpdateDeployment,
+  validateDeleteDeployment,
   validateTrackAnalytics,
   
   // Parameter validation

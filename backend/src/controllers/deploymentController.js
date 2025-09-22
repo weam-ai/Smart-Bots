@@ -43,7 +43,10 @@ const createDeployment = asyncHandler(async (req, res) => {
     customCSS: '',
     customJS: '',
     autoOpen: false,
-    welcomeMessage: 'Hi! How can I help you today?'
+    welcomeMessage: 'Hi! How can I help you today?',
+    logo: '',
+    primaryColor: '#3B82F6',
+    secondaryColor: '#1E40AF'
   };
 
   const finalSettings = { ...defaultSettings, ...settings };
@@ -115,26 +118,52 @@ const getDeployments = asyncHandler(async (req, res) => {
   console.log('📋 Fetching deployments for agent:', agentId);
 
   try {
+    // Run migration once (you can remove this after first run)
+    // await migrateDeployments();
     const deployments = await ScriptTag.find({ agent: agentId })
       .sort({ createdAt: -1 })
       .select('-scriptCode'); // Exclude large script code from list
 
-    console.log(`✅ Found ${deployments.length} deployments`);
+    // Ensure all deployments have the required settings fields
+    const deploymentsWithDefaults = deployments.map(deployment => {
+      const settings = {
+        theme: deployment.settings?.theme || 'light',
+        position: deployment.settings?.position || 'bottom-right',
+        size: {
+          width: deployment.settings?.size?.width || '400px',
+          height: deployment.settings?.size?.height || '600px'
+        },
+        customCSS: deployment.settings?.customCSS || '',
+        customJS: deployment.settings?.customJS || '',
+        welcomeMessage: deployment.settings?.welcomeMessage || 'Hi! How can I help you today?',
+        autoOpen: deployment.settings?.autoOpen || false,
+        logo: deployment.settings?.logo || '',
+        primaryColor: deployment.settings?.primaryColor || '#3B82F6',
+        secondaryColor: deployment.settings?.secondaryColor || '#1E40AF'
+      };
+      
+      console.log('🔍 Deployment settings for', deployment.name, ':', {
+        original: deployment.settings,
+        processed: settings
+      });
 
-    res.json({
-      success: true,
-      data: deployments.map(deployment => ({
+      return {
         _id: deployment._id,
         agentId: deployment.agent,
         name: deployment.name,
         description: deployment.description,
         websiteUrl: deployment.deploymentUrl,
-        settings: deployment.settings,
+        settings: settings,
         isActive: deployment.isActive,
         analytics: deployment.analytics,
         createdAt: deployment.createdAt,
         updatedAt: deployment.updatedAt
-      }))
+      };
+    });
+
+    res.json({
+      success: true,
+      data: deploymentsWithDefaults
     });
 
   } catch (error) {
@@ -168,6 +197,23 @@ const getDeployment = asyncHandler(async (req, res) => {
 
     console.log('✅ Deployment found:', deployment.name);
 
+    // Ensure deployment has the required settings fields
+    const settings = {
+      theme: deployment.settings?.theme || 'light',
+      position: deployment.settings?.position || 'bottom-right',
+      size: {
+        width: deployment.settings?.size?.width || '400px',
+        height: deployment.settings?.size?.height || '600px'
+      },
+      customCSS: deployment.settings?.customCSS || '',
+      customJS: deployment.settings?.customJS || '',
+      welcomeMessage: deployment.settings?.welcomeMessage || 'Hi! How can I help you today?',
+      autoOpen: deployment.settings?.autoOpen || false,
+      logo: deployment.settings?.logo || '',
+      primaryColor: deployment.settings?.primaryColor || '#3B82F6',
+      secondaryColor: deployment.settings?.secondaryColor || '#1E40AF'
+    };
+
     res.json({
       success: true,
       data: {
@@ -176,7 +222,7 @@ const getDeployment = asyncHandler(async (req, res) => {
         name: deployment.name,
         description: deployment.description,
         websiteUrl: deployment.deploymentUrl,
-        settings: deployment.settings,
+        settings: settings,
         embedCode: deployment.embedCode,
         isActive: deployment.isActive,
         analytics: deployment.analytics,
@@ -197,13 +243,27 @@ const updateDeployment = asyncHandler(async (req, res) => {
   const { agentId, _id } = req.params;
   const updateData = req.body;
 
-  console.log('🔄 Updating deployment:', _id);
 
   try {
-    const deployment = await ScriptTag.findOne({
+    // First, let's see what deployments exist for this agent
+    const allDeployments = await ScriptTag.find({ agent: agentId }).select('_id name');
+
+    // Try to find the deployment with the exact ID
+    let deployment = await ScriptTag.findOne({
       _id: _id,
       agent: agentId
     });
+
+    // If not found, try converting to ObjectId
+    if (!deployment && mongoose.Types.ObjectId.isValid(_id)) {
+      console.log('🔍 Trying with ObjectId conversion...');
+      deployment = await ScriptTag.findOne({
+        _id: new mongoose.Types.ObjectId(_id),
+        agent: agentId
+      });
+    }
+
+    console.log('🔍 Found deployment:', deployment ? 'YES' : 'NO');
 
     if (!deployment) {
       return res.status(404).json({
@@ -220,7 +280,25 @@ const updateDeployment = asyncHandler(async (req, res) => {
     if (updateData.description !== undefined) deployment.description = updateData.description.trim();
     if (updateData.websiteUrl !== undefined) deployment.deploymentUrl = updateData.websiteUrl;
     if (updateData.settings) {
-      deployment.settings = { ...deployment.settings, ...updateData.settings };
+      console.log('🔍 Before settings update:', deployment.settings);
+      
+      // Ensure all required fields exist with defaults
+      const defaultSettings = {
+        theme: 'light',
+        position: 'bottom-right',
+        size: { width: '400px', height: '600px' },
+        customCSS: '',
+        customJS: '',
+        welcomeMessage: 'Hi! How can I help you today?',
+        autoOpen: false,
+        logo: '',
+        primaryColor: '#3B82F6',
+        secondaryColor: '#1E40AF'
+      };
+      
+      // Merge with defaults first, then with new settings
+      deployment.settings = { ...defaultSettings, ...deployment.settings, ...updateData.settings };
+      console.log('🔍 After settings update:', deployment.settings);
     }
     if (updateData.isActive !== undefined) deployment.isActive = updateData.isActive;
 
@@ -262,7 +340,7 @@ const updateDeployment = asyncHandler(async (req, res) => {
 const deleteDeployment = asyncHandler(async (req, res) => {
   const { agentId, _id } = req.params;
 
-  console.log('🗑️ Deleting deployment:', _id);
+  console.log('🗑️ Deleting deployment:', req.params);
 
   try {
     const deployment = await ScriptTag.findOneAndDelete({
@@ -393,6 +471,52 @@ const trackAnalytics = asyncHandler(async (req, res) => {
 // ==================== HELPER FUNCTIONS ====================
 
 /**
+ * Migrate existing deployments to include new fields
+ */
+async function migrateDeployments() {
+  try {
+    console.log('🔄 Starting deployment migration...');
+    
+    const deployments = await ScriptTag.find({});
+    let migratedCount = 0;
+    
+    for (const deployment of deployments) {
+      let needsUpdate = false;
+      const defaultSettings = {
+        theme: 'light',
+        position: 'bottom-right',
+        size: { width: '400px', height: '600px' },
+        customCSS: '',
+        customJS: '',
+        welcomeMessage: 'Hi! How can I help you today?',
+        autoOpen: false,
+        logo: '',
+        primaryColor: '#3B82F6',
+        secondaryColor: '#1E40AF'
+      };
+      
+      // Check if any new fields are missing
+      for (const [key, defaultValue] of Object.entries(defaultSettings)) {
+        if (deployment.settings[key] === undefined) {
+          deployment.settings[key] = defaultValue;
+          needsUpdate = true;
+        }
+      }
+      
+      if (needsUpdate) {
+        await deployment.save();
+        migratedCount++;
+        console.log(`✅ Migrated deployment: ${deployment.name}`);
+      }
+    }
+    
+    console.log(`🎉 Migration complete! Updated ${migratedCount} deployments.`);
+  } catch (error) {
+    console.error('❌ Migration failed:', error);
+  }
+}
+
+/**
  * Generate embed code for deployment
  */
 function generateEmbedCode(_id, settings) {
@@ -414,7 +538,10 @@ function generateEmbedCode(_id, settings) {
       autoOpen: ${settings.autoOpen},
       welcomeMessage: '${settings.welcomeMessage}',
       customCSS: \`${settings.customCSS || ''}\`,
-      customJS: \`${settings.customJS || ''}\`
+      customJS: \`${settings.customJS || ''}\`,
+      logo: '${settings.logo || ''}',
+      primaryColor: '${settings.primaryColor || '#3B82F6'}',
+      secondaryColor: '${settings.secondaryColor || '#1E40AF'}'
     };
     
     var script = document.createElement('script');

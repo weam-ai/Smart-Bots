@@ -16,7 +16,7 @@ router.get('/:_id/embed',
 // POST /api/deployments/:_id/analytics - Track analytics (public)
 router.post('/:_id/analytics',
   validateTrackAnalytics,
-  jwtAuthMiddleware,
+  // jwtAuthMiddleware,
   deploymentController.trackAnalytics
 );
 

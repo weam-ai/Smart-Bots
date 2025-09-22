@@ -63,7 +63,7 @@ export default function AgentPage() {
           break
         case 4:
           // Navigate to deploy page for step 4
-          router.push(`/${agentId}/deploy?step=4`)
+          router.push(`/${agentId}/deploy?step=4&tab=deploy`)
           break
         default:
           setCurrentStep('upload')
@@ -84,7 +84,7 @@ export default function AgentPage() {
     name: 'Loading...',
     systemPrompt: 'You are a helpful AI assistant. Answer questions based on the provided documents.',
     temperature: 0.7,
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4o',
     files: [],
     status: 'uploading',
     trainingProgress: 0
