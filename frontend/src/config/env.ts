@@ -9,7 +9,6 @@ import dotenv from 'dotenv';
 console.log(`✅ .env file loaded from: ${path.join(process.cwd(), '..', '.env')}`);
   dotenv.config({ path: path.join(process.cwd(), '..', '.env') });
 
-// Environment Configuration Interface
 interface EnvConfig {
   // Iron Session Configuration
   NEXT_PUBLIC_IRON_SESSION_COOKIE_NAME: string;
