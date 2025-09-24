@@ -6,12 +6,8 @@
 import path from 'path';
 import dotenv from 'dotenv';
 
-// Load dotenv only on server side
-if (typeof window === 'undefined') {
-  // Load from root .env file (one level up from Nextjs directory)
-  console.log(`✅ .env file loaded from: ${path.join(process.cwd(), '..', '.env')}`);
+console.log(`✅ .env file loaded from: ${path.join(process.cwd(), '..', '.env')}`);
   dotenv.config({ path: path.join(process.cwd(), '..', '.env') });
-}
 
 // Environment Configuration Interface
 interface EnvConfig {
