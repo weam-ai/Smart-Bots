@@ -101,7 +101,7 @@ export default function AgentDeploy({
       customCSS: "",
       customJS: "",
       logo: "",
-      primaryColor: "#3B82F6",
+      primaryColor: "#000000",
       secondaryColor: "#1E40AF",
     },
   });
@@ -311,7 +311,7 @@ export default function AgentDeploy({
         customCSS: "",
         customJS: "",
         logo: "",
-        primaryColor: "#3B82F6",
+        primaryColor: "#000000",
         secondaryColor: "#1E40AF",
       },
     });
@@ -368,19 +368,19 @@ export default function AgentDeploy({
   return (
     <div className="max-w-6xl mx-auto p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex md:items-center justify-between mb-8 flex-col md:flex-row max-md:gap-y-2">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-gray-900">
             Deploy Your Chatbot
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-600 mt-1 text-sm">
             Create deployments to embed your chatbot on any website
           </p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={openCreateModal}
-            className="btn-primary flex items-center gap-2"
+            className="border px-4 py-2 rounded-md text-sm hover:bg-black hover:text-white flex items-center gap-2"
           >
             <Plus className="h-5 w-5" />
             Create Deployment
@@ -391,17 +391,17 @@ export default function AgentDeploy({
       {/* Deployments Grid */}
       {deployments.length === 0 ? (
         <div className="text-center py-12">
-          <Globe className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          <Globe className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-900 mb-1">
             No deployments yet
           </h3>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-600 mb-6 text-sm">
             Create your first deployment to start embedding your chatbot on
             websites
           </p>
           <button
             onClick={openCreateModal}
-            className="btn-primary flex items-center gap-2 mx-auto"
+            className="border px-4 py-2 rounded-md text-sm bg-black text-white hover:bg-gray-700 hover:text-white flex items-center gap-2 mx-auto"
           >
             <Plus className="h-5 w-5" />
             Create Your First Deployment
@@ -485,7 +485,7 @@ export default function AgentDeploy({
                 <div className="flex items-center gap-2 justify-center">
                   <button
                     onClick={() => handleCopyEmbedCode(deployment?._id)}
-                    className="flex items-center gap-1 px-3 py-1 text-sm bg-primary-100 text-primary-700 rounded-md hover:bg-primary-200 transition-colors"
+                    className="flex items-center gap-1 px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
                   >
                     <Copy className="h-4 w-4" />
                     Copy Code
@@ -539,7 +539,7 @@ export default function AgentDeploy({
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, name: e.target.value }))
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 text-sm"
                   placeholder="My Website Chatbot"
                 />
               </div>
@@ -556,7 +556,7 @@ export default function AgentDeploy({
                       description: e.target.value,
                     }))
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 text-sm"
                   rows={3}
                   placeholder="Brief description of this deployment"
                 />
@@ -575,7 +575,7 @@ export default function AgentDeploy({
                       websiteUrl: e.target.value,
                     }))
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 text-sm"
                   placeholder="https://example.com or localhost:3002"
                 />
                 <p className="text-xs text-gray-500 mt-1">
@@ -596,7 +596,7 @@ export default function AgentDeploy({
                         settings: { ...prev.settings, theme: e.target.value },
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 text-sm"
                   >
                     <option value="light">Light</option>
                     <option value="dark">Dark</option>
@@ -619,7 +619,7 @@ export default function AgentDeploy({
                         },
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 text-sm"
                   >
                     <option value="bottom-right">Bottom Right</option>
                     <option value="bottom-left">Bottom Left</option>
@@ -650,7 +650,7 @@ export default function AgentDeploy({
                         },
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 text-sm"
                     placeholder="400px"
                   />
                   <p className="text-xs text-gray-500 mt-1">
@@ -677,7 +677,7 @@ export default function AgentDeploy({
                         },
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 text-sm"
                     placeholder="600px"
                   />
                   <p className="text-xs text-gray-500 mt-1">
@@ -702,7 +702,7 @@ export default function AgentDeploy({
                       },
                     }))
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 text-sm"
                   placeholder="Hi! How can I help you today?"
                 />
               </div>
@@ -723,7 +723,7 @@ export default function AgentDeploy({
                           settings: { ...prev.settings, logo: e.target.value },
                         }))
                       }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 text-sm"
                       placeholder="https://example.com/logo.png"
                     />
                     <p className="text-xs text-gray-500 mt-1">
@@ -778,7 +778,7 @@ export default function AgentDeploy({
                           },
                         }))
                       }
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 text-sm"
                       placeholder="#3B82F6"
                     />
                   </div>
@@ -814,7 +814,7 @@ export default function AgentDeploy({
                           },
                         }))
                       }
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 text-sm"
                       placeholder="#1E40AF"
                     />
                   </div>
@@ -835,7 +835,7 @@ export default function AgentDeploy({
                       },
                     }))
                   }
-                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
                 />
                 <label
                   htmlFor="autoOpen"
@@ -849,7 +849,7 @@ export default function AgentDeploy({
             <div className="flex items-center justify-end gap-3 mt-6">
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                className="border px-4 py-2 rounded-md text-sm hover:bg-black hover:text-white"
               >
                 Cancel
               </button>
@@ -860,7 +860,7 @@ export default function AgentDeploy({
                     : handleCreateDeployment
                 }
                 disabled={!formData.name.trim()}
-                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                className="border px-4 py-2 rounded-md text-sm bg-black text-white hover:bg-gray-700 hover:text-white"
               >
                 {editingDeployment ? "Update Deployment" : "Create Deployment"}
               </button>
@@ -895,7 +895,7 @@ export default function AgentDeploy({
                   navigator.clipboard.writeText(showEmbedCode);
                   toast.success("Embed code copied to clipboard!");
                 }}
-                className="btn-primary flex items-center gap-2"
+                className="btn-gray flex items-center gap-2"
               >
                 <Copy className="h-4 w-4" />
                 Copy to Clipboard

@@ -200,7 +200,7 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'active':
-        return <Clock className="h-4 w-4 text-primary-500" />;
+        return <Clock className="h-4 w-4 text-gray-500" />;
       case 'ended':
         return <CheckCircle className="h-4 w-4 text-green-500" />;
       case 'paused':
@@ -214,7 +214,7 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
-        return 'bg-primary-100 text-primary-800';
+        return 'bg-gray-100 text-gray-800';
       case 'ended':
         return 'bg-green-100 text-green-800';
       case 'paused':
@@ -261,7 +261,7 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
             onClick={() => handleTabChange('deploy')}
             className={`py-4 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'deploy'
-                ? 'border-primary-500 text-primary-600'
+                ? 'border-gray-500 text-gray-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
@@ -274,7 +274,7 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
             onClick={() => handleTabChange('chat-history')}
             className={`py-4 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'chat-history'
-                ? 'border-primary-500 text-primary-600'
+                ? 'border-gray-500 text-gray-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
@@ -287,7 +287,7 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
       </div>
 
       {/* Main Content */}
-      <div className="w-[67%] mx-auto px-4 sm:px-6 lg:px-8 flex-1 flex overflow-hidden">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 flex md:overflow-hidden">
         {activeTab === 'deploy' ? (
           /* Deploy Tab Content - Use AgentDeploy Component */
           <div className="flex-1">
@@ -300,9 +300,9 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
           </div>
         ) : (
           /* Chat History Tab Content */
-          <div className="flex-1 flex overflow-hidden">
+          <div className="flex-1 flex md:overflow-hidden flex-col md:flex-row">
             {/* Left Sidebar - Sessions List */}
-            <div className="w-1/3 bg-white border-r border-gray-200 flex flex-col">
+            <div className="md:w-1/3 bg-white border-r border-gray-200 flex flex-col">
               {/* Filters */}
               <div className="p-4 border-b border-gray-200 space-y-3">
                 <div className="relative">
@@ -312,7 +312,7 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
                     placeholder="Search conversations..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   />
                 </div>
                 {/* <select
@@ -345,7 +345,7 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
                       <div
                         key={session._id}
                         className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                          selectedSession === session._id ? 'bg-primary-50 border-r-2 border-primary-500' : ''
+                          selectedSession === session._id ? 'bg-gray-50 border-r-2 border-gray-500' : ''
                         }`}
                         onClick={() => toggleSession(session._id)}
                       >
@@ -414,7 +414,7 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
                   <div className="flex-1 overflow-y-auto p-4">
                     {loadingMessages[selectedSession] ? (
                       <div className="flex items-center justify-center h-full">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600"></div>
                       </div>
                     ) : (
                       <div className="space-y-4">
@@ -428,18 +428,18 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
                           (sessionMessages[selectedSession] || []).map((message, index) => (
                             <div key={index} className={`flex gap-3 ${message.messageType === 'user' ? 'justify-end' : 'justify-start'}`}>
                               {message.messageType === 'assistant' && (
-                                <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                  <MessageSquare className="h-4 w-4 text-primary-600"/>
+                                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                  <MessageSquare className="h-4 w-4 text-gray-600"/>
                                 </div>
                               )}
                               <div className={`max-w-md px-4 py-3 rounded-lg ${
                                 message.messageType === 'user'
-                                  ? 'bg-primary-600 text-white'
+                                  ? 'bg-gray-600 text-white'
                                   : 'bg-gray-100 text-gray-900'
                               }`}>
                                 <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                                 <p className={`text-xs mt-2 ${
-                                  message.messageType === 'user' ? 'text-primary-100' : 'text-gray-500'
+                                  message.messageType === 'user' ? 'text-gray-100' : 'text-gray-500'
                                 }`}>
                                   {formatDate(message.createdAt)}
                                 </p>

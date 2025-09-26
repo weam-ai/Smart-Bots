@@ -85,9 +85,9 @@ export default function AgentUpload({
       case "application/pdf":
         return <FileText className="h-5 w-5 text-red-500" />;
       case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-        return <FileText className="h-5 w-5 text-primary-500" />;
+        return <FileText className="h-5 w-5 text-gray-500" />;
       case "application/msword":
-        return <FileText className="h-5 w-5 text-primary-500" />;
+        return <FileText className="h-5 w-5 text-gray-500" />;
       case "text/plain":
         return <File className="h-5 w-5 text-gray-500" />;
       default:
@@ -284,24 +284,24 @@ export default function AgentUpload({
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Instructions */}
         <div className="card mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">
+          <h2 className="text-lg font-semibold text-gray-900 mb-1">
             Upload Your Documents
           </h2>
-          <p className="text-gray-600 mb-4">
+          <p className="text-gray-600 mb-4 text-sm">
             Upload the documents you want your AI agent to learn from. These
             will be processed and used to answer questions.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-500" />
+              <CheckCircle className="h-4 w-4 text-gray-500" />
               <span>PDF, DOCX, TXT files</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-500" />
+              <CheckCircle className="h-4 w-4 text-gray-500" />
               <span>Max 5MB per file</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-500" />
+              <CheckCircle className="h-4 w-4 text-gray-500" />
               <span>Up to 10 files total</span>
             </div>
           </div>
@@ -313,7 +313,7 @@ export default function AgentUpload({
             {...getRootProps()}
             className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors cursor-pointer ${
               isDragActive
-                ? "border-primary-500 bg-primary-50"
+                ? "border-gray-500 bg-gray-50"
                 : "border-gray-300 hover:border-gray-400"
             }`}
           >
@@ -321,20 +321,20 @@ export default function AgentUpload({
             <Upload className="mx-auto h-16 w-16 text-gray-400 mb-6" />
             {isDragActive ? (
               <div>
-                <p className="text-xl text-primary-600 mb-2">
+                <p className="text-xl text-gray-600 mb-2">
                   Drop the files here...
                 </p>
                 <p className="text-gray-500">Release to upload</p>
               </div>
             ) : (
               <div>
-                <p className="text-xl text-gray-900 mb-2">
+                <p className="text-xl text-gray-900 mb-1">
                   Drag & drop files here, or click to select
                 </p>
-                <p className="text-gray-500 mb-4">
+                <p className="text-gray-500 mb-4 text-sm">
                   Choose PDF, DOCX, or TXT files to train your AI agent
                 </p>
-                <button className="btn-primary">Choose Files</button>
+                <button className="border px-4 py-2 rounded-md text-sm hover:bg-black hover:text-white">Choose Files</button>
               </div>
             )}
           </div>
@@ -380,10 +380,10 @@ export default function AgentUpload({
               {existingFiles.map((file) => (
                 <div
                   key={file._id}
-                  className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg"
+                  className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg flex-col md:flex-row"
                 >
                   <div className="flex items-center gap-4">
-                    {getFileIcon(file.mimeType)}
+                    <div>{getFileIcon(file.mimeType)}</div>
                     <div>
                       <p className="font-medium text-gray-900">
                         {file.originalFilename}
@@ -465,7 +465,7 @@ export default function AgentUpload({
                       <div className="flex items-center gap-3">
                         <div className="w-32 bg-gray-200 rounded-full h-2">
                           <div
-                            className="bg-primary-600 h-2 rounded-full transition-all duration-300"
+                            className="bg-gray-600 h-2 rounded-full transition-all duration-300"
                             style={{ width: `${fileInfo.progress}%` }}
                           />
                         </div>
@@ -524,7 +524,7 @@ export default function AgentUpload({
         <div className="flex justify-between items-center">
           <button
             onClick={onBack}
-            className="btn-secondary inline-flex items-center gap-2"
+            className="border px-4 py-2 rounded-md text-sm hover:bg-black hover:text-white flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Agents
@@ -539,7 +539,7 @@ export default function AgentUpload({
                     variant="dots" 
                     size="sm" 
                     text="Uploading files..." 
-                    className="text-primary-600"
+                    className="text-gray-600"
                   />
                 )}
 
@@ -572,10 +572,10 @@ export default function AgentUpload({
                 return (
                   <button
                     onClick={onStartTesting}
-                    className="btn-primary inline-flex items-center gap-2"
+                    className="border px-4 py-2 rounded-md text-sm bg-black text-white hover:bg-gray-700 hover:text-white flex items-center gap-2"
                   >
-                    <ArrowRight className="h-4 w-4" />
                     Test Chatbot
+                    <ArrowRight className="h-4 w-4" />
                   </button>
                 );
               }
@@ -584,10 +584,9 @@ export default function AgentUpload({
               if (!hasUploadedFiles && !hasExistingFiles) {
                 return (
                   <button
-                    className="btn-primary inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="border px-4 py-2 rounded-md text-sm bg-black text-white hover:bg-gray-700 hover:text-white"
                     disabled={true}
                   >
-                    <ArrowRight className="h-4 w-4" />
                     Train Chatbot
                   </button>
                 );
@@ -598,10 +597,9 @@ export default function AgentUpload({
                 return (
                   <button
                     onClick={onStartTraining}
-                    className="btn-primary inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="border px-4 py-2 rounded-md text-sm bg-black text-white cursor-pointer hover:bg-gray-700 hover:text-white"
                     disabled={isUploading}
                   >
-                    <ArrowRight className="h-4 w-4" />
                     Train Chatbot
                   </button>
                 );
@@ -633,7 +631,7 @@ export default function AgentUpload({
             <div className="flex gap-3 justify-end">
               <button
                 onClick={handleDeleteCancel}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                className="border px-4 py-2 rounded-md text-sm hover:bg-black hover:text-white"
                 disabled={isDeleting}
               >
                 Cancel
@@ -641,7 +639,7 @@ export default function AgentUpload({
               <button
                 onClick={() => handleDeleteFile(showDeleteConfirm)}
                 disabled={isDeleting}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="border px-4 py-2 rounded-md text-sm bg-red-600 text-white hover:bg-gray-700 hover:text-white flex items-center gap-2"
               >
                 {isDeleting ? (
                   <>
