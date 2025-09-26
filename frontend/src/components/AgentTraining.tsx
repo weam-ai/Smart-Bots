@@ -145,7 +145,7 @@ export default function AgentTraining({ agentData, onTrainingComplete, onBack }:
     if (step.status === 'completed') {
       return <CheckCircle className="h-6 w-6 text-green-500" />
     } else if (step.status === 'processing') {
-      return <InlineLoader variant="spinner" size="md" className="text-primary-600" />
+      return <InlineLoader variant="spinner" size="md" className="text-gray-600" />
     } else {
       const icons = [FileText, Zap, Brain, Database, MessageSquare]
       const Icon = icons[index] || FileText
@@ -184,12 +184,12 @@ export default function AgentTraining({ agentData, onTrainingComplete, onBack }:
             <div className="card mb-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900">Training Progress</h2>
-                <span className="text-2xl font-bold text-primary-600">{overallProgress}%</span>
+                <span className="text-2xl font-bold text-gray-600">{overallProgress}%</span>
               </div>
               
               <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
                 <div 
-                  className="bg-primary-600 h-3 rounded-full transition-all duration-500"
+                  className="bg-gray-600 h-3 rounded-full transition-all duration-500"
                   style={{ width: `${overallProgress}%` }}
                 />
               </div>
@@ -212,7 +212,7 @@ export default function AgentTraining({ agentData, onTrainingComplete, onBack }:
                       <div className="flex items-center justify-between mb-1">
                         <h4 className={`font-medium ${
                           step.status === 'completed' ? 'text-green-700' :
-                          step.status === 'processing' ? 'text-primary-700' :
+                          step.status === 'processing' ? 'text-gray-700' :
                           'text-gray-700'
                         }`}>
                           {step.name}
@@ -225,7 +225,7 @@ export default function AgentTraining({ agentData, onTrainingComplete, onBack }:
                       {step.status === 'processing' && (
                         <div className="w-full bg-gray-200 rounded-full h-1.5">
                           <div 
-                            className="bg-primary-600 h-1.5 rounded-full transition-all duration-300"
+                            className="bg-gray-600 h-1.5 rounded-full transition-all duration-300"
                             style={{ width: `${step.progress}%` }}
                           />
                         </div>
@@ -284,21 +284,21 @@ export default function AgentTraining({ agentData, onTrainingComplete, onBack }:
               <h3 className="text-lg font-semibold text-gray-900 mb-4">RAG Technology</h3>
               <div className="space-y-3 text-sm">
                 <div className="flex items-start gap-2">
-                  <Brain className="h-4 w-4 text-primary-600 mt-0.5" />
+                  <Brain className="h-4 w-4 text-gray-600 mt-0.5" />
                   <div>
                     <p className="font-medium">Vector Embeddings</p>
                     <p className="text-gray-600">Converting text to semantic vectors</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
-                  <Database className="h-4 w-4 text-primary-600 mt-0.5" />
+                  <Database className="h-4 w-4 text-gray-600 mt-0.5" />
                   <div>
                     <p className="font-medium">Pinecone Database</p>
                     <p className="text-gray-600">Fast vector similarity search</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
-                  <MessageSquare className="h-4 w-4 text-primary-600 mt-0.5" />
+                  <MessageSquare className="h-4 w-4 text-gray-600 mt-0.5" />
                   <div>
                     <p className="font-medium">Smart Retrieval</p>
                     <p className="text-gray-600">Context-aware responses</p>
@@ -332,7 +332,7 @@ export default function AgentTraining({ agentData, onTrainingComplete, onBack }:
         <div className="flex justify-between items-center mt-8">
           <button
             onClick={onBack}
-            className="btn-secondary inline-flex items-center gap-2"
+            className="border px-4 py-2 rounded-md text-sm hover:bg-black hover:text-white flex items-center gap-2"
             disabled={isTraining}
           >
             <ArrowLeft className="h-4 w-4" />
@@ -342,7 +342,7 @@ export default function AgentTraining({ agentData, onTrainingComplete, onBack }:
           {overallProgress === 100 && (
             <button
               onClick={onTrainingComplete}
-              className="btn-primary inline-flex items-center gap-2 text-lg px-4 py-2"
+              className="border px-4 py-2 rounded-md text-sm bg-black text-white hover:bg-gray-700 hover:text-white flex items-center gap-2"
             >
               Test Chatbot
               <ArrowRight className="h-5 w-5" />

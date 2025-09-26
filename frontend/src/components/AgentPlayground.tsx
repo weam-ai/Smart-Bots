@@ -128,7 +128,7 @@ export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: Ag
                   <select
                     value={localAgentData.model}
                     onChange={(e) => setLocalAgentData({...localAgentData, model: e.target.value})}
-                    className="input-field"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 text-sm"
                   >
                     {models.map((model) => (
                       <option key={model.id} value={model.id}>
@@ -156,7 +156,7 @@ export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: Ag
                       step="0.1"
                       value={localAgentData.temperature}
                       onChange={(e) => setLocalAgentData({...localAgentData, temperature: parseFloat(e.target.value)})}
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider text-sm"
                     />
                   </div>
                 </div>
@@ -170,7 +170,7 @@ export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: Ag
                     value={localAgentData.systemPrompt}
                     onChange={(e) => setLocalAgentData({...localAgentData, systemPrompt: e.target.value})}
                     rows={6}
-                    className="input-field resize-none"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 text-sm resize-none"
                     placeholder="Define your AI assistant's role and behavior..."
                   />
                 </div>
@@ -186,7 +186,7 @@ export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: Ag
                   <FileText className="h-5 w-5 text-gray-600" />
                   <h2 className="text-lg font-semibold text-gray-900">Sources</h2>
                 </div>
-                {/* <button className="text-sm text-primary-600 hover:text-primary-700">
+                {/* <button className="text-sm text-gray-600 hover:text-gray-700">
                   <RotateCcw className="h-4 w-4" />
                 </button> */}
               </div>
@@ -222,8 +222,8 @@ export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: Ag
             {/* Chat Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                  <Bot className="h-6 w-6 text-primary-600" />
+                <div className="h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <Bot className="h-6 w-6 text-black" />
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900">{localAgentData.name}</h3>
@@ -232,7 +232,7 @@ export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: Ag
               </div>
               <button
                 onClick={clearChat}
-                className="text-sm text-gray-500 hover:text-gray-700"
+                className="border px-3 py-1 rounded-md text-sm text-gray-500 hover:bg-black hover:text-white"
               >
                 Clear
               </button>
@@ -246,21 +246,21 @@ export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: Ag
                   className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {msg.role === 'assistant' && (
-                    <div className="h-8 w-8 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Bot className="h-4 w-4 text-primary-600" />
+                    <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Bot className="h-4 w-4 text-gray-600" />
                     </div>
                   )}
                   <div
                     className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                       msg.role === 'user'
-                        ? 'bg-primary-600 text-white'
+                        ? 'bg-gray-600 text-white'
                         : 'bg-gray-100 text-gray-900'
                     }`}
                   >
                     {msg.role === 'assistant' ? (
                       <ReactMarkdown 
                         remarkPlugins={[remarkGfm]}
-                        className="prose prose-sm max-w-none"
+                        className="prose prose-sm max-w-none text-sm"
                       >
                         {msg.content}
                       </ReactMarkdown>
@@ -278,8 +278,8 @@ export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: Ag
               
               {(isSending || isTyping) && (
                 <div className="flex gap-3 justify-start">
-                  <div className="h-8 w-8 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Bot className="h-4 w-4 text-primary-600" />
+                  <div className="h-8 w-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Bot className="h-4 w-4 text-gray-600" />
                   </div>
                   <div className="bg-gray-100 px-4 py-2 rounded-lg">
                     <InlineLoader 
@@ -296,22 +296,20 @@ export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: Ag
 
             {/* Message Input */}
             <div className="p-4 border-t border-gray-200">
-              <div className="flex gap-2 items-end">
-                <div className="flex-1 relative">
+              <div className="flex gap-2 items-center">
                   <textarea
                     ref={textareaRef}
                     value={message}
                     onChange={(e) => updateMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Message..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none min-h-[40px] max-h-[120px]"
+                    className="border px-4 py-2 text-sm rounded-md outline-none w-full resize-none"
                     rows={1}
-                  />
-                </div>
+                  />                
                 <button
                   onClick={sendMessage}
                   disabled={!isMessageValid || isSending}
-                  className="p-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="p-2 bg-black text-white rounded-lg hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <Send className="h-4 w-4" />
                 </button>

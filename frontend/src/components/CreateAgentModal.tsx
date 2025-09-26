@@ -73,8 +73,8 @@ export default function CreateAgentModal({ isOpen, onClose, onSubmit, isLoading 
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 bg-primary-100 rounded-lg flex items-center justify-center">
-              <Brain className="h-6 w-6 text-primary-600" />
+            <div className="h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center">
+              <Brain className="h-6 w-6 text-black" />
             </div>
             <div>
               <h2 className="text-xl font-semibold text-gray-900">Create New AI Agent</h2>
@@ -83,7 +83,7 @@ export default function CreateAgentModal({ isOpen, onClose, onSubmit, isLoading 
           </div>
           <button
             onClick={handleClose}
-            className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+            className="p-2 text-gray-400 bg-gray-100 rounded-md hover:text-black transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -101,7 +101,7 @@ export default function CreateAgentModal({ isOpen, onClose, onSubmit, isLoading 
               id="name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className={`input-field ${errors.name ? 'border-red-500 focus:ring-red-500' : ''}`}
+              className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 text-sm ${errors.name ? 'border-red-500 focus:ring-red-500' : ''}`}
               placeholder="e.g., Customer Support Bot, Documentation Assistant"
             />
             {errors.name && (
@@ -118,9 +118,9 @@ export default function CreateAgentModal({ isOpen, onClose, onSubmit, isLoading 
               {models.map((model) => (
                 <label
                   key={model.id}
-                  className={`relative flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
+                  className={`relative flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
                     formData.model === model.id
-                      ? 'border-primary-500 bg-primary-50'
+                      ? 'border-gray-500 bg-gray-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
@@ -135,7 +135,7 @@ export default function CreateAgentModal({ isOpen, onClose, onSubmit, isLoading 
                   <div className="flex items-center gap-3">
                     <div className={`h-4 w-4 rounded-full border-2 ${
                       formData.model === model.id
-                        ? 'border-primary-500 bg-primary-500'
+                        ? 'border-black bg-black'
                         : 'border-gray-300'
                     }`}>
                       {formData.model === model.id && (
@@ -189,7 +189,7 @@ export default function CreateAgentModal({ isOpen, onClose, onSubmit, isLoading 
               rows={4}
               value={formData.systemPrompt}
               onChange={(e) => setFormData({ ...formData, systemPrompt: e.target.value })}
-              className={`input-field resize-none ${errors.systemPrompt ? 'border-red-500 focus:ring-red-500' : ''}`}
+              className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 text-sm resize-none ${errors.systemPrompt ? 'border-red-500 focus:ring-red-500' : ''}`}
               placeholder="Define your AI assistant's personality and behavior..."
             />
             {errors.systemPrompt && (
@@ -205,14 +205,14 @@ export default function CreateAgentModal({ isOpen, onClose, onSubmit, isLoading 
             <button
               type="button"
               onClick={handleClose}
-              className="btn-secondary flex-1"
+              className="border px-4 py-2 rounded-md text-sm hover:bg-black hover:text-white w-full"
               disabled={isLoading}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="btn-primary flex-1 inline-flex items-center justify-center gap-2"
+              className="border px-4 py-2 rounded-md text-sm bg-black text-white hover:bg-gray-700 hover:text-white w-full flex items-center justify-center gap-2"
               disabled={isLoading}
             >
               {isLoading ? (
