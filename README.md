@@ -210,8 +210,5 @@ For issues and questions:
 - Check the documentation
 - Review the API reference
 
----
-
-Built with ❤️ using Next.js, Node.js, and OpenAI
-
+Built with ❤️ using WEAM
 

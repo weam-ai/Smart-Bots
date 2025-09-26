@@ -45,7 +45,7 @@ const createDeployment = asyncHandler(async (req, res) => {
     autoOpen: false,
     welcomeMessage: 'Hi! How can I help you today?',
     logo: '',
-    primaryColor: '#3B82F6',
+    primaryColor: '#000000',
     secondaryColor: '#1E40AF'
   };
 
@@ -138,7 +138,7 @@ const getDeployments = asyncHandler(async (req, res) => {
         welcomeMessage: deployment.settings?.welcomeMessage || 'Hi! How can I help you today?',
         autoOpen: deployment.settings?.autoOpen || false,
         logo: deployment.settings?.logo || '',
-        primaryColor: deployment.settings?.primaryColor || '#3B82F6',
+        primaryColor: deployment.settings?.primaryColor || '#000000',
         secondaryColor: deployment.settings?.secondaryColor || '#1E40AF'
       };
       
@@ -210,7 +210,7 @@ const getDeployment = asyncHandler(async (req, res) => {
       welcomeMessage: deployment.settings?.welcomeMessage || 'Hi! How can I help you today?',
       autoOpen: deployment.settings?.autoOpen || false,
       logo: deployment.settings?.logo || '',
-      primaryColor: deployment.settings?.primaryColor || '#3B82F6',
+      primaryColor: deployment.settings?.primaryColor || '#000000',
       secondaryColor: deployment.settings?.secondaryColor || '#1E40AF'
     };
 
@@ -292,7 +292,7 @@ const updateDeployment = asyncHandler(async (req, res) => {
         welcomeMessage: 'Hi! How can I help you today?',
         autoOpen: false,
         logo: '',
-        primaryColor: '#3B82F6',
+        primaryColor: '#000000',
         secondaryColor: '#1E40AF'
       };
       
@@ -491,7 +491,7 @@ async function migrateDeployments() {
         welcomeMessage: 'Hi! How can I help you today?',
         autoOpen: false,
         logo: '',
-        primaryColor: '#3B82F6',
+        primaryColor: '#000000',
         secondaryColor: '#1E40AF'
       };
       

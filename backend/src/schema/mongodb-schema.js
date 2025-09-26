@@ -555,7 +555,7 @@ const scriptTagSchema = new mongoose.Schema({
     },
     primaryColor: {
       type: String,
-      default: '#3B82F6'
+      default: '#000000'
     },
     secondaryColor: {
       type: String,

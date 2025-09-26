@@ -87,12 +87,12 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <Bot className="h-8 w-8 text-primary-600" />
-              <h1 className="ml-2 text-xl font-semibold text-gray-900">Weam AI </h1>
+              <Bot className="h-8 w-8 text-black" />
+              <h1 className="ml-2 text-xl font-semibold text-gray-900">AI Chatbot </h1>
             </div>
             <button
               onClick={() => {window.location.assign('/')}}
-              className="btn-primary inline-flex items-center gap-2"
+              className="inline-flex items-center gap-2 border px-4 py-2 rounded-md text-sm hover:bg-black hover:text-white"
               disabled={isCreating}
             >
               {isCreating ? (
@@ -115,7 +115,7 @@ export default function Home() {
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <div className="card text-center"> 
-            <div className="text-3xl font-bold text-primary-600 mb-2">
+            <div className="text-3xl font-bold text-black mb-2">
               {isLoadingAgents ? (
                 <Loader2 className="h-8 w-8 animate-spin mx-auto" />
               ) : (
@@ -125,7 +125,7 @@ export default function Home() {
             <div className="text-sm text-gray-600">Company Agents</div>
           </div>
           <div className="card text-center">
-            <div className="text-3xl font-bold text-primary-600 mb-2">
+            <div className="text-3xl font-bold text-black mb-2">
               {isLoadingAgents ? (
                 <Loader2 className="h-8 w-8 animate-spin mx-auto" />
               ) : (
@@ -135,7 +135,7 @@ export default function Home() {
             <div className="text-sm text-gray-600">Total Sessions</div>
           </div>
           <div className="card text-center">
-            <div className="text-3xl font-bold text-primary-600 mb-2">
+            <div className="text-3xl font-bold text-black mb-2">
               {isLoadingAgents ? (
                 <Loader2 className="h-8 w-8 animate-spin mx-auto" />
               ) : (
@@ -197,15 +197,15 @@ export default function Home() {
               ) : (
                 <>
                   {/* Create New Agent Card - First in grid */}
-                  <div className="card-hover border-2 border-dashed border-gray-300 hover:border-primary-400 transition-colors cursor-pointer">
+                  <div className="card-hover border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors cursor-pointer">
                     <div 
                       className="flex flex-col items-center justify-center text-center py-8"
                       onClick={handleCreateNewAgent}
                     >
-                      <div className="h-12 w-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
-                        <Plus className="h-6 w-6 text-primary-600" />
+                      <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
+                        <Plus className="h-6 w-6 text-black" />
                       </div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Create New Agent</h3>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-1">Create New Agent</h3>
                       <p className="text-sm text-gray-600">
                         Upload documents and train a new AI chatbot
                       </p>
@@ -220,11 +220,11 @@ export default function Home() {
                   <div key={agent._id} className="card-hover group cursor-pointer" onClick={() => handleOpenAgent(agent._id)}>
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="h-12 w-12 bg-primary-100 rounded-lg flex items-center justify-center text-2xl">
+                        <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center text-2xl">
                           🤖
                         </div>
                         <div>
-                          <h3 className="text-lg font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
+                          <h3 className="text-lg font-semibold text-gray-700 group-hover:text-black transition-colors">
                             {agent.name}
                           </h3>
                           <span className={`status-badge ${
@@ -284,7 +284,7 @@ export default function Home() {
                         }}
                         className={`w-full text-sm mt-4 inline-flex items-center justify-center gap-2 ${
                           agent.status === 'ready' || agent.status === 'completed'
-                            ? 'btn-primary' 
+                            ? 'bg-black text-white border px-4 py-2 rounded-md text-sm hover:bg-gray-700 hover:text-white' 
                             : 'bg-gray-200 text-gray-700 hover:bg-gray-300 px-4 py-2 rounded-lg font-medium transition-colors'
                         }`}
                       >
@@ -346,14 +346,14 @@ export default function Home() {
             <div className="flex gap-3 justify-end">
               <button
                 onClick={handleDeleteCancel}
-                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                className="border px-4 py-2 rounded-md text-sm hover:bg-black hover:text-white"
                 disabled={isDeleting}
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteConfirm}
-                className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50"
+                className="border px-4 py-2 rounded-md text-sm bg-black text-white hover:bg-gray-700 hover:text-white"
                 disabled={isDeleting}
               >
                 {isDeleting ? (
