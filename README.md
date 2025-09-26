@@ -212,4 +212,4 @@ For issues and questions:
 
 ---
 
-Built with ❤️ using Next.js, Node.js, and OpenAI
+Built with ❤️ using WEAM

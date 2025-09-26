@@ -140,7 +140,7 @@ export default function DocumentUpload({ onUpload, onBack, agentName }: Document
       case 'application/pdf':
         return <FileText className="h-5 w-5 text-red-500" />
       case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-        return <FileText className="h-5 w-5 text-primary-500" />
+        return <FileText className="h-5 w-5 text-gray-500" />
       case 'text/plain':
         return <File className="h-5 w-5 text-gray-500" />
       default:
@@ -173,7 +173,7 @@ export default function DocumentUpload({ onUpload, onBack, agentName }: Document
             <div className="flex items-center gap-4">
               <button
                 onClick={onBack}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="p-2 text-gray-400 bg-gray-100 rounded-md hover:text-black transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -193,14 +193,14 @@ export default function DocumentUpload({ onUpload, onBack, agentName }: Document
             {...getRootProps()}
             className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
               isDragActive
-                ? 'border-primary-500 bg-primary-50'
+                ? 'border-gray-500 bg-gray-50'
                 : 'border-gray-300 hover:border-gray-400'
             }`}
           >
             <input {...getInputProps()} />
             <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
             {isDragActive ? (
-              <p className="text-lg text-primary-600">Drop the files here...</p>
+              <p className="text-lg text-gray-600">Drop the files here...</p>
             ) : (
               <div>
                 <p className="text-lg text-gray-900 mb-2">
@@ -241,7 +241,7 @@ export default function DocumentUpload({ onUpload, onBack, agentName }: Document
                   <div className="flex items-center gap-3">
                     {fileInfo.status === 'uploading' && (
                       <div className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin text-primary-600" />
+                        <Loader2 className="h-4 w-4 animate-spin text-gray-600" />
                         <span className="text-sm text-gray-600">{Math.round(fileInfo.progress)}%</span>
                       </div>
                     )}
@@ -284,7 +284,7 @@ export default function DocumentUpload({ onUpload, onBack, agentName }: Document
           <div className="mt-8 text-center">
             <button
               onClick={handleContinue}
-              className="btn-primary inline-flex items-center gap-2 text-lg px-8 py-4"
+              className="border px-4 py-2 rounded-md text-sm bg-black text-white hover:bg-gray-700 hover:text-white flex items-center gap-2"
               disabled={isUploading}
             >
               {isUploading ? (

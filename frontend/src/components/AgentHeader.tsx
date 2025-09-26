@@ -37,9 +37,9 @@ const AgentHeader: React.FC<AgentHeaderProps> = ({
           key={i}
           className={`w-8 h-2 rounded-full ${
             i < currentStep
-              ? "bg-primary-500"
+              ? "bg-black"
               : i === currentStep
-              ? "bg-green-500"
+              ? "bg-gray-500"
               : "bg-gray-200"
           }`}
         />
@@ -59,8 +59,8 @@ const AgentHeader: React.FC<AgentHeaderProps> = ({
               router.replace("/");
             }}
           >
-            <div className="h-8 w-8 bg-primary-100 rounded-lg flex items-center justify-center">
-              <Bot className="h-8 w-8 text-primary-600 p-1" />
+            <div className="h-8 w-8 bg-gray-100 rounded-lg flex items-center justify-center">
+              <Bot className="h-7 w-7 text-black p-1" />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-gray-900">Weam AI</h2>
@@ -72,7 +72,7 @@ const AgentHeader: React.FC<AgentHeaderProps> = ({
             onClick={() => {
               window.location.assign("/");
             }}
-            className="btn-primary inline-flex items-center gap-2"
+            className="border px-4 py-2 rounded-md text-sm bg-black text-white hover:bg-gray-700 hover:text-white flex items-center gap-2"
           >
             <>
               <ArrowLeft className="h-4 w-4" />
@@ -80,12 +80,12 @@ const AgentHeader: React.FC<AgentHeaderProps> = ({
             </>
           </button>
         </div>
-        <div className="flex mx-auto items-center justify-between gap-4 mt-2 mb-2">
+        <div className="flex mx-auto md:items-center justify-between gap-4 mt-2 mb-2 md:flex-row flex-col px-2 md:px-0">
           {/* Left side - Back button and title */}
           <div className="flex items-center gap-4">
             <button
               onClick={onBack}
-              className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              className="p-2 text-gray-400 bg-gray-100 rounded-md hover:text-black transition-colors"
             >
               <ArrowLeft className="h-5 w-5" />
             </button>
@@ -99,7 +99,7 @@ const AgentHeader: React.FC<AgentHeaderProps> = ({
           </div>
 
           {/* Right side - Step indicators and optional deploy button */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-col md:flex-row">
             <div className="flex items-center gap-1">
               {renderStepIndicators()}
             </div>
@@ -107,7 +107,7 @@ const AgentHeader: React.FC<AgentHeaderProps> = ({
             {showDeployButton && onDeploy && (
               <button
                 onClick={onDeploy}
-                className="btn-primary inline-flex items-center gap-2"
+                className="border px-4 py-2 rounded-md text-sm bg-black text-white hover:bg-gray-700 hover:text-white flex items-center gap-2"
               >
                 <Globe className="h-4 w-4" />
                 Deploy

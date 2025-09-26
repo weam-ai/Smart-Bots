@@ -41,7 +41,7 @@ const Loader: React.FC<LoaderProps> = ({
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className={`bg-primary-600 rounded-full animate-bounce ${sizeClasses[size].replace('h-', 'h-').replace('w-', 'w-')}`}
+                className={`bg-black rounded-full animate-bounce ${sizeClasses[size].replace('h-', 'h-').replace('w-', 'w-')}`}
                 style={{
                   animationDelay: `${i * 0.1}s`,
                   height: size === 'sm' ? '8px' : size === 'md' ? '12px' : size === 'lg' ? '16px' : '20px',
@@ -54,7 +54,7 @@ const Loader: React.FC<LoaderProps> = ({
 
       case 'pulse':
         return (
-          <div className={`bg-primary-600 rounded-full animate-pulse ${sizeClasses[size]}`} />
+          <div className={`bg-black rounded-full animate-pulse ${sizeClasses[size]}`} />
         );
 
       case 'bounce':
@@ -63,7 +63,7 @@ const Loader: React.FC<LoaderProps> = ({
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className={`bg-primary-600 rounded-full animate-bounce ${sizeClasses[size].replace('h-', 'h-').replace('w-', 'w-')}`}
+                className={`bg-black rounded-full animate-bounce ${sizeClasses[size].replace('h-', 'h-').replace('w-', 'w-')}`}
                 style={{
                   animationDelay: `${i * 0.2}s`,
                   height: size === 'sm' ? '8px' : size === 'md' ? '12px' : size === 'lg' ? '16px' : '20px',
@@ -80,7 +80,7 @@ const Loader: React.FC<LoaderProps> = ({
             {[0, 1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="bg-primary-600 rounded-full animate-pulse"
+                className="bg-black rounded-full animate-pulse"
                 style={{
                   animationDelay: `${i * 0.1}s`,
                   height: size === 'sm' ? '8px' : size === 'md' ? '12px' : size === 'lg' ? '16px' : '20px',
@@ -94,16 +94,16 @@ const Loader: React.FC<LoaderProps> = ({
       case 'orbit':
         return (
           <div className={`relative ${sizeClasses[size]}`}>
-            <div className="absolute inset-0 border-4 border-primary-200 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-transparent border-t-primary-600 rounded-full animate-spin"></div>
-            <div className="absolute inset-2 border-2 border-transparent border-r-primary-400 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }}></div>
+            <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-transparent border-t-black rounded-full animate-spin"></div>
+            <div className="absolute inset-2 border-2 border-transparent border-r-gray-400 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }}></div>
           </div>
         );
 
       case 'spinner':
       default:
         return (
-          <div className={`${baseClasses} border-4 border-primary-200 border-t-primary-600 rounded-full`} />
+          <div className={`${baseClasses} border-4 border-gray-200 border-t-black rounded-full`} />
         );
     }
   };
@@ -118,7 +118,7 @@ const Loader: React.FC<LoaderProps> = ({
         {showRefresh && (
           <button 
             onClick={onRefresh} 
-            className="mt-4 text-sm text-primary-600 hover:text-primary-700 underline transition-colors duration-200"
+            className="mt-4 text-sm text-black border px-4 py-2 rounded-md hover:bg-black hover:text-white transition-colors duration-200"
           >
             Refresh if stuck
           </button>
@@ -152,7 +152,7 @@ export const InlineLoader: React.FC<Omit<LoaderProps, 'text' | 'showRefresh' | '
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className="bg-primary-600 rounded-full animate-bounce"
+                className="bg-gray-600 rounded-full animate-bounce"
                 style={{
                   animationDelay: `${i * 0.1}s`,
                   height: size === 'sm' ? '6px' : size === 'md' ? '8px' : size === 'lg' ? '10px' : '12px',
@@ -165,13 +165,13 @@ export const InlineLoader: React.FC<Omit<LoaderProps, 'text' | 'showRefresh' | '
 
       case 'pulse':
         return (
-          <div className={`bg-primary-600 rounded-full animate-pulse ${sizeClasses[size]}`} />
+          <div className={`bg-gray-300 rounded-full animate-pulse ${sizeClasses[size]}`} />
         );
 
       case 'spinner':
       default:
         return (
-          <div className={`${baseClasses} border-2 border-primary-200 border-t-primary-600 rounded-full`} />
+          <div className={`${baseClasses} border-2 border-gray-200 border-t-gray-300 rounded-full`} />
         );
     }
   };
@@ -196,10 +196,10 @@ export const PageLoader: React.FC<{ text?: string; showRefresh?: boolean; onRefr
         {/* Animated logo or icon */}
         <div className="relative mb-8">
           <div className="w-20 h-20 mx-auto relative">
-            <div className="absolute inset-0 border-4 border-primary-200 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-transparent border-t-primary-600 rounded-full animate-spin"></div>
-            <div className="absolute inset-2 border-2 border-transparent border-r-primary-400 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }}></div>
-            <div className="absolute inset-4 border border-transparent border-b-primary-300 rounded-full animate-pulse"></div>
+            <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-transparent border-t-black rounded-full animate-spin"></div>
+            <div className="absolute inset-2 border-2 border-transparent border-r-gray-400 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }}></div>
+            <div className="absolute inset-4 border border-transparent border-b-gray-200 rounded-full animate-pulse"></div>
           </div>
         </div>
 
@@ -214,7 +214,7 @@ export const PageLoader: React.FC<{ text?: string; showRefresh?: boolean; onRefr
           {[0, 1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className="w-2 h-2 bg-primary-600 rounded-full animate-bounce"
+              className="w-2 h-2 bg-gray-800 rounded-full animate-bounce"
               style={{ animationDelay: `${i * 0.1}s` }}
             />
           ))}
@@ -223,7 +223,7 @@ export const PageLoader: React.FC<{ text?: string; showRefresh?: boolean; onRefr
         {showRefresh && (
           <button 
             onClick={onRefresh} 
-            className="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-600 hover:text-primary-700 bg-white border border-primary-200 rounded-lg hover:bg-primary-50 transition-all duration-200"
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-white hover:text-white bg-black border rounded-md hover:bg-gray-700 transition-all duration-200"
           >
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
