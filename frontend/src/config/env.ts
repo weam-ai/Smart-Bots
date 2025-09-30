@@ -41,7 +41,7 @@ export const envConfig: EnvConfig = {
   NEXT_PUBLIC_JWT_EXPIRATION_HOURS: process.env.NEXT_PUBLIC_JWT_EXPIRATION_HOURS ? parseInt(process.env.NEXT_PUBLIC_JWT_EXPIRATION_HOURS, 10) : parseInt(process.env.JWT_EXPIRATION_HOURS || '1', 10),
   NEXT_PUBLIC_API_RETRY_DELAY: process.env.NEXT_PUBLIC_API_RETRY_DELAY ? parseInt(process.env.NEXT_PUBLIC_API_RETRY_DELAY, 10) : parseInt(process.env.API_RETRY_DELAY || '5', 10),
   
-  NEXT_PUBLIC_BACKEND_API_URL: process.env.NEXT_PUBLIC_BACKEND_API_URL || process.env.BACKEND_API_URL || 'https://app.weam.ai/ai-chatbot-api',
+  NEXT_PUBLIC_BACKEND_API_URL: process.env.NEXT_PUBLIC_BACKEND_API_URL || process.env.BACKEND_API_URL || 'https://dev.weam.ai/ai-chatbot-api',
   NEXT_PUBLIC_BACKEND_API_URL_WITHOUT_PREFIX: process.env.NEXT_PUBLIC_BACKEND_API_URL_WITHOUT_PREFIX || '',
   NEXT_PUBLIC_BACKEND_API_PREFIX: process.env.NEXT_PUBLIC_BACKEND_API_PREFIX || '/ai-chatbot-api',
   NEXT_PUBLIC_NODE_ENV: process.env.NEXT_PUBLIC_NODE_ENV || process.env.NODE_ENV || '',
