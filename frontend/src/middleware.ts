@@ -68,6 +68,7 @@ async function checkSolutionAccess(userId: string, urlPath: string, roleCode: st
             "userId": userId,
             "urlPath": urlPath
         };
+        console.log("🔍 Access check request body:", requestBody);
 
         const basicauth = Buffer.from(
             `${NEXT_PUBLIC_BASIC_AUTH_USERNAME}:${NEXT_PUBLIC_BASIC_AUTH_PASSWORD}`
@@ -84,7 +85,8 @@ async function checkSolutionAccess(userId: string, urlPath: string, roleCode: st
             body: JSON.stringify(requestBody),
         });
 
-        const data: AccessCheckResponse = await response.json();
+        const data = await response.json();
+        console.log("🔍 Access check API response:", data);
         return data;
     } catch (error) {
         console.error('❌ Error calling access check API:', error);
@@ -125,8 +127,10 @@ export async function middleware(request: NextRequest) {
         // Get user session
         const session:any= await getSessionFromCookies(request);
 
-        if (!session || !session.user) {
-            console.warn('⚠️ No valid session found, redirecting to login');
+        if (!session && !session.user) {
+            console.log("🚀 ~ middleware ~ session:", session)
+            console.log("🚀 ~ middleware ~ session.user:", session.user)
+            // console.warn('⚠️ No valid session found, redirecting to login');
             return NextResponse.redirect(new URL('/ai-chatbot/login', request.url));
         }
 
