@@ -66,7 +66,7 @@ async function checkSolutionAccess(userId: string, urlPath: string, roleCode: st
 
         const requestBody: AccessCheckRequest = {
             "userId": userId,
-            "urlPath": urlPath,
+            "urlPath": `/${urlPath.split('/')[1]}`,
             "companyId": companyId
         };
         console.log("🔍 Access check request body:", requestBody);
