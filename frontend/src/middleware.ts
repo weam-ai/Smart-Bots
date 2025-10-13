@@ -50,7 +50,7 @@ async function getSessionFromCookies(request: NextRequest) {
 /**
  * Call the access check API
  */
-async function checkSolutionAccess(userId: string, urlPath: string, roleCode: string): Promise<AccessCheckResponse> {
+async function checkSolutionAccess(userId: string, urlPath: string, roleCode: string, companyId: string): Promise<AccessCheckResponse> {
     try {
         console.log(`🔍 Checking access for userId: ${userId}, urlPath: ${urlPath}, roleCode: ${roleCode}`);
         
@@ -66,8 +66,10 @@ async function checkSolutionAccess(userId: string, urlPath: string, roleCode: st
 
         const requestBody: AccessCheckRequest = {
             "userId": userId,
-            "urlPath": urlPath
+            "urlPath": `/${urlPath.split('/')[1]}`,
+            "companyId": companyId
         };
+        console.log("🔍 Access check request body:", requestBody);
 
         const basicauth = Buffer.from(
             `${NEXT_PUBLIC_BASIC_AUTH_USERNAME}:${NEXT_PUBLIC_BASIC_AUTH_PASSWORD}`
@@ -84,7 +86,8 @@ async function checkSolutionAccess(userId: string, urlPath: string, roleCode: st
             body: JSON.stringify(requestBody),
         });
 
-        const data: AccessCheckResponse = await response.json();
+        const data = await response.json();
+        console.log("🔍 Access check API response:", data);
         return data;
     } catch (error) {
         console.error('❌ Error calling access check API:', error);
@@ -126,6 +129,8 @@ export async function middleware(request: NextRequest) {
         const session:any= await getSessionFromCookies(request);
 
         if (!session || !session.user) {
+            console.log("🚀 ~ middleware ~ session:", session)
+            console.log("🚀 ~ middleware ~ session.user:", session.user)
             console.warn('⚠️ No valid session found, redirecting to login');
             return NextResponse.redirect(new URL('/ai-chatbot/login', request.url));
         }
@@ -137,7 +142,7 @@ export async function middleware(request: NextRequest) {
             console.log(`✅ Admin user, allowing: ${fullPath}`);
             return NextResponse.next();
         }
-        const accessResult = await checkSolutionAccess(session.user._id, fullPath, session.user.roleCode || '');
+        const accessResult = await checkSolutionAccess(session.user._id, fullPath, session.user.roleCode || '', session.user.companyId || '');
 
         if (!accessResult.data.hasAccess) {
             console.warn(`⚠️ Access denied for solution: ${pathname}, message: ${accessResult.message}`);
