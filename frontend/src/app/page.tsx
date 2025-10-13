@@ -7,6 +7,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { useAgentOperations, useDeleteAgent } from '@/hooks/useAgents'
 import CreateAgentModal from '@/components/CreateAgentModal'
 import type { Agent, CreateAgentPayload } from '@/types/agent'
+import Mainlogo from '@/components/icons/Logo'
 
 export default function Home() {
   const router = useRouter()
@@ -87,8 +88,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <Bot className="h-8 w-8 text-black" />
-              <h1 className="ml-2 text-xl font-semibold text-gray-900">AI Chatbot </h1>
+              <Mainlogo width={32} height={32} className="h-8 w-8" />
+              <h1 className="ml-2 text-lg font-semibold text-gray-900">Weam </h1>
             </div>
             <button
               onClick={() => {window.location.assign('/')}}
@@ -103,7 +104,7 @@ export default function Home() {
               ) : (
                 <>
                   <ArrowLeft className="h-4 w-4" />
-                  Back to Weam
+                  Back to App
                 </>
               )}
             </button>
@@ -148,7 +149,7 @@ export default function Home() {
 
         {/* Agents Grid */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Company AI Agents</h2>
+          <h2 className="md:text-2xl text-lg font-bold text-gray-900 md:mb-6 mb-4">Company AI Agents</h2>
           
           {/* Loading State */}
           {isLoadingAgents && (
@@ -190,7 +191,7 @@ export default function Home() {
                   <Bot className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">No agents yet</h3>
                   <p className="text-gray-600 mb-4">Create your first AI agent to get started.</p>
-                  <button onClick={handleCreateNewAgent} className="btn-primary">
+                  <button onClick={handleCreateNewAgent} className="border px-4 py-2 rounded-md text-sm bg-black text-white hover:bg-gray-700 hover:text-white">
                     Create Your First Agent
                   </button>
                 </div>

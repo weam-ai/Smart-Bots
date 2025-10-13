@@ -31,4 +31,5 @@ export interface AccessCheckResponse {
 export interface AccessCheckRequest {
   userId: string;
   urlPath: string;
+  companyId: string;
 }

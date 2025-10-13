@@ -72,11 +72,11 @@ const AgentHeader: React.FC<AgentHeaderProps> = ({
             onClick={() => {
               window.location.assign("/");
             }}
-            className="border px-4 py-2 rounded-md text-sm bg-black text-white hover:bg-gray-700 hover:text-white flex items-center gap-2"
+            className="inline-flex items-center gap-2 border px-4 py-2 rounded-md text-sm hover:bg-black hover:text-white"
           >
             <>
               <ArrowLeft className="h-4 w-4" />
-              Back to Weam
+              Back to App
             </>
           </button>
         </div>
