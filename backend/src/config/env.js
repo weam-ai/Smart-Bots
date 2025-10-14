@@ -22,6 +22,7 @@ const envConfig = {
   JWT_SECRET: process.env.JWT_SECRET,
   
   // Database Configuration
+  MONOGODB_URI: process.env.MONOGODB_URI,
   DB_CONNECTION: process.env.DB_CONNECTION,
   DB_HOST: process.env.DB_HOST,
   DB_DATABASE: process.env.DB_DATABASE,
@@ -105,6 +106,7 @@ const validateEnvConfig = () => {
     'OPENAI_API_KEY',
     'JWT_SECRET',
     'IRON_SESSION_PASSWORD',
+    'MONOGODB_URI',
   ];
 
   const missingFields = requiredFields.filter(field => !envConfig[field]);
@@ -124,6 +126,7 @@ module.exports = {
   JWT_SECRET: envConfig.JWT_SECRET,
   IRON_SESSION_COOKIE_NAME: envConfig.IRON_SESSION_COOKIE_NAME,
   IRON_SESSION_PASSWORD: envConfig.IRON_SESSION_PASSWORD,
+  MONOGODB_URI : envConfig.MONOGODB_URI,
   DB_CONNECTION: envConfig.DB_CONNECTION,
   DB_HOST: envConfig.DB_HOST,
   DB_DATABASE: envConfig.DB_DATABASE,

@@ -14,6 +14,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { PageLoader } from '@/components/ui/Loader';
+import { NEXT_PUBLIC_API_PREFIX } from '@/config/env';
 
 interface ChatSession {
   _id: string;
@@ -68,11 +69,11 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ agentId }) => {
 
   // Navigation step definitions
   const navigationSteps = {
-    1: '/ai-chatbot', // Main agent page
-    2: `/ai-chatbot/${agentId}`, // Agent detail page
-    3: `/ai-chatbot/${agentId}/playground`, // Playground page
-    4: `/ai-chatbot/${agentId}/deploy`, // Deploy page
-    5: `/ai-chatbot/${agentId}/chat-history` // Chat history page (current)
+    1: `${NEXT_PUBLIC_API_PREFIX}`, // Main agent page
+    2: `${NEXT_PUBLIC_API_PREFIX}/${agentId}`, // Agent detail page
+    3: `${NEXT_PUBLIC_API_PREFIX}/${agentId}/playground`, // Playground page
+    4: `${NEXT_PUBLIC_API_PREFIX}/${agentId}/deploy`, // Deploy page
+    5: `${NEXT_PUBLIC_API_PREFIX}/${agentId}/chat-history` // Chat history page (current)
   };
 
   // Initialize navigation history on component mount
@@ -109,7 +110,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ agentId }) => {
       router.push(previousPath);
     } else {
       // If at step 1, go to main page
-      router.push('/ai-chatbot');
+      router.push(`${NEXT_PUBLIC_API_PREFIX}`);
     }
   };
 

@@ -1,3 +1,5 @@
+import { NEXT_PUBLIC_API_PREFIX } from "@/config/env";
+
 // User context interface
 export interface UserContext {
   userId: string;
@@ -12,7 +14,7 @@ export interface UserContext {
 export const getUserContext = async (): Promise<UserContext | null> => {
   try {
     // Call the API route to get user context
-    const response = await fetch('/ai-chatbot/api/auth/user', {
+    const response = await fetch(`${NEXT_PUBLIC_API_PREFIX}/api/auth/user`, {
       method: 'GET',
       credentials: 'include', // Include cookies
     });

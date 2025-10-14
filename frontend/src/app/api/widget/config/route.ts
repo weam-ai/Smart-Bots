@@ -21,10 +21,6 @@ export async function GET() {
     return NextResponse.json(
       { 
         error: 'Failed to generate widget configuration',
-        fallback: {
-          API_BASE_URL: 'http://localhost:5000/ai-chatbot-api',
-          WIDGET_VERSION: '1.0.0'
-        }
       },
       { status: 500 }
     );
