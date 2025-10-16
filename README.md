@@ -1,4 +1,4 @@
-# AI Chatbot Generator
+# Smart Bots
 
 Create and deploy intelligent AI chatbots from your documents using RAG (Retrieval Augmented Generation) technology.
 
