@@ -24,6 +24,7 @@ import {
   BarChart3
 } from 'lucide-react';
 import AgentHeader from './AgentHeader';
+import { NEXT_PUBLIC_API_PREFIX } from '@/config/env';
 
 interface ChatSession {
   _id: string;
@@ -99,7 +100,7 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
       const previousPath = navigationSteps[previousStep as keyof typeof navigationSteps];
       router.push(previousPath);
     } else {
-      router.push('/ai-chatbot?step=1');
+      router.push(`${NEXT_PUBLIC_API_PREFIX}?step=1`);
     }
   };
 

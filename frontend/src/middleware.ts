@@ -13,6 +13,7 @@ const NEXT_PUBLIC_BASIC_AUTH_PASSWORD = process.env.NEXT_PUBLIC_BASIC_AUTH_PASSW
 const NEXT_PUBLIC_SOLUTION_URL = process.env.NEXT_PUBLIC_SOLUTION_URL || '';
 const NEXT_PUBLIC_IRON_SESSION_COOKIE_NAME = process.env.NEXT_PUBLIC_IRON_SESSION_COOKIE_NAME || 'weam';
 const NEXT_PUBLIC_IRON_SESSION_PASSWORD = process.env.NEXT_PUBLIC_IRON_SESSION_PASSWORD || '';
+const NEXT_PUBLIC_API_PREFIX = process.env.NEXT_PUBLIC_API_PREFIX || '';
 
 // Solution apps configuration
 const SOLUTION_URL = NEXT_PUBLIC_SOLUTION_URL.split(',');
@@ -111,7 +112,7 @@ export async function middleware(request: NextRequest) {
 
     // Get the full path from the URL (including basePath)
     const fullUrl = new URL(request.url);
-    const fullPath = fullUrl.pathname; // This will be /ai-chatbot/ or /ai-chatbot
+    const fullPath = fullUrl.pathname; 
 
     // For basePath configuration, we need to check if this is the root path or a solution path
     // The pathname will be '/' for the root when basePath is configured
@@ -132,7 +133,7 @@ export async function middleware(request: NextRequest) {
             console.log("🚀 ~ middleware ~ session:", session)
             console.log("🚀 ~ middleware ~ session.user:", session.user)
             console.warn('⚠️ No valid session found, redirecting to login');
-            return NextResponse.redirect(new URL('/ai-chatbot/login', request.url));
+            return NextResponse.redirect(new URL(`${NEXT_PUBLIC_API_PREFIX}/login`, request.url));
         }
 
         console.log(`👤 User session found:`, session.user);
@@ -146,7 +147,7 @@ export async function middleware(request: NextRequest) {
 
         if (!accessResult.data.hasAccess) {
             console.warn(`⚠️ Access denied for solution: ${pathname}, message: ${accessResult.message}`);
-            return NextResponse.redirect(new URL('/login', request.url));
+            return NextResponse.redirect(new URL(`${NEXT_PUBLIC_API_PREFIX}/login`, request.url));
         }
 
         console.log(`✅ Access granted for solution: ${pathname}`);
