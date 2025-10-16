@@ -1,3 +1,5 @@
+import { NEXT_PUBLIC_API_PREFIX } from "@/config/env";
+
 // User context interface
 export interface UserContext {
   userId: string;
@@ -12,12 +14,17 @@ export interface UserContext {
 export const getUserContext = async (): Promise<UserContext | null> => {
   try {
     // Call the API route to get user context
-    const response = await fetch('/ai-chatbot/api/auth/user', {
+    const response = await fetch(`${NEXT_PUBLIC_API_PREFIX}/api/auth/user`, {
       method: 'GET',
       credentials: 'include', // Include cookies
     });
+    console.log("🚀 ~ getUserContext ~ response:", response)
 
     if (!response.ok) {
+      if (response.status === 401) {
+        console.warn('⚠️ No valid session found - user not authenticated');
+        return null;
+      }
       console.warn('⚠️ Failed to fetch user context from API');
       return null;
     }

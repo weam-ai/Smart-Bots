@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  basePath: process.env.NEXT_PUBLIC_API_PREFIX || '/ai-chatbot',
-  assetPrefix: process.env.NEXT_PUBLIC_API_PREFIX || '/ai-chatbot',
+  basePath: process.env.NEXT_PUBLIC_API_PREFIX || '/smart-bots',
+  assetPrefix: process.env.NEXT_PUBLIC_API_PREFIX || '/smart-bots',
   // env: {
   //   NEXT_PUBLIC_DOMAIN_URL: process.env.NEXT_PUBLIC_DOMAIN_URL || 'http://localhost:3001',
   // },
