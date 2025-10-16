@@ -227,7 +227,7 @@ export default function AgentPlayground({ agentData, onAgentUpdate, onBack }: Ag
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900">{localAgentData.name}</h3>
-                  <p className="text-xs text-gray-500">Powered by Weam</p>
+                  <p className="text-xs text-gray-500">Powered by Weam AI</p>
                 </div>
               </div>
               <button

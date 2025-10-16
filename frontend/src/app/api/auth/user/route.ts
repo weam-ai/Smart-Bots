@@ -9,10 +9,11 @@ export async function GET() {
     const userContext = await getUserContext();
     
     if (!userContext) {
+      // Return 401 Unauthorized instead of 500 for missing session
       return NextResponse.json({
         success: false,
-        error: 'Failed to get user context'
-      }, { status: 500 });
+        error: 'No valid session found'
+      }, { status: 401 });
     }
     
     return NextResponse.json({

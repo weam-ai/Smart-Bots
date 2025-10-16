@@ -89,7 +89,7 @@ export default function Home() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <Mainlogo width={32} height={32} className="h-8 w-8" />
-              <h1 className="ml-2 text-lg font-semibold text-gray-900">Weam </h1>
+              <h1 className="ml-2 text-lg font-semibold text-gray-900">Weam AI</h1>
             </div>
             <button
               onClick={() => {window.location.assign('/')}}

@@ -18,8 +18,13 @@ export const getUserContext = async (): Promise<UserContext | null> => {
       method: 'GET',
       credentials: 'include', // Include cookies
     });
+    console.log("🚀 ~ getUserContext ~ response:", response)
 
     if (!response.ok) {
+      if (response.status === 401) {
+        console.warn('⚠️ No valid session found - user not authenticated');
+        return null;
+      }
       console.warn('⚠️ Failed to fetch user context from API');
       return null;
     }
