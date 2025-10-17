@@ -18,7 +18,6 @@ export const getUserContext = async (): Promise<UserContext | null> => {
       method: 'GET',
       credentials: 'include', // Include cookies
     });
-    console.log("🚀 ~ getUserContext ~ response:", response)
 
     if (!response.ok) {
       if (response.status === 401) {
