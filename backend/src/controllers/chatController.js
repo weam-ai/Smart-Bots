@@ -81,7 +81,7 @@ const sendMessage = async (req, res) => {
       agentId,
       queryEmbedding,
       {
-        limit: 18,
+        limit: 10,
         threshold: 0.3
       }
     )
@@ -116,13 +116,19 @@ const sendMessage = async (req, res) => {
     
     console.log('🔧 Using parameters:', { finalModel, finalTemperature, finalInstructions: finalInstructions.substring(0, 50) })
     
+    // GPT-5 needs higher token limits due to reasoning tokens
+    const maxTokens = finalModel.includes('gpt-5') 
+      ? Math.max(agent.maxTokens || 4000, 4000)
+      : (agent.maxTokens || 1000);
+    
+    console.log(`🔧 Using maxTokens: ${maxTokens} for model: ${finalModel}`);
+    
     const aiResponse = await openaiService.generateChatCompletion(
       message.trim(), // userMessage
       similarChunks,  // context chunks
       {
         model: finalModel,
         temperature: finalTemperature,
-        maxTokens: agent.maxTokens || 1000,
         systemPrompt: finalInstructions
       }
     )

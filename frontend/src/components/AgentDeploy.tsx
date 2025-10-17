@@ -623,9 +623,6 @@ export default function AgentDeploy({
                   >
                     <option value="bottom-right">Bottom Right</option>
                     <option value="bottom-left">Bottom Left</option>
-                    <option value="top-right">Top Right</option>
-                    <option value="top-left">Top Left</option>
-                    <option value="center">Center</option>
                   </select>
                 </div>
               </div>
