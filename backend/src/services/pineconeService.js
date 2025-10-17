@@ -29,7 +29,7 @@ const PINECONE_CONFIG = {
   VECTOR_SIZE: 1536,
   DISTANCE: 'cosine',
   BATCH_SIZE: 100,
-  SEARCH_LIMIT: 18,
+  SEARCH_LIMIT: 10,
   SIMILARITY_THRESHOLD: 0.7
 };
 
@@ -186,7 +186,7 @@ const storeEmbeddings = async (companyId, agentId, fileId, chunks, embeddings, c
 };
 
 /**
- * Search similar vectors in Pinecone
+ * Search similar vectors in Pinecone using embeddings
  */
 const searchSimilar = async (companyId, agentId, queryEmbedding, options = {}) => {
   try {
@@ -245,6 +245,75 @@ const searchSimilar = async (companyId, agentId, queryEmbedding, options = {}) =
   } catch (error) {
     console.error(`❌ Pinecone search failed:`, error);
     throw error.code ? error : createServiceError(`Pinecone search failed: ${error.message}`, 'PINECONE_SEARCH');
+  }
+};
+
+/**
+ * Search Pinecone using direct text query (using Pinecone's built-in text search)
+ * This uses Pinecone's searchRecords method with text input
+ */
+const searchByText = async (companyId, agentId, queryText, options = {}) => {
+  try {
+    const client = initializePinecone();
+    const indexName = generateIndexName(companyId);
+    const index = client.index(indexName);
+    
+    const limit = options.limit || PINECONE_CONFIG.SEARCH_LIMIT;
+    const threshold = options.threshold || 0.1; // Lower threshold for text search
+    
+    console.log(`🔍 Searching ${indexName} for text matches (agentId: ${agentId}, query: "${queryText}")`);
+    
+    // Use Pinecone's searchRecords with text input
+    const searchResult = await index.searchRecords({
+      query: {
+        topK: limit,
+        inputs: { text: queryText }
+      },
+      fields: ['content', 'filename', 'fileId', 'chunkIndex'],
+      filter: {
+        agentId: { $eq: agentId }
+      }
+    });
+    
+    // Process results
+    const results = searchResult.matches
+      .filter(match => match.score >= threshold)
+      .map(match => ({
+        id: match.id,
+        score: match.score,
+        content: match.values?.content || match.metadata?.content || '',
+        metadata: {
+          fileId: match.values?.fileId || match.metadata?.fileId,
+          chunkIndex: match.values?.chunkIndex || match.metadata?.chunkIndex,
+          filename: match.values?.filename || match.metadata?.filename,
+          chunkLength: match.metadata?.chunkLength,
+          method: match.metadata?.method,
+          contentHash: match.metadata?.contentHash,
+          companyId: match.metadata?.companyId,
+          userId: match.metadata?.userId
+        }
+      }));
+    
+    console.log(`📊 Text search completed: ${results.length} results found`);
+    
+    return {
+      results,
+      query: {
+        text: queryText,
+        agentId: agentId,
+        searchType: 'text'
+      },
+      stats: {
+        totalMatches: searchResult.matches.length,
+        filteredMatches: results.length,
+        resultsFound: results.length
+      },
+      searchedAt: new Date().toISOString()
+    };
+    
+  } catch (error) {
+    console.error(`❌ Pinecone text search failed:`, error);
+    throw error.code ? error : createServiceError(`Pinecone text search failed: ${error.message}`, 'PINECONE_TEXT_SEARCH');
   }
 };
 
@@ -368,6 +437,7 @@ module.exports = {
   ensureIndex,
   storeEmbeddings,
   searchSimilar,
+  searchByText,
   deleteFileChunks,
   deleteAgentChunks,
   getIndexStats,

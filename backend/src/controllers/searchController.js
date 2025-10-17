@@ -12,16 +12,16 @@ const { asyncHandler, createValidationError } = require('../utils/errorHelpers')
  * Core search function (can be called directly or via HTTP)
  */
 const searchDocuments = async (reqOrParams, res = null, returnRaw = false) => {
-  let agentId, query, limit, threshold, companyId, userId;
+  let agentId, query, limit, threshold, companyId, userId, searchType;
   
   // Handle both HTTP request and direct function call
   if (reqOrParams.params) {
     // HTTP request format
     ({ agentId } = reqOrParams.params);
-    ({ query, limit, threshold, companyId, userId } = reqOrParams.body);
+    ({ query, limit, threshold, companyId, userId, searchType } = reqOrParams.body);
   } else {
     // Direct function call format
-    ({ agentId, query, limit, threshold, companyId, userId } = reqOrParams);
+    ({ agentId, query, limit, threshold, companyId, userId, searchType } = reqOrParams);
   }
 
   // Validate required fields
@@ -55,27 +55,48 @@ const searchDocuments = async (reqOrParams, res = null, returnRaw = false) => {
   }
 
   try {
-    // Step 1: Generate embedding for the search query
-    console.log(`🤖 Generating embedding for query...`);
-    const queryEmbedding = await openaiService.generateEmbeddings([query]);
+    let searchResults;
+    let queryEmbedding;
     
-    if (!queryEmbedding.embeddings || queryEmbedding.embeddings.length === 0) {
-      throw new Error('Failed to generate query embedding');
+    // Choose search method based on searchType parameter
+    if (searchType === 'text') {
+      // Direct text search using Pinecone's searchRecords
+      console.log(`🔍 Using direct text search for query: "${query}"`);
+      const searchOptions = {
+        limit: limit || 10,
+        threshold: threshold || 0.1 // Lower threshold for text search
+      };
+
+      console.log(`📦 Searching Pinecone with text search options:`, searchOptions);
+      searchResults = await pineconeService.searchByText(
+        companyId,
+        agentId,
+        query,
+        searchOptions
+      );
+    } else {
+      // Default: Semantic search using embeddings
+      console.log(`🤖 Generating embedding for semantic search...`);
+      queryEmbedding = await openaiService.generateEmbeddings([query]);
+      
+      if (!queryEmbedding.embeddings || queryEmbedding.embeddings.length === 0) {
+        throw new Error('Failed to generate query embedding');
+      }
+
+      // Step 2: Search for similar vectors in Pinecone
+      const searchOptions = {
+        limit: limit || 10,
+        threshold: threshold || 0.7
+      };
+
+      console.log(`📦 Searching Pinecone with semantic search options:`, searchOptions);
+      searchResults = await pineconeService.searchSimilar(
+        companyId,
+        agentId,
+        queryEmbedding.embeddings[0].embedding,
+        searchOptions
+      );
     }
-
-    // Step 2: Search for similar vectors in Qdrant
-    const searchOptions = {
-      limit: limit || 10,
-      threshold: threshold || 0.7
-    };
-
-    console.log(`📦 Searching Pinecone with options:`, searchOptions);
-    const searchResults = await pineconeService.searchSimilar(
-      companyId,
-      agentId,
-      queryEmbedding.embeddings[0].embedding,
-      searchOptions
-    );
 
     // Step 3: Apply additional filtering if needed
     let filteredResults = searchResults.results;
@@ -97,11 +118,7 @@ const searchDocuments = async (reqOrParams, res = null, returnRaw = false) => {
       query: {
         text: query,
         agentId: agentId,
-        embedding: {
-          model: queryEmbedding.model,
-          dimensions: queryEmbedding.embeddings[0].embedding.length,
-          tokens: queryEmbedding.totalTokens
-        },
+        searchType: searchType || 'semantic',
         filters: {
           companyId: companyId || null,
           userId: userId || null
@@ -112,10 +129,19 @@ const searchDocuments = async (reqOrParams, res = null, returnRaw = false) => {
         totalResults: filteredResults.length,
         originalResults: searchResults.results.length,
         filtered: filteredResults.length !== searchResults.results.length,
-        searchOptions: searchOptions,
+        searchType: searchType || 'semantic',
         searchedAt: new Date().toISOString()
       }
     };
+    
+    // Add embedding info only for semantic search
+    if (searchType !== 'text' && queryEmbedding) {
+      response.query.embedding = {
+        model: queryEmbedding.model,
+        dimensions: queryEmbedding.embeddings[0].embedding.length,
+        tokens: queryEmbedding.totalTokens
+      };
+    }
 
     console.log(`✅ Search completed: ${filteredResults.length} results returned`);
 
@@ -202,78 +228,8 @@ const getSearchStats = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Test search endpoint with sample queries
- * POST /api/search/:agentId/test
- */
-const testSearch = asyncHandler(async (req, res) => {
-  const { agentId } = req.params;
-
-  const testQueries = [
-    "What are your services?",
-    "How does AI work?",
-    "Tell me about your company",
-    "artificial intelligence solutions"
-  ];
-
-  try {
-    const results = [];
-
-    for (const query of testQueries) {
-      console.log(`🧪 Testing search with query: "${query}"`);
-      
-      try {
-        // Generate embedding for test query
-        const queryEmbedding = await openaiService.generateEmbeddings([query]);
-        
-        // Search Pinecone
-        const searchResults = await pineconeService.searchSimilar(
-          companyId,
-          agentId,
-          queryEmbedding.embeddings[0].embedding,
-          { limit: 3, threshold: 0.5 }
-        );
-
-        results.push({
-          query: query,
-          resultsFound: searchResults.results.length,
-          topResult: searchResults.results[0] ? {
-            score: searchResults.results[0].score,
-            contentPreview: searchResults.results[0].content.substring(0, 100) + '...'
-          } : null
-        });
-
-      } catch (queryError) {
-        results.push({
-          query: query,
-          error: queryError.message
-        });
-      }
-    }
-
-    const response = {
-      success: true,
-      agentId: agentId,
-      testResults: results,
-      summary: {
-        totalQueries: testQueries.length,
-        successfulQueries: results.filter(r => !r.error).length,
-        failedQueries: results.filter(r => r.error).length
-      },
-      testedAt: new Date().toISOString()
-    };
-
-    res.json(response);
-
-  } catch (error) {
-    console.error(`❌ Search test failed:`, error);
-    throw error;
-  }
-});
-
 module.exports = {
   searchDocuments,
   searchSimilar,
-  getSearchStats,
-  testSearch
+  getSearchStats
 };

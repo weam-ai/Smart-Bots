@@ -36,8 +36,7 @@ router.get('/:agentId/stats',
 router.post('/:agentId/test',
   validateAgentId,
   verifyAgentOwnership,
-  jwtAuthMiddleware,
-  searchController.testSearch
+  jwtAuthMiddleware
 );
 
 module.exports = router;
