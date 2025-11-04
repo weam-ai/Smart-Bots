@@ -68,14 +68,24 @@ const sendMessage = async (req, res) => {
 
     console.log('✅ Agent found:', agent.name, 'Status:', agent.status)
 
-    // 2. Generate query embedding
-    console.log('🧠 Generating query embedding...')
-    const embeddingResult = await openaiService.generateEmbeddings([message.trim()])
+    // Track performance
+    const perfStart = Date.now()
+    const perfTimings = {}
+
+    // 2. OPTIMIZED: Parallelize embedding generation and session preparation
+    const finalSessionId = sessionId || uuidv4()
+    
+    const embeddingStart = Date.now()
+    const [embeddingResult, existingSession] = await Promise.all([
+      openaiService.generateEmbeddings([message.trim()]),
+      ChatSession.findOne({ sessionId: finalSessionId })
+    ])
+    perfTimings.embedding = Date.now() - embeddingStart
+    
     const queryEmbedding = embeddingResult.embeddings[0].embedding
-    console.log('✅ Query embedding generated, dimensions:', queryEmbedding.length)
 
     // 3. Search similar chunks
-    console.log('🔍 Searching for similar chunks...')
+    const searchStart = Date.now()
     const searchResult = await pineconeService.searchSimilar(
       companyId,
       agentId,
@@ -85,9 +95,10 @@ const sendMessage = async (req, res) => {
         threshold: 0.3
       }
     )
+    perfTimings.search = Date.now() - searchStart
 
     const similarChunks = searchResult.results || []
-    console.log('📊 Found similar chunks:', similarChunks.length)
+    console.log(`📊 Found ${similarChunks.length} chunks (${perfTimings.search}ms)`)
 
     // 4. Build context from chunks
     let context = ''
@@ -123,6 +134,7 @@ const sendMessage = async (req, res) => {
     
     console.log(`🔧 Using maxTokens: ${maxTokens} for model: ${finalModel}`);
     
+    const aiStart = Date.now()
     const aiResponse = await openaiService.generateChatCompletion(
       message.trim(), // userMessage
       similarChunks,  // context chunks
@@ -132,20 +144,18 @@ const sendMessage = async (req, res) => {
         systemPrompt: finalInstructions
       }
     )
+    perfTimings.aiResponse = Date.now() - aiStart
 
-    console.log('✅ AI response generated, length:', aiResponse.response.length)
+    console.log(`✅ AI response generated (${perfTimings.aiResponse}ms), length:`, aiResponse.response.length)
 
-    // 6. Generate session ID if not provided
-    const finalSessionId = sessionId || uuidv4()
-
-    // 7. Create or update chat session with visitor data
+    // 6. OPTIMIZED: Handle session and save messages in parallel
     try {
-      console.log('🔍 Looking for session with sessionId:', finalSessionId)
-      let session = await ChatSession.findOne({ sessionId: finalSessionId })
+      const dbStart = Date.now()
       
+      // Prepare or create session
+      let session = existingSession
       if (!session) {
-        console.log('❌ Session not found, creating new one')
-        // Create new session with the provided sessionId
+        console.log('🆕 Creating new chat session:', finalSessionId)
         session = new ChatSession({
           sessionId: finalSessionId,
           // Multi-tenant fields (required for new records)
@@ -157,26 +167,20 @@ const sendMessage = async (req, res) => {
           status: 'active',
           totalMessages: 0
         })
-        await session.save()
-        console.log('✅ New chat session created:', session._id, 'with sessionId:', finalSessionId)
       } else {
-        console.log('✅ Found existing session:', session._id, 'with sessionId:', finalSessionId)
-      }
-
-      // Update session with visitor data if provided
-      if (visitorId && !session.visitor) {
-        session.visitor = visitorId
+        console.log('♻️  Using existing session:', session._id)
+        // Update session with visitor data if provided
+        if (visitorId && !session.visitor) {
+          session.visitor = visitorId
+        }
       }
 
       session.totalMessages += 1
       session.lastMessageAt = new Date()
-      await session.save()
 
-      console.log('✅ Chat session updated:', session._id)
-
-      // Store user message
+      // Prepare user message
       const userMessage = new ChatMessage({
-        session: session._id,
+        session: session._id || null, // Will be updated after session save if new
         // Multi-tenant fields (required for new records)
         companyId: companyId,
         createdBy: createdBy,
@@ -187,12 +191,10 @@ const sendMessage = async (req, res) => {
         contentHash: require('crypto').createHash('md5').update(message.trim()).digest('hex'),
         createdAt: new Date()
       })
-      await userMessage.save()
 
-      // Store AI response
+      // Prepare AI message
       const aiMessage = new ChatMessage({
-        session: session._id,
-        // Multi-tenant fields (required for new records)
+        session: session._id || null, // Will be updated after session save if new
         companyId: companyId,
         createdBy: createdBy,
         
@@ -209,16 +211,50 @@ const sendMessage = async (req, res) => {
         },
         createdAt: new Date()
       })
-      
-      console.log('🔍 AI Message before save:', { messageType: aiMessage.messageType, content: aiMessage.content.substring(0, 50) })
-      await aiMessage.save()
-      console.log('🔍 AI Message after save:', { messageType: aiMessage.messageType, _id: aiMessage._id })
 
-      console.log('✅ Chat messages stored:', { userMessage: userMessage._id, aiMessage: aiMessage._id })
+      // Save session first if new, then save messages in parallel
+      if (!existingSession) {
+        await session.save()
+        console.log('✅ New chat session created:', session._id, '(sessionId:', finalSessionId + ')')
+        // Update message session references
+        userMessage.session = session._id
+        aiMessage.session = session._id
+        
+        // Save messages in parallel
+        await Promise.all([
+          userMessage.save(),
+          aiMessage.save()
+        ])
+      } else {
+        // Save everything in parallel
+        await Promise.all([
+          session.save(),
+          userMessage.save(),
+          aiMessage.save()
+        ])
+      }
+      
+      perfTimings.database = Date.now() - dbStart
+      
+      console.log('🔍 AI Message saved:', { messageType: aiMessage.messageType, _id: aiMessage._id })
+      console.log(`✅ Chat messages stored (${perfTimings.database}ms):`, { 
+        userMessage: userMessage._id, 
+        aiMessage: aiMessage._id 
+      })
     } catch (sessionError) {
       console.warn('⚠️ Failed to update chat session:', sessionError.message)
       // Don't fail the entire request if session update fails
     }
+    
+    // Log total performance
+    perfTimings.total = Date.now() - perfStart
+    console.log('📊 Performance breakdown:', {
+      embedding: `${perfTimings.embedding}ms`,
+      search: `${perfTimings.search}ms`,
+      aiResponse: `${perfTimings.aiResponse}ms`,
+      database: `${perfTimings.database}ms`,
+      total: `${perfTimings.total}ms`
+    })
 
     // 8. Return response
     const response = {

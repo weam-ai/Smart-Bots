@@ -23,6 +23,8 @@ import {
   Globe,
   BarChart3
 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import AgentHeader from './AgentHeader';
 import { NEXT_PUBLIC_API_PREFIX } from '@/config/env';
 
@@ -438,7 +440,16 @@ const DeployWithChatHistory: React.FC<DeployWithChatHistoryProps> = ({ agentId }
                                   ? 'bg-gray-600 text-white'
                                   : 'bg-gray-100 text-gray-900'
                               }`}>
-                                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                                {message.messageType === 'assistant' ? (
+                                  <ReactMarkdown 
+                                    remarkPlugins={[remarkGfm]}
+                                    className="prose prose-sm max-w-none text-sm prose-headings:mt-3 prose-headings:mb-2 prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-pre:my-2 prose-pre:bg-gray-800 prose-pre:text-gray-100 prose-code:text-gray-800 prose-code:bg-gray-200 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-strong:text-gray-900 prose-a:text-blue-600 hover:prose-a:text-blue-700"
+                                  >
+                                    {message.content}
+                                  </ReactMarkdown>
+                                ) : (
+                                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                                )}
                                 <p className={`text-xs mt-2 ${
                                   message.messageType === 'user' ? 'text-gray-100' : 'text-gray-500'
                                 }`}>
