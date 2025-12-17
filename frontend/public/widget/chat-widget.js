@@ -9,7 +9,7 @@
 
   // Configuration with better defaults and validation
   const CONFIG = {
-    API_BASE_URL: 'https://main.weam.ai/ai-chatbot-api',
+    API_BASE_URL: 'https://app.weam.ai/ai-chatbot-api',
     WIDGET_VERSION: '2.0.0',
     DEFAULT_SETTINGS: {
       _id: null, // Deployment ID - required for API calls
