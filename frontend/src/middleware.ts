@@ -105,7 +105,9 @@ export async function middleware(request: NextRequest) {
         pathname.startsWith('/api') ||
         pathname.startsWith('/static') ||
         pathname.startsWith('/favicon.ico') ||
-        pathname.startsWith('/login')
+        pathname.startsWith('/login') ||
+        pathname.startsWith('/widget') || // allow public widget assets (e.g., chat-widget.js) without login
+        pathname.startsWith('/public') // allow public widget assets (e.g., chat-widget.js) without login
     ) {
         return NextResponse.next();
     }
@@ -169,9 +171,10 @@ export const config = {
          * - _next/image (image optimization files)
          * - favicon.ico (favicon file)
          * - login (login page)
+         * - widget (public embeddable assets like chat-widget.js)
          * Include root path for basePath configuration
          */
         '/',
-        '/((?!api|_next/static|_next/image|favicon.ico|login).*)',
+        '/((?!api|_next/static|_next/image|favicon.ico|login|widget|public).*)',
     ],
 };
