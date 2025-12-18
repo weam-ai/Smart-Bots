@@ -235,6 +235,7 @@ module.exports = {
   getOptimalStrategy,
   getAvailableStrategies,
   generateChunkHash,
+  createTextSplitter,
   LANGCHAIN_STRATEGIES,
   CHUNKING_DEFAULTS
 };

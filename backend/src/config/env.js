@@ -63,7 +63,7 @@ const envConfig = {
   AWS_S3_REGION: process.env.AWS_S3_REGION || 'us-east-1',
   
   // API Configuration
-  API_TIMEOUT: parseInt(process.env.API_TIMEOUT || '30000', 10),
+  API_TIMEOUT: parseInt(process.env.API_TIMEOUT || '120000', 10), // 2 minutes for GPT-5 models
   JWT_EXPIRATION_HOURS: parseInt(process.env.JWT_EXPIRATION_HOURS || '24', 10),
   API_RETRY_DELAY: parseInt(process.env.API_RETRY_DELAY || '1000', 10),
   

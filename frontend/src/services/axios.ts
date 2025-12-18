@@ -5,7 +5,7 @@
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios'
 import toast from 'react-hot-toast'
-import { HTTP_STATUS, ERROR_MESSAGES, HEADERS, STORAGE_KEYS } from '@/utils/constants'
+import { HTTP_STATUS, ERROR_MESSAGES, HEADERS, STORAGE_KEYS, API_CONFIG } from '@/utils/constants'
 import { getAuthHeaders } from '@/utils/auth'
 import type { ApiResponse } from '@/types/api'
 import {  NEXT_PUBLIC_API_TIMEOUT, NEXT_PUBLIC_BACKEND_API_URL, NEXT_PUBLIC_NODE_ENV } from '@/config/env'
@@ -197,7 +197,15 @@ const handleResponseError = (error: AxiosError): Promise<never> => {
 
   // Handle specific error types
   if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
-    toast.error(ERROR_MESSAGES.TIMEOUT_ERROR)
+    // Provide more helpful timeout error message for chat operations
+    const isChatRequest = error.config?.url?.includes('/chat')
+    const timeoutMessage = isChatRequest 
+      ? 'AI response is taking longer than expected. This might be due to processing large documents or complex queries. Please try again.'
+      : ERROR_MESSAGES.TIMEOUT_ERROR
+    
+    toast.error(timeoutMessage, {
+      duration: 6000, // Show for 6 seconds
+    })
     return Promise.reject(error)
   }
 
@@ -343,10 +351,45 @@ export const httpGet = async <T>(url: string, config?: AxiosRequestConfig): Prom
 }
 
 /**
+ * Get timeout for specific model
+ */
+const getModelTimeout = (model?: string): number => {
+  if (!model) return NEXT_PUBLIC_API_TIMEOUT || 120000
+  
+  // Check if model matches any configured timeout
+  const modelKey = Object.keys(API_CONFIG.MODEL_TIMEOUTS).find(key => 
+    model.toLowerCase().includes(key.toLowerCase())
+  )
+  
+  return modelKey 
+    ? (API_CONFIG.MODEL_TIMEOUTS as any)[modelKey] 
+    : (API_CONFIG.MODEL_TIMEOUTS as any).default
+}
+
+/**
  * Generic POST request
  */
 export const httpPost = async <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> => {
   const response = await axiosInstance.post<ApiResponse<T>>(url, data, config)
+  return extractData(response.data)
+}
+
+/**
+ * POST request with dynamic timeout based on model
+ * Use this for chat/AI requests where model type affects response time
+ */
+export const httpPostWithModelTimeout = async <T>(
+  url: string, 
+  data?: any, 
+  model?: string,
+  config?: AxiosRequestConfig
+): Promise<T> => {
+  const timeout = getModelTimeout(model)
+  
+  const response = await axiosInstance.post<ApiResponse<T>>(url, data, {
+    ...config,
+    timeout
+  })
   return extractData(response.data)
 }
 

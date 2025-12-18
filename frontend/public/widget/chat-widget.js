@@ -385,7 +385,7 @@
                 <span class="ai-chatbot-checkbox-text">I agree to the privacy policy and terms of service</span>
               </label>
             </div>
-            <button type="submit" class="ai-chatbot-identity-submit">Start Chatting 1111</button>
+            <button type="submit" class="ai-chatbot-identity-submit">Start Chatting</button>
           </form>
         </div>
 
@@ -602,16 +602,6 @@
     if (!elements.welcomeMessage) return;
     
     const position = getSpeechBubblePositionStyles();
-    
-    // Log the current state for debugging
-    console.log('🔍 Welcome Message Positioning:', {
-      isOpen: widgetState.isOpen,
-      isMinimized: widgetState.isMinimized,
-      position: position,
-      bottom: position.bottom,
-      left: position.left,
-      right: position.right
-    });
     
     // Apply positioning styles with !important to override CSS
     elements.welcomeMessage.style.setProperty('bottom', position.bottom || '', 'important');
@@ -1321,7 +1311,6 @@
     addWidgetEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      console.log('🖱️ Minimized icon clicked');
       toggleWidget();
     }, elements.minimized);
     
@@ -1797,10 +1786,6 @@
   function toggleWidget() {
     if (!widgetState.isInitialized) return;
     
-    console.log('🔄 Toggle Widget:', {
-      currentState: { isOpen: widgetState.isOpen, isMinimized: widgetState.isMinimized }
-    });
-    
     if (widgetState.isOpen) {
       closeWidget();
     } else {
@@ -1816,7 +1801,6 @@
     
     // Prevent multiple calls
     if (widgetState.isOpen) {
-      console.log('⚠️ Open Widget called but widget is already open');
       return;
     }
     
@@ -1853,11 +1837,6 @@
     
     widgetState.isOpen = true;
     widgetState.isMinimized = false;
-    
-    console.log('📖 Widget Opened:', {
-      isOpen: widgetState.isOpen,
-      isMinimized: widgetState.isMinimized
-    });
     
     // Focus input
     setTimeout(() => {
@@ -1948,11 +1927,8 @@
     
     // Prevent multiple calls
     if (!widgetState.isOpen) {
-      console.log('⚠️ Close Widget called but widget is already closed');
       return;
     }
-    
-    console.log('🚪 Close Widget called - Stack trace:', new Error().stack);
     
     // Add minimized class to widget
     elements.widget.classList.add('minimized');
@@ -1983,11 +1959,6 @@
     
     widgetState.isOpen = false;
     widgetState.isMinimized = true;
-    
-    console.log('📕 Widget Closed:', {
-      isOpen: widgetState.isOpen,
-      isMinimized: widgetState.isMinimized
-    });
   }
 
   /**

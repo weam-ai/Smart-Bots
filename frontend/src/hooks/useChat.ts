@@ -4,8 +4,8 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { httpGet, httpPost } from '@/services/axios'
-import { API_ENDPOINTS, CHAT } from '@/utils/constants'
+import { httpGet, httpPost, httpPostWithModelTimeout } from '@/services/axios'
+import { API_ENDPOINTS, CHAT, AGENT } from '@/utils/constants'
 import type { ChatMessage, ChatSession, SendMessagePayload } from '@/types/chat'
 import toast from 'react-hot-toast'
 
@@ -144,10 +144,29 @@ export const useSendMessage = () => {
       setIsLoading(true)
       setError(null)
 
-      const response = await httpPost<ChatMessage>(
+      // Check if using reasoning model (GPT-5, O3, etc.)
+      const isReasoningModel = messageData.model && 
+        AGENT.REASONING_MODELS.some(m => messageData.model?.toLowerCase().includes(m.toLowerCase()))
+
+      // Show special toast for reasoning models
+      if (isReasoningModel) {
+        toast.loading(
+          `Using ${messageData.model} - This may take up to 3 minutes due to advanced reasoning...`,
+          { id: 'reasoning-model-wait', duration: 5000 }
+        )
+      }
+
+      // Use model-specific timeout
+      const response = await httpPostWithModelTimeout<ChatMessage>(
         API_ENDPOINTS.CHAT.BY_AGENT(agentId),
-        messageData
+        messageData,
+        messageData.model
       )
+
+      // Dismiss reasoning model toast
+      if (isReasoningModel) {
+        toast.dismiss('reasoning-model-wait')
+      }
 
       return response
     } catch (err) {

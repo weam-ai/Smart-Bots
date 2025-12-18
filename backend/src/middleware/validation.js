@@ -273,9 +273,11 @@ const deploymentSchemas = {
     description: Joi.string()
       .max(500)
       .trim()
+      .allow('')
       .optional(),
     
     websiteUrl: Joi.string()
+      .allow('')
       .uri()
       .optional()
       .messages({
@@ -346,9 +348,11 @@ const deploymentSchemas = {
     description: Joi.string()
       .max(500)
       .trim()
+      .allow('')
       .optional(),
     
     websiteUrl: Joi.string()
+      .allow('')
       .uri()
       .optional(),
     

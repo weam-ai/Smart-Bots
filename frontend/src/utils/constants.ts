@@ -10,8 +10,21 @@ export const API_CONFIG = {
   BASE_URL: NEXT_PUBLIC_BACKEND_API_URL,
   TIMEOUT: NEXT_PUBLIC_API_TIMEOUT,
   WITH_CREDENTIALS: true,
+  // Model-specific timeouts (in milliseconds)
+  MODEL_TIMEOUTS: {
+    // Reasoning models (slower, need more time)
+    'gpt-5': 180000,        // 3 minutes
+    'gpt-5-mini': 150000,   // 2.5 minutes
+    'gpt-5-nano': 120000,   // 2 minutes
+    'o3': 180000,           // 3 minutes
+    'o3-mini': 150000,      // 2.5 minutes
+    // Standard models (faster)
+    'gpt-4.1': 90000,       // 1.5 minutes
+    'gpt-4o': 90000,        // 1.5 minutes
+    'gpt-4o-mini': 60000,   // 1 minute
+    'default': NEXT_PUBLIC_API_TIMEOUT || 120000, // 2 minutes default
+  }
 } as const
-console.log("🚀 ~ API_CONFIG:", API_CONFIG)
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -135,13 +148,14 @@ export const AI_MODEL = {
 // Agent Constants
 export const AGENT = {
   MODELS: [
-    { id: 'gpt-5', name: 'GPT-5', description: 'Most advanced model with latest capabilities (fixed temperature)' },
-    { id: 'gpt-5-mini', name: 'GPT-5 Mini', description: 'Cost-effective GPT-5 model (fixed temperature)' },
-    { id: 'gpt-5-nano', name: 'GPT-5 Nano', description: 'Compact GPT-5 model (fixed temperature)' },
-    { id: 'gpt-4.1', name: 'GPT-4.1', description: 'Enhanced GPT-4 with improved performance' },
-    { id: 'gpt-4o', name: 'GPT-4o', description: 'Latest GPT-4 model with multimodal capabilities' },
-    { id: 'o3', name: 'O3', description: 'OpenAI\'s most advanced reasoning model (fixed temperature)' },
+    { id: 'gpt-5', name: 'GPT-5', description: 'Most advanced model with latest capabilities (fixed temperature)', isReasoningModel: true },
+    { id: 'gpt-5-mini', name: 'GPT-5 Mini', description: 'Cost-effective GPT-5 model (fixed temperature)', isReasoningModel: true },
+    { id: 'gpt-5-nano', name: 'GPT-5 Nano', description: 'Compact GPT-5 model (fixed temperature)', isReasoningModel: true },
+    { id: 'gpt-4.1', name: 'GPT-4.1', description: 'Enhanced GPT-4 with improved performance', isReasoningModel: false },
+    { id: 'gpt-4o', name: 'GPT-4o', description: 'Latest GPT-4 model with multimodal capabilities', isReasoningModel: false },
+    { id: 'o3', name: 'O3', description: 'OpenAI\'s most advanced reasoning model (fixed temperature)', isReasoningModel: true },
   ],
+  REASONING_MODELS: ['gpt-5', 'gpt-5-mini', 'gpt-5-nano', 'o3', 'o3-mini'],
   TEMPERATURE: {
     MIN: 0.1,
     MAX: 1.0,
