@@ -17,7 +17,7 @@ app.use(helmet());
 // app.use(compression()); // Temporarily disabled
 
 const corsOptions = {
-  origin: CORS_ORIGIN_DEV ? CORS_ORIGIN_DEV.split(',') : [/weam\.ai$/],
+  origin: '*', // allow all origins
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: [
