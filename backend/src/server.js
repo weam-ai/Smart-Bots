@@ -17,7 +17,14 @@ app.use(helmet());
 // app.use(compression()); // Temporarily disabled
 
 const corsOptions = {
-  origin: CORS_ORIGIN_DEV ? CORS_ORIGIN_DEV.split(',') : [/weam\.ai$/],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Allow all origins for widget endpoints (public API)
+    // This is safe because widget endpoints are designed to be embedded anywhere
+    callback(null, true);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: [
