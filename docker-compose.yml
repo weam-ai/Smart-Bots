@@ -45,7 +45,7 @@ services:
       - app-network
 
   mongodb:
-    image: mongo:7
+    image: mongo:8.2
     container_name: ai-chatbot-mongodb
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
@@ -56,6 +56,7 @@ services:
       - mongo_data:/data/db
     networks:
       - app-network
+    restart: unless-stopped
 
   mongo-express:
     image: mongo-express:latest
@@ -92,8 +93,18 @@ services:
       timeout: 10s
       retries: 3
 
+
+  minio-perms:
+    image: mirror.gcr.io/library/busybox:1.37
+    user: "0:0"
+    volumes:
+      - minio_data:/data
+    command: ["chown", "-R", "65532:65532", "/data"]
+    networks:
+      - app-network
+      
   minio:
-    image: minio/minio:latest
+    image: cgr.dev/chainguard/minio:latest
     container_name: ai-chatbot-minio
     ports:
       - "9000:9000"     # S3 API
@@ -112,6 +123,9 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+    depends_on:
+      minio-perms:
+        condition: service_completed_successfully
 
 volumes:
   mongo_data:

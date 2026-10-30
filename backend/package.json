@@ -45,10 +45,5 @@
     "nodejs"
   ],
   "author": "Your Name",
-  "license": "MIT",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "unrs-resolver"
-    ]
-  }
+  "license": "MIT"
 }

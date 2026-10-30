@@ -18,8 +18,8 @@ ENV NEXT_PUBLIC_DOMAIN_URL=$NEXT_PUBLIC_DOMAIN_URL
 RUN npm install -g pnpm
 
 # Copy package files
-COPY package*.json ./
-RUN pnpm install
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
 
 # Copy source code
 COPY . .
